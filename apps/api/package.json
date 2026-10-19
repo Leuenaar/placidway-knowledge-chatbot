@@ -1,0 +1,29 @@
+{
+  "name": "@pwbot/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node --import tsx --test \"src/**/*.test.ts\"",
+    "search": "tsx src/scripts/search.ts",
+    "ask": "tsx src/scripts/ask.ts",
+    "suite": "tsx src/scripts/suite.ts",
+    "unanswered": "tsx src/scripts/unanswered.ts",
+    "purge": "tsx src/scripts/purge.ts",
+    "leads": "tsx src/scripts/leads.ts"
+  },
+  "dependencies": {
+    "@pwbot/shared": "*",
+    "express": "^4.21.0",
+    "zod": "^3.23.0",
+    "@pwbot/embed": "*"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0"
+  }
+}

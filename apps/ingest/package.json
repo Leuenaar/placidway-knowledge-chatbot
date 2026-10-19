@@ -1,0 +1,23 @@
+{
+  "name": "@pwbot/ingest",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "clean": "tsx src/cli.ts clean",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node --import tsx --test \"src/**/*.test.ts\"",
+    "chunk": "tsx src/cli.ts chunk",
+    "embed": "tsx src/cli.ts embed",
+    "load": "tsx src/cli.ts load",
+    "eval": "tsx src/cli.ts eval",
+    "refresh": "tsx src/cli.ts refresh"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0"
+  },
+  "dependencies": {
+    "@pwbot/embed": "*"
+  }
+}

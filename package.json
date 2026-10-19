@@ -1,0 +1,37 @@
+{
+  "name": "pw-knowledge-chatbot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Website knowledge chatbot (monorepo): React UI, API server and the shared API contract.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev -w @pwbot/api\" \"npm run dev -w @pwbot/web\"",
+    "dev:api": "npm run dev -w @pwbot/api",
+    "dev:web": "npm run dev -w @pwbot/web",
+    "build": "npm run build -w @pwbot/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "ingest:clean": "npm run clean -w @pwbot/ingest --",
+    "ingest:chunk": "npm run chunk -w @pwbot/ingest --",
+    "ingest:embed": "npm run embed -w @pwbot/ingest --",
+    "ingest:load": "npm run load -w @pwbot/ingest --",
+    "ingest:eval": "npm run eval -w @pwbot/ingest --",
+    "ingest:refresh": "npm run refresh -w @pwbot/ingest --",
+    "search": "npm run search -w @pwbot/api --",
+    "ask": "npm run ask -w @pwbot/api --",
+    "suite": "npm run suite -w @pwbot/api --",
+    "unanswered": "npm run unanswered -w @pwbot/api --",
+    "purge": "npm run purge -w @pwbot/api --",
+    "leads": "npm run leads -w @pwbot/api --"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0",
+    "typescript": "^5.6.0"
+  }
+}

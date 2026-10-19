@@ -1,0 +1,948 @@
+/* ============================================================================
+ * PETA FILE
+ * FILE    : apps/web/src/styles.css
+ * TUJUAN  : Gaya layar obrolan. Warna adalah token di :root, jadi tema terang
+ *           dan gelap hanya mendefinisikan ulang nilai. Koral PlacidWay
+ *           (#E85A4F) dipakai apa adanya untuk logo dan avatar; tombol dan
+ *           gelembung pengunjung memakai koral lebih gelap (--accent) agar
+ *           teks putih terbaca. Tata letak: satu kolom di tengah memenuhi
+ *           layar (header, area obrolan bergulir, kotak input).
+ * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ *    1. Warna dan token tema terang (ubah warna di sini)
+ *    2. Tema gelap (nilai warna yang diganti)
+ *    3. Dasar: reset, html, body, tombol, sr-only, fokus
+ *    4. Tata letak utama
+ *    5. Header (logo, label AI, tombol)
+ *    6. Layar sambutan dan kartu topik
+ *    7. Pesan: baris, gelembung, catatan, tombol penawaran
+ *    8. Daftar sumber
+ *    9. Saran pertanyaan lanjutan
+ *    10. Penanda mengetik
+ *    11. Kotak input
+ *    12. Layar kecil (di bawah 520px dan 440px)
+ *    13. Layar tersempit (di bawah 359px)
+ *    14. Kartu kontak
+ *    15. Kolom jebakan bot (di luar layar)
+ * KALAU DIMINTA MENGUBAH:
+ *    - Mengubah warna: BAGIAN 1 (terang) dan BAGIAN 2 (gelap)
+ *    - Mengubah tampilan gelembung chat: BAGIAN 7
+ *    - Mengubah tampilan kartu kontak: BAGIAN 14
+ *    - Mengubah ukuran di HP: BAGIAN 12 dan 13
+ * ============================================================================ */
+
+/* ===== BAGIAN 1: Warna dan token tema terang (ubah warna di sini) ===== */
+/*
+ * Styles for the chat screen.
+ *
+ * Colours are tokens on :root, so the light and dark themes only redefine values.
+ * The PlacidWay coral (#E85A4F) is used as-is for the logo and avatar. White text on that
+ * exact coral reaches only 3.5:1, so buttons and the user bubble use a deeper coral
+ * (--accent, 5.3:1 with white text in light mode, 5.0:1 in dark mode).
+ *
+ * Layout is one centred column that fills the viewport: header, scrolling chat, composer.
+ */
+:root {
+  color-scheme: light dark;
+
+  --bg: #faf6f3;
+  --surface: #ffffff;
+  --surface-2: #f5eeea;
+  --border: #e4d9d3;
+  --text: #2b2321;
+  --muted: #675a55;
+
+  --brand: #e85a4f;
+  --accent: #c4372c;
+  --accent-hover: #a92d23;
+  --on-accent: #ffffff;
+  --link: #b02f24;
+
+  --note-bg: #fff4dc;
+  --note-border: #e8d08f;
+  --note-text: #5a4408;
+
+  --alert-bg: #fdecea;
+  --alert-border: #f1b5ae;
+  --alert-text: #7a1c13;
+
+  --shadow-sm: 0 1px 2px rgba(43, 35, 33, 0.06);
+  --shadow-md: 0 2px 4px rgba(43, 35, 33, 0.05), 0 8px 24px rgba(43, 35, 33, 0.07);
+
+  --radius: 18px;
+  --gutter: 16px;
+  --column: 760px;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Noto Naskh Arabic", sans-serif;
+}
+
+/* ===== BAGIAN 2: Tema gelap (nilai warna yang diganti) ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #151110;
+    --surface: #201a18;
+    --surface-2: #2a2220;
+    --border: #41352f;
+    --text: #f4edea;
+    --muted: #c0b0a9;
+
+    --accent: #c93e33;
+    --accent-hover: #b8352b;
+    --link: #ff9d92;
+
+    --note-bg: #2b2411;
+    --note-border: #5a4a1d;
+    --note-text: #f3dfa8;
+
+    --alert-bg: #2e1715;
+    --alert-border: #6b2d27;
+    --alert-text: #ffd1cc;
+
+    --shadow-sm: none;
+    --shadow-md: none;
+  }
+}
+
+/* ===== BAGIAN 3: Dasar: reset, html, body, tombol, sr-only, fokus ===== */
+* {
+  box-sizing: border-box;
+}
+
+/* 106.25% of the browser default is 17px, and it still follows the user's own font-size setting. */
+html {
+  font-size: 106.25%;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 1rem/1.6 var(--font);
+  -webkit-text-size-adjust: 100%;
+}
+
+button,
+textarea {
+  font: inherit;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+:focus-visible {
+  outline: 3px solid var(--link);
+  outline-offset: 2px;
+}
+
+/* The chat area takes focus from code after a suggestion is chosen; it needs no ring then. */
+.chat:focus {
+  outline: none;
+}
+
+/* ===== BAGIAN 4: Tata letak utama ===== */
+/* ---------- Layout ---------- */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.chat {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.chat-inner {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  max-width: var(--column);
+  margin: 0 auto;
+  padding: 20px var(--gutter) 12px;
+}
+
+/* ===== BAGIAN 5: Header (logo, label AI, tombol) ===== */
+/* ---------- Header ---------- */
+
+.demo-banner {
+  margin: 0;
+  padding: 6px var(--gutter);
+  background: var(--note-bg);
+  border-bottom: 1px solid var(--note-border);
+  color: var(--note-text);
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: var(--column);
+  min-height: 64px;
+  margin: 0 auto;
+  padding: 8px var(--gutter);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.logo {
+  display: block;
+  height: 32px;
+  width: auto;
+  flex: none;
+}
+
+.pill {
+  flex: none;
+  padding: 2px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ghost,
+.quote-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.ghost {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+}
+
+.ghost:hover {
+  background: var(--surface-2);
+}
+
+.quote-link {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  text-decoration: none;
+}
+
+.quote-link:hover {
+  background: var(--accent-hover);
+}
+
+/* ===== BAGIAN 6: Layar sambutan dan kartu topik ===== */
+/* ---------- Welcome screen ---------- */
+
+.welcome {
+  margin: auto 0;
+  padding: 12px 0 28px;
+  text-align: center;
+}
+
+.welcome-mark {
+  display: block;
+  margin: 0 auto 14px;
+}
+
+.welcome h2 {
+  margin: 0 0 12px;
+  font-size: 1.5rem;
+  line-height: 1.25;
+  font-weight: 700;
+  text-wrap: balance;
+}
+
+.welcome-lead {
+  max-width: 34rem;
+  margin: 0 auto 6px;
+  color: var(--muted);
+}
+
+.topics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  max-width: 560px;
+  margin: 24px auto 0;
+}
+
+.topic {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 72px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--text);
+  text-align: start;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.topic:hover:not(:disabled) {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+}
+
+.topic:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.topic-label {
+  color: var(--link);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.topic-question {
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.welcome-alt {
+  margin: 22px 0 0;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+.welcome-alt a {
+  color: var(--link);
+  font-weight: 600;
+}
+
+/* ===== BAGIAN 7: Pesan: baris, gelembung, catatan, tombol penawaran ===== */
+/* ---------- Messages ---------- */
+
+.messages {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.row-user {
+  justify-content: flex-end;
+}
+
+.avatar {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  margin-top: 2px;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  max-width: 640px;
+}
+
+.bubble {
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  overflow-wrap: anywhere;
+}
+
+.bubble-user {
+  max-width: min(85%, 560px);
+  background: var(--accent);
+  color: var(--on-accent);
+  border-end-end-radius: 6px;
+}
+
+.bubble-assistant {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-end-start-radius: 6px;
+  box-shadow: var(--shadow-sm);
+}
+
+.bubble-alert {
+  background: var(--alert-bg);
+  border-color: var(--alert-border);
+  color: var(--alert-text);
+}
+
+.text p {
+  margin: 0;
+}
+
+.text p.plain {
+  white-space: pre-wrap;
+}
+
+.text p + p,
+.text p + ul,
+.text ul + p,
+.text ul + ul {
+  margin-top: 0.75em;
+}
+
+.text ul {
+  margin: 0;
+  padding-inline-start: 1.25em;
+}
+
+.text li + li {
+  margin-top: 0.25em;
+}
+
+.text strong {
+  font-weight: 650;
+}
+
+.retry {
+  min-height: 44px;
+  margin-top: 12px;
+  padding: 0 16px;
+  border: 1px solid currentColor;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.retry:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.note {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--note-border);
+  border-radius: 12px;
+  background: var(--note-bg);
+  color: var(--note-text);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* ===== BAGIAN 8: Daftar sumber ===== */
+/* ---------- Sources ---------- */
+
+.sources {
+  width: 100%;
+}
+
+.sources-title,
+.followups-title {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sources ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sources a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--link);
+  text-decoration: none;
+}
+
+.sources a:hover {
+  border-color: var(--accent);
+}
+
+.sources a:hover .source-title {
+  text-decoration: underline;
+}
+
+.source-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.source-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.source-meta {
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.cta:hover {
+  background: var(--accent-hover);
+}
+
+/* ===== BAGIAN 9: Saran pertanyaan lanjutan ===== */
+/* ---------- Follow-up suggestions ---------- */
+
+.followups {
+  width: 100%;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.9375rem;
+  text-align: start;
+  cursor: pointer;
+}
+
+.chip:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+
+.chip:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ===== BAGIAN 10: Penanda mengetik ===== */
+/* ---------- Typing indicator ---------- */
+
+.typing {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 12px 16px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+  animation: pulse 1.2s infinite ease-in-out;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.typing-text {
+  margin-inline-start: 6px;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+@keyframes pulse {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot {
+    animation: none;
+    opacity: 0.7;
+  }
+
+  .topic {
+    transition: none;
+  }
+}
+
+/* ===== BAGIAN 11: Kotak input ===== */
+/* ---------- Composer ---------- */
+
+.composer-wrap {
+  padding: 12px var(--gutter) calc(10px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.composer-inner {
+  max-width: var(--column);
+  margin: 0 auto;
+}
+
+.composer {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.composer textarea {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  max-height: 140px;
+  padding: 11px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg);
+  color: var(--text);
+  /* At least 16px stops iOS Safari from zooming the page when the field gets focus. */
+  font-size: 1rem;
+  line-height: 1.45;
+  resize: none;
+}
+
+.composer textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+.send {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.send:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.send:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.composer-note {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+.counter {
+  position: absolute;
+  inset-inline-end: 0;
+  top: -22px;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+/* ===== BAGIAN 12: Layar kecil (di bawah 520px dan 440px) ===== */
+/* ---------- Small screens ---------- */
+
+@media (max-width: 520px) {
+  .chat-inner {
+    padding-top: 12px;
+  }
+
+  .welcome {
+    padding: 0 0 16px;
+  }
+
+  .welcome-mark {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 8px;
+  }
+
+  .welcome h2 {
+    margin-bottom: 8px;
+    font-size: 1.3125rem;
+  }
+
+  .welcome-lead {
+    font-size: 0.9375rem;
+  }
+
+  .topics {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .topic {
+    min-height: 60px;
+    padding: 10px 14px;
+  }
+
+  .welcome-alt {
+    margin-top: 14px;
+  }
+}
+
+@media (max-width: 440px) {
+  .header-inner {
+    gap: 8px;
+  }
+
+  .brand {
+    gap: 8px;
+  }
+
+  .logo {
+    height: 28px;
+  }
+
+  .pill {
+    padding: 2px 8px;
+    font-size: 0.6875rem;
+  }
+
+  .quote-link {
+    padding: 0 12px;
+  }
+
+  /* "New chat" becomes an icon only; it keeps its accessible name through aria-label. */
+  .ghost {
+    padding: 0 12px;
+  }
+
+  .ghost .btn-label {
+    display: none;
+  }
+
+  /* The Send button shows only the arrow, with the visible word hidden but still readable. */
+  .send .btn-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+  }
+}
+
+/* ===== BAGIAN 13: Layar tersempit (di bawah 359px) ===== */
+/* On the narrowest phones the label shrinks to "AI" so it cannot collide with the buttons.
+   The rest of the words stay in the page for screen readers. */
+@media (max-width: 359px) {
+  .pill-rest {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .actions {
+    flex: none;
+  }
+}
+
+/* ===== BAGIAN 14: Kartu kontak ===== */
+/* ---------- Lead card (contact form offered once) ---------- */
+
+.lead {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.lead-title {
+  margin: 0;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.lead-field {
+  display: grid;
+  gap: 4px;
+  font-size: 0.9375rem;
+}
+
+.lead-field input[type="text"],
+.lead-field input[type="email"] {
+  min-height: 46px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  /* At least 16px stops iOS Safari from zooming the page when the field gets focus. */
+  font-size: 1rem;
+}
+
+.lead-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.lead-consent input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+/* ===== BAGIAN 15: Kolom jebakan bot (di luar layar) ===== */
+/* Off-screen bait for bots. Not display:none, because some bots skip fields that are hidden that way. */
+.lead-trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.lead-failed {
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--alert-border);
+  border-radius: 10px;
+  background: var(--alert-bg);
+  color: var(--alert-text);
+  font-size: 0.875rem;
+}
+
+.lead-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.lead-submit {
+  border: 0;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.lead-submit:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.lead-decline {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  background: transparent;
+  color: var(--link);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.lead input:focus-visible,
+.lead button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}

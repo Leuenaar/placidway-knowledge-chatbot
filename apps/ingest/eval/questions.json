@@ -1,0 +1,27 @@
+[
+  { "id": "en-price-outpatient", "lang": "en", "q": "How much does the out-patient program cost?", "expect": ["PRICE"] },
+  { "id": "en-not-included", "lang": "en", "q": "What is not included in the price?", "expect": ["P2-excluded-1", "P3-excluded-1", "P4-excluded-1", "P7-excluded-1"] },
+  { "id": "en-itinerary", "lang": "en", "q": "How long is the typical treatment stay and what happens each week?", "expect": ["P2-itinerary-1", "P3-itinerary-1", "P4-itinerary-1"] },
+  { "id": "en-insurance", "lang": "en", "q": "Do you accept health insurance?", "expect": ["P7-faq-3"] },
+  { "id": "en-payment-plans", "lang": "en", "q": "Are there payment plans or financing?", "expect": ["P7-faq-11"] },
+  { "id": "en-airport", "lang": "en", "q": "How do I get from the airport to the clinic?", "expect": ["P1-destination-3"] },
+  { "id": "en-doctors", "lang": "en", "q": "Which doctors work at the clinic?", "expect": ["P1-overview-9", "P1-overview-10", "P1-overview-11", "P1-overview-12", "P1-overview-13"] },
+  { "id": "en-english-staff", "lang": "en", "q": "Does the staff speak English?", "expect": ["P2-faq-8", "P3-faq-5", "P4-faq-5"] },
+  { "id": "en-optional", "lang": "en", "q": "Which optional procedures cost extra?", "expect": ["P2-optional-1", "P3-optional-1", "P4-optional-1"] },
+  { "id": "en-location", "lang": "en", "q": "What is the address of the clinic?", "expect": ["P6-overview-4", "P1-overview-15", "P5-overview-2", "P2-overview-7", "P3-overview-7", "P4-overview-7"] },
+
+  { "id": "es-price-outpatient", "lang": "es", "q": "¿Cuánto cuesta el programa ambulatorio?", "expect": ["PRICE"] },
+  { "id": "es-insurance", "lang": "es", "q": "¿Aceptan seguro médico?", "expect": ["P7-faq-3"] },
+  { "id": "es-spanish-staff", "lang": "es", "q": "¿El personal habla español?", "expect": ["P2-faq-8", "P3-faq-5", "P4-faq-5"] },
+  { "id": "es-airport", "lang": "es", "q": "¿Cómo llego desde el aeropuerto de San Diego?", "expect": ["P1-destination-3"] },
+
+  { "id": "ar-price-outpatient", "lang": "ar", "q": "كم تبلغ تكلفة برنامج العلاج الخارجي؟", "expect": ["PRICE"] },
+  { "id": "ar-insurance", "lang": "ar", "q": "هل يغطي التأمين الصحي تكاليف العلاج؟", "expect": ["P7-faq-3"] },
+  { "id": "ar-not-included", "lang": "ar", "q": "ما هي الخدمات غير المشمولة في السعر؟", "expect": ["P2-excluded-1", "P3-excluded-1", "P4-excluded-1", "P7-excluded-1"] },
+  { "id": "ar-doctors", "lang": "ar", "q": "من هم الأطباء في المركز؟", "expect": ["P1-overview-9", "P1-overview-10", "P1-overview-11", "P1-overview-12", "P1-overview-13"] },
+
+  { "id": "id-price-outpatient", "lang": "id", "q": "Berapa biaya program rawat jalan?", "expect": ["PRICE"] },
+  { "id": "id-payment-plans", "lang": "id", "q": "Apakah ada cicilan atau paket pembayaran?", "expect": ["P7-faq-11"] },
+  { "id": "id-not-included", "lang": "id", "q": "Apa saja yang tidak termasuk dalam harga paket?", "expect": ["P2-excluded-1", "P3-excluded-1", "P4-excluded-1", "P7-excluded-1"] },
+  { "id": "id-itinerary", "lang": "id", "q": "Bagaimana jadwal perawatan selama 3 minggu?", "expect": ["P2-itinerary-1", "P3-itinerary-1", "P4-itinerary-1"] }
+]
