@@ -1,18 +1,18 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/follow-ups.ts
- * TUJUAN  : Tabel tetap saran pertanyaan lanjutan. Saran TIDAK dibuat oleh
- *           model, jadi tiap pertanyaan pasti bisa dijawab bot dan tidak
- *           mengulang topik yang baru dijawab.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Teks saran pertanyaan (Inggris)
- *    2. Tabel saran per topik
- *    3. Pemetaan jenis chunk ke topik
- *    4. Versi kunci teks, supaya tampil dalam bahasa pengunjung
- * KALAU DIMINTA MENGUBAH:
- *    - Kata-kata saran pertanyaan (BAGIAN 1)
- *    - Saran yang muncul untuk tiap topik (BAGIAN 2)
- *    - Topik mana yang dipicu jenis chunk apa (BAGIAN 3)
+ * PURPOSE : Fixed table of follow-up question suggestions. The suggestions are
+ *           NOT made by the model, so every question can surely be answered by
+ *           the bot and does not repeat the topic that was just answered.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Suggested question text (English)
+ *    2. Table of suggestions per topic
+ *    3. Mapping of chunk kinds to topics
+ *    4. Version of the text keys, so they are shown in the visitor's language
+ * IF ASKED TO CHANGE:
+ *    - Wording of the suggested questions (PART 1)
+ *    - Suggestions that appear for each topic (PART 2)
+ *    - Which topic is triggered by which chunk kind (PART 3)
  * ============================================================================ */
 
 /**
@@ -23,14 +23,14 @@
 /** What the reply was about. It selects the follow-up questions offered under the reply. */
 export type Topic = "cost" | "included" | "duration" | "after" | "about" | "general";
 
-// ===== BAGIAN 1: Teks saran pertanyaan (Inggris) =====
+// ===== PART 1: Suggested question text (English) =====
 const ASK_COST = "How much does the treatment cost?";
 const ASK_INCLUDED = "What is included in the package?";
 const ASK_DURATION = "How long is the program?";
 const ASK_AFTER = "What happens after the program?";
 const ASK_ABOUT = "Tell me about the ITC Immunity Therapy Center";
 
-// ===== BAGIAN 2: Tabel saran per topik =====
+// ===== PART 2: Table of suggestions per topic =====
 export const FOLLOW_UPS: Record<Topic, string[]> = {
   cost: [ASK_INCLUDED, ASK_DURATION, ASK_AFTER],
   included: [ASK_COST, ASK_DURATION, ASK_AFTER],
@@ -40,7 +40,7 @@ export const FOLLOW_UPS: Record<Topic, string[]> = {
   general: [ASK_COST, ASK_INCLUDED, ASK_ABOUT],
 };
 
-// ===== BAGIAN 3: Pemetaan jenis chunk ke topik =====
+// ===== PART 3: Mapping of chunk kinds to topics =====
 /** The chunk kinds that map to a topic. Anything else (faq, review, overview...) gives the general suggestions. */
 const TOPIC_OF_KIND: Record<string, Topic> = {
   price: "cost",
@@ -59,7 +59,7 @@ export function topicOfKinds(kinds: string[]): Topic {
   return "general";
 }
 
-// ===== BAGIAN 4: Versi kunci teks, supaya tampil dalam bahasa pengunjung =====
+// ===== PART 4: Version of the text keys, so they are shown in the visitor's language =====
 /** The same table as FOLLOW_UPS, as text keys, so the questions can be shown in the visitor's language (see i18n). */
 export const FOLLOW_UP_KEYS: Record<Topic, readonly ("ask_cost" | "ask_included" | "ask_duration" | "ask_after" | "ask_about")[]> = {
   cost: ["ask_included", "ask_duration", "ask_after"],

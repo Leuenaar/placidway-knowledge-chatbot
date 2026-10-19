@@ -1,19 +1,19 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/crisis.ts
- * TUJUAN  : Lapisan kedua deteksi krisis: daftar frasa jelas dalam lima
- *           bahasa (Inggris, Indonesia, Turki, Spanyol, Arab). Lapisan
- *           pertama adalah kategori crisis dari langkah rewrite (model).
- *           Salah satu lapisan cukup untuk memicu balasan krisis.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Normalisasi teks (huruf kecil, tanpa aksen) sebelum dicocokkan
- *    2. Daftar frasa krisis per bahasa
- *    3. Fungsi pemeriksa: true kalau pesan terlihat krisis
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah frasa krisis baru atau bahasa baru (BAGIAN 2)
+ * PURPOSE : Second layer of crisis detection: a list of clear phrases in five
+ *           languages (English, Indonesian, Turkish, Spanish, Arabic). The
+ *           first layer is the crisis category from the rewrite step (the
+ *           model). Either layer alone is enough to trigger the crisis reply.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Text normalisation (lower case, no accents) before matching
+ *    2. List of crisis phrases per language
+ *    3. Checker function: true if the message looks like a crisis
+ * IF ASKED TO CHANGE:
+ *    - Add a new crisis phrase or a new language (PART 2)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Normalisasi teks (huruf kecil, tanpa aksen) sebelum dicocokkan =====
+// ===== PART 1: Text normalisation (lower case, no accents) before matching =====
 /**
  * Second layer of crisis detection. The first layer is the "crisis" category from the rewrite step (a model); this one is a plain list
  * of clear phrases in five languages, so a message like "I want to kill myself" is caught even when the model misreads it.
@@ -35,7 +35,7 @@ export function normalizeForMatch(text: string): string {
     .replace(/\s+/g, " ");
 }
 
-// ===== BAGIAN 2: Daftar frasa krisis per bahasa =====
+// ===== PART 2: List of crisis phrases per language =====
 const PATTERNS: RegExp[] = [
   // English
   /\bkill(ing)? (myself|my self)\b/,
@@ -75,7 +75,7 @@ const PATTERNS: RegExp[] = [
   /اريد ان اؤذي نفسي/,
 ];
 
-// ===== BAGIAN 3: Fungsi pemeriksa: true kalau pesan terlihat krisis =====
+// ===== PART 3: Checker function: true if the message looks like a crisis =====
 export function looksLikeCrisis(message: string): boolean {
   const text = normalizeForMatch(message);
   return PATTERNS.some((p) => p.test(text));

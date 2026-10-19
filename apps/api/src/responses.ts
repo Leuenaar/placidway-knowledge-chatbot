@@ -1,11 +1,10 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/responses.ts
- * TUJUAN  : Pembuat objek balasan standar (ChatResponse) supaya semua
- *           balasan, termasuk error, punya bentuk yang sama dan nilai bawaan
- *           yang sama.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Pembuat balasan standar dan balasan error
+ * PURPOSE : Builder of the standard reply object (ChatResponse) so every
+ *           reply, including errors, has the same shape and the same defaults.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Builder of the standard reply and the error reply
  * ============================================================================ */
 
 /**
@@ -16,7 +15,7 @@
  */
 import type { ChatResponse } from "@pwbot/shared";
 
-// ===== BAGIAN 1: Pembuat balasan standar dan balasan error =====
+// ===== PART 1: Builder of the standard reply and the error reply =====
 type ResponseInput = Pick<ChatResponse, "answer" | "kind"> & Partial<ChatResponse>;
 
 export function buildResponse(input: ResponseInput): ChatResponse {

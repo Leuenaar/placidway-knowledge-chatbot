@@ -1,24 +1,24 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/refresh/plan.ts
- * TUJUAN  : Rencana refresh: membandingkan halaman baru dengan isi database
- *           untuk memutuskan halaman mana yang new, changed, unchanged, atau
- *           blocked-older (salinan lebih lama dari yang ada di database).
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Tipe: isi database dan hasil rencana
- *    2. Beda chunk: tambah, ubah, hapus, nomor ulang
- *    3. Beda kosong
- *    4. Membuat rencana per halaman
- *    5. Laporan refresh yang mudah dibaca
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah aturan kapan halaman dianggap berubah (BAGIAN 4)
+ * PURPOSE : Refresh plan: compares the new pages with the database content to
+ *           decide which pages are new, changed, unchanged, or blocked-older
+ *           (a copy older than the one in the database).
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Type: database content and plan results
+ *    2. Chunk diff: add, change, delete, renumber
+ *    3. Empty diff
+ *    4. Build the plan per page
+ *    5. Easy-to-read refresh report
+ * IF ASKED TO CHANGE:
+ *    - Change the rule for when a page counts as changed (PART 4)
  * ============================================================================ */
 
 import { toIsoDate } from "../chunk/chunk.js";
 import type { ManifestEntry } from "../chunk/run.js";
 import type { Chunk } from "../chunk/types.js";
 
-// ===== BAGIAN 1: Tipe: isi database dan hasil rencana =====
+// ===== PART 1: Type: database content and plan results =====
 /** What the database holds for one page. */
 export interface DbPage {
   page_no: number;
@@ -49,7 +49,7 @@ export interface PagePlan {
   dbModified: string | null;
 }
 
-// ===== BAGIAN 2: Beda chunk: tambah, ubah, hapus, nomor ulang =====
+// ===== PART 2: Chunk diff: add, change, delete, renumber =====
 export function diffChunks(oldRefs: DbChunkRef[], next: Chunk[]): ChunkDiff {
   const oldById = new Map(oldRefs.map((c) => [c.id, c.text_hash]));
   const newIds = new Set(next.map((c) => c.id));
@@ -61,10 +61,10 @@ export function diffChunks(oldRefs: DbChunkRef[], next: Chunk[]): ChunkDiff {
   return { added, changed, removed, renumbered };
 }
 
-// ===== BAGIAN 3: Beda kosong =====
+// ===== PART 3: Empty diff =====
 const none: ChunkDiff = { added: [], changed: [], removed: [], renumbered: [] };
 
-// ===== BAGIAN 4: Membuat rencana per halaman =====
+// ===== PART 4: Build the plan per page =====
 /**
  * Decide per page what Refresh should do.
  * - new: the database has no row for the page.
@@ -91,7 +91,7 @@ export function planRefresh(manifest: ManifestEntry[], chunks: Chunk[], dbPages:
   });
 }
 
-// ===== BAGIAN 5: Laporan refresh yang mudah dibaca =====
+// ===== PART 5: Easy-to-read refresh report =====
 export function renderRefreshReport(plans: PagePlan[], mode: "plan" | "applied", warnings: string[]): string {
   const out = ["# Refresh report", "", mode === "plan" ? "Plan only. Nothing was written to the database." : "Applied to the database.", ""];
   out.push("| Page | Status | Added | Changed | Removed | Renumbered | Reason |", "| ---: | --- | ---: | ---: | ---: | ---: | --- |");

@@ -1,23 +1,22 @@
 -- ============================================================================
--- PETA FILE
+-- FILE MAP
 -- FILE    : db/migrations/003_match_chunks.sql
--- TUJUAN  : Migrasi 003: fungsi pencarian match_chunks(vektor, jumlah).
---           Server menanamkan pertanyaan lalu memanggil fungsi ini lewat
---           PostgREST untuk mendapat chunk terdekat. Cosine distance, tanpa
---           indeks vektor (sekitar 150 baris, pencarian penuh instan dan
---           selalu benar). Hasil dibatasi maksimal 20 baris. Hanya
---           service_role yang boleh menjalankan.
--- BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
---    1. Mulai transaksi
---    2. Fungsi match_chunks: kolom hasil dan isi pencarian
---    3. Hak akses: hanya service_role yang boleh menjalankan
---    4. Keterangan fungsi
---    5. Selesai
--- KALAU DIMINTA MENGUBAH:
---    - Mengubah jumlah maksimal hasil (20): BAGIAN 2
+-- PURPOSE : Migration 003: the search function match_chunks(vector, count).
+--           The server embeds the question and calls this function through
+--           PostgREST to get the nearest chunks. Cosine distance, no vector
+--           index (about 150 rows, a full scan is instant and always correct).
+--           The result is capped at 20 rows. Only service_role may run it.
+-- PARTS   : (in the code, search for the text PART n with Ctrl+F)
+--    1. Start the transaction
+--    2. Function match_chunks: result columns and the search body
+--    3. Access rights: only service_role may run it
+--    4. Function description
+--    5. Done
+-- IF ASKED TO CHANGE:
+--    - Change the maximum number of results (20): PART 2
 -- ============================================================================
 
--- ===== BAGIAN 1: Mulai transaksi =====
+-- ===== PART 1: Start the transaction =====
 -- 003_match_chunks.sql
 -- PlacidWay Knowledge Chatbot, migration 003.
 --
@@ -40,7 +39,7 @@
 -- Run once in the Supabase SQL Editor. Safe to re-run (create or replace).
 begin;
 
--- ===== BAGIAN 2: Fungsi match_chunks: kolom hasil dan isi pencarian =====
+-- ===== PART 2: Function match_chunks: result columns and the search body =====
 create or replace function public.match_chunks(
   query_embedding extensions.vector(384),
   match_count     integer default 5
@@ -78,15 +77,15 @@ as $$
   limit greatest(1, least(match_count, 20));
 $$;
 
--- ===== BAGIAN 3: Hak akses: hanya service_role yang boleh menjalankan =====
+-- ===== PART 3: Access rights: only service_role may run it =====
 revoke all on function public.match_chunks(extensions.vector, integer)
   from public, anon, authenticated;
 grant execute on function public.match_chunks(extensions.vector, integer)
   to service_role;
 
--- ===== BAGIAN 4: Keterangan fungsi =====
+-- ===== PART 4: Function description =====
 comment on function public.match_chunks(extensions.vector, integer) is
   'Nearest chunks to a question embedding (cosine). Called by the API server only.';
 
--- ===== BAGIAN 5: Selesai =====
+-- ===== PART 5: Done =====
 commit;

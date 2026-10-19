@@ -1,24 +1,24 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/web/src/api.ts
- * TUJUAN  : Klien API untuk web: kirim pesan (/api/chat), cek mode server
- *           (/api/health), kirim kartu kontak (/api/lead). Fungsi-fungsi ini
- *           tidak pernah melempar error: kegagalan jaringan menjadi balasan
- *           'error' biasa sehingga tampilan hanya punya satu jalur.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Impor
- *    2. Alamat dasar API (kosong = alamat yang sama lewat proxy)
- *    3. Balasan bila server tidak terjangkau
- *    4. Kirim satu pertanyaan ke /api/chat (beserta riwayat dari browser)
- *    5. Cek /api/health (mock atau live)
- *    6. Kirim kartu kontak ke /api/lead
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah teks error koneksi: cari 'I couldn't reach the server'
- *      (BAGIAN 3)
- *    - Mengubah alamat API saat produksi: VITE_API_BASE (BAGIAN 2)
+ * PURPOSE : API client for the web app: send a message (/api/chat), check the
+ *           server mode (/api/health), send the contact card (/api/lead).
+ *           These functions never throw: a network failure becomes an ordinary
+ *           'error' reply, so the screen has only one path.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Imports
+ *    2. Base API address (empty = same address through the proxy)
+ *    3. Reply when the server cannot be reached
+ *    4. Send one question to /api/chat (with the history from the browser)
+ *    5. Check /api/health (mock or live)
+ *    6. Send the contact card to /api/lead
+ * IF ASKED TO CHANGE:
+ *    - Change the connection error text: search for 'I couldn't reach the
+ *      server' (PART 3)
+ *    - Change the API address in production: VITE_API_BASE (PART 2)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Impor =====
+// ===== PART 1: Imports =====
 /**
  * Client for the API. These functions never throw: a network failure becomes a normal
  * "error" reply, so the UI has a single path for success and failure.
@@ -33,11 +33,11 @@ import {
   type LeadResponse,
 } from "@pwbot/shared";
 
-// ===== BAGIAN 2: Alamat dasar API (kosong = alamat yang sama lewat proxy) =====
+// ===== PART 2: Base API address (empty = same address through the proxy) =====
 /** Empty by default (same origin, via the dev proxy). Set VITE_API_BASE to call another host. */
 const API_BASE: string = import.meta.env?.VITE_API_BASE ?? "";
 
-// ===== BAGIAN 3: Balasan bila server tidak terjangkau =====
+// ===== PART 3: Reply when the server cannot be reached =====
 const CONNECTION_ERROR: ChatResponse = {
   answer: "I couldn't reach the server. Please check your connection and try again.",
   kind: "error",
@@ -48,7 +48,7 @@ const CONNECTION_ERROR: ChatResponse = {
   follow_ups: [],
 };
 
-// ===== BAGIAN 4: Kirim satu pertanyaan ke /api/chat (beserta riwayat dari browser) =====
+// ===== PART 4: Send one question to /api/chat (with the history from the browser) =====
 /** `history` is the chat the browser remembers; the server uses it only if it has forgotten the session. */
 export async function sendMessage(sessionId: string, message: string, history: HistoryEntry[] = []): Promise<ChatResponse> {
   const payload: ChatRequest = { session_id: sessionId, message, ...(history.length > 0 ? { history } : {}) };
@@ -67,7 +67,7 @@ export async function sendMessage(sessionId: string, message: string, history: H
   return CONNECTION_ERROR;
 }
 
-// ===== BAGIAN 5: Cek /api/health (mock atau live) =====
+// ===== PART 5: Check /api/health (mock or live) =====
 /** Returns null when the API is unreachable. The UI then simply hides the mode badge. */
 export async function fetchHealth(): Promise<HealthResponse | null> {
   try {
@@ -79,7 +79,7 @@ export async function fetchHealth(): Promise<HealthResponse | null> {
   }
 }
 
-// ===== BAGIAN 6: Kirim kartu kontak ke /api/lead =====
+// ===== PART 6: Send the contact card to /api/lead =====
 /** Sends the contact card. true only when the server stored it; any failure (network, limit, validation) is false. */
 export async function submitLead(request: Omit<LeadRequest, "consent">): Promise<boolean> {
   const payload: LeadRequest = { ...request, consent: true };

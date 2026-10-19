@@ -1,17 +1,19 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/eval/eval.test.ts
- * TUJUAN  : Uji alat evaluasi pencarian: menemukan chunk yang benar,
- *           melaporkan peringkat per bahasa, menolak vektor dari model lain,
- *           set pertanyaan valid.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the search evaluation tool: it finds the correct chunk,
+ *           reports the rank per language, rejects vectors from another model,
+ *           and the question set is valid.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. evaluate: finds the right chunk, reports rank and per-language numbers
- *    2. evaluate: refuses vectors from another model and expectations that do not e...
- *    3. question set: ids unique, 4 languages, every question has an expectation
+ *    2. evaluate: refuses vectors from another model and expectations that do
+ *       not e...
+ *    3. question set: ids unique, 4 languages, every question has an
+ *       expectation
  *    4. question set: every expected chunk id exists in the real chunks
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 import assert from "node:assert/strict";
@@ -39,7 +41,7 @@ const mk = (id: string, text: string): Chunk => ({
 
 const corpus = [mk("P1-a-1", "hotel pool towels and breakfast"), mk("P1-a-2", "insurance does not cover alternative therapy abroad"), mk("P1-a-3", "airport shuttle from San Diego")];
 
-// ===== BAGIAN 1: evaluate: finds the right chunk, reports rank and per-language numbers =====
+// ===== PART 1: evaluate: finds the right chunk, reports rank and per-language numbers =====
 test("evaluate: finds the right chunk, reports rank and per-language numbers", async () => {
   const embedder = createFakeEmbedder();
   const { file } = await embedChunks(corpus, embedder);
@@ -60,7 +62,7 @@ test("evaluate: finds the right chunk, reports rank and per-language numbers", a
   assert.match(renderEvalReport(embedder.model, res), /\| en \| 2 \| 100% \|/);
 });
 
-// ===== BAGIAN 2: evaluate: refuses vectors from another model and expectations that do not e... =====
+// ===== PART 2: evaluate: refuses vectors from another model and expectations that do not e... =====
 test("evaluate: refuses vectors from another model and expectations that do not exist", async () => {
   const embedder = createFakeEmbedder();
   const { file } = await embedChunks(corpus, embedder);
@@ -68,7 +70,7 @@ test("evaluate: refuses vectors from another model and expectations that do not 
   await assert.rejects(evaluate([{ id: "q", lang: "en", q: "x", expect: ["P9-missing-1"] }], corpus, file, embedder), /does not exist/);
 });
 
-// ===== BAGIAN 3: question set: ids unique, 4 languages, every question has an expectation =====
+// ===== PART 3: question set: ids unique, 4 languages, every question has an expectation =====
 test("question set: ids unique, 4 languages, every question has an expectation", () => {
   const qs = readQuestions(resolve(fileURLToPath(new URL("../../eval/questions.json", import.meta.url))));
   assert.equal(new Set(qs.map((q) => q.id)).size, qs.length);
@@ -78,7 +80,7 @@ test("question set: ids unique, 4 languages, every question has an expectation",
 
 const chunksPath = resolve(fileURLToPath(new URL("../../../../data/chunks/chunks.json", import.meta.url)));
 
-// ===== BAGIAN 4: question set: every expected chunk id exists in the real chunks =====
+// ===== PART 4: question set: every expected chunk id exists in the real chunks =====
 test("question set: every expected chunk id exists in the real chunks", { skip: existsSync(chunksPath) ? false : "data/chunks is not present" }, () => {
   const ids = new Set((JSON.parse(readFileSync(chunksPath, "utf8")) as Chunk[]).map((c) => c.id));
   const qs = readQuestions(resolve(fileURLToPath(new URL("../../eval/questions.json", import.meta.url))));

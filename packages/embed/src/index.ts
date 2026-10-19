@@ -1,24 +1,24 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : packages/embed/src/index.ts
- * TUJUAN  : Pintu paket @pwbot/embed: mengekspor embedder asli (e5), embedder
- *           palsu untuk uji, dan fungsi matematika vektor. Server dan alat
- *           ingest memakai paket yang sama.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Ekspor embedder e5 (asli)
- *    2. Ekspor embedder palsu (untuk uji)
- *    3. Ekspor fungsi vektor (cosine, normalisasi, bentuk pgvector)
- *    4. Ekspor tipe Embedder dan panjang vektor database
+ * PURPOSE : Entry point of the @pwbot/embed package: it exports the real
+ *           embedder (e5), the fake embedder for tests, and the vector maths
+ *           functions. The server and the ingest tool use the same package.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Export of the real e5 embedder
+ *    2. Export of the fake embedder (for tests)
+ *    3. Export of the vector functions (cosine, normalisation, pgvector shape)
+ *    4. Export of the Embedder type and the database vector length
  * ============================================================================ */
 
-// ===== BAGIAN 1: Ekspor embedder e5 (asli) =====
+// ===== PART 1: Export of the real e5 embedder =====
 export { createE5Embedder, PASSAGE_PREFIX, QUERY_PREFIX, type E5Options } from "./e5.js";
 
-// ===== BAGIAN 2: Ekspor embedder palsu (untuk uji) =====
+// ===== PART 2: Export of the fake embedder (for tests) =====
 export { createFakeEmbedder, FAKE_MODEL } from "./fake.js";
 
-// ===== BAGIAN 3: Ekspor fungsi vektor (cosine, normalisasi, bentuk pgvector) =====
+// ===== PART 3: Export of the vector functions (cosine, normalisation, pgvector shape) =====
 export { cosine, l2normalize, toPgVector } from "./math.js";
 
-// ===== BAGIAN 4: Ekspor tipe Embedder dan panjang vektor database =====
+// ===== PART 4: Export of the Embedder type and the database vector length =====
 export { DB_VECTOR_DIMS, type Embedder } from "./types.js";

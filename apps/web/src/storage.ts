@@ -1,26 +1,25 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/web/src/storage.ts
- * TUJUAN  : Obrolan yang diingat browser agar reload tidak menghapus layar
- *           dan pertanyaan lanjutan tetap nyambung. Disimpan di
- *           sessionStorage (milik tab ini, hilang saat tab ditutup). Obrolan
- *           krisis tidak pernah disimpan. Data yang dibaca kembali diperiksa;
- *           data rusak atau lama dibuang. Pertanyaan tanpa jawaban tidak
- *           dipulihkan.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Batas penyimpanan (kunci, jumlah pesan, ukuran)
- *    2. Tipe: antarmuka penyimpanan yang dipakai
- *    3. Pola UUID dan jenis balasan yang bukan konteks
- *    4. Mengambil sessionStorage dengan aman
- *    5. Menghapus obrolan tersimpan
- *    6. Memeriksa bentuk satu pesan yang dibaca kembali
- *    7. Pembantu: apakah ada balasan krisis
- *    8. Menyimpan obrolan (atau menghapus bila kosong atau krisis)
- *    9. Membaca obrolan tersimpan (null bila tidak bisa dipercaya)
- *    10. Menyusun riwayat yang dikirim bersama pertanyaan berikutnya
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah jumlah pesan atau ukuran yang disimpan: BAGIAN 1
- *    - Mengubah riwayat yang dikirim ke server: BAGIAN 10
+ * PURPOSE : The chat the browser remembers, so a reload does not clear the
+ *           screen and follow-up questions still connect. Saved in
+ *           sessionStorage (belongs to this tab, gone when the tab is closed).
+ *           A crisis chat is never saved. Data read back is checked; broken or
+ *           old data is dropped. A question without an answer is not restored.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Storage limits (key, number of messages, size)
+ *    2. Type: the storage interface that is used
+ *    3. UUID pattern and the reply kinds that are not context
+ *    4. Get sessionStorage safely
+ *    5. Delete the saved chat
+ *    6. Check the shape of one message read back
+ *    7. Helper: whether there is a crisis reply
+ *    8. Save the chat (or delete it if it is empty or a crisis)
+ *    9. Read the saved chat (null if it cannot be trusted)
+ *    10. Build the history that is sent with the next question
+ * IF ASKED TO CHANGE:
+ *    - Change the number of messages or the size that is stored: PART 1
+ *    - Change the history sent to the server: PART 10
  * ============================================================================ */
 
 /**
@@ -44,14 +43,14 @@ import {
 } from "@pwbot/shared";
 import type { ChatMessage } from "./types";
 
-// ===== BAGIAN 1: Batas penyimpanan (kunci, jumlah pesan, ukuran) =====
+// ===== PART 1: Storage limits (key, number of messages, size) =====
 export const STORAGE_KEY = "pwbot.chat.v1";
 /** Messages kept on screen after a reload (a message is a question or an answer). */
 export const MAX_STORED_MESSAGES = 30;
 /** Upper bound for the stored text. Older messages are dropped until it fits. */
 export const MAX_STORED_BYTES = 100_000;
 
-// ===== BAGIAN 2: Tipe: antarmuka penyimpanan yang dipakai =====
+// ===== PART 2: Type: the storage interface that is used =====
 /** The part of the Storage interface used here, so tests can pass a plain object. */
 export interface TabStorage {
   getItem(key: string): string | null;
@@ -64,12 +63,12 @@ export interface SavedChat {
   messages: ChatMessage[];
 }
 
-// ===== BAGIAN 3: Pola UUID dan jenis balasan yang bukan konteks =====
+// ===== PART 3: UUID pattern and the reply kinds that are not context =====
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 /** Replies that are never part of the context sent to the bot: the server does not remember them either. */
 const NOT_CONTEXT = new Set(["error", "rate_limited", "crisis"]);
 
-// ===== BAGIAN 4: Mengambil sessionStorage dengan aman =====
+// ===== PART 4: Get sessionStorage safely =====
 function tabStorage(): TabStorage | null {
   try {
     return typeof window !== "undefined" ? window.sessionStorage : null;
@@ -78,7 +77,7 @@ function tabStorage(): TabStorage | null {
   }
 }
 
-// ===== BAGIAN 5: Menghapus obrolan tersimpan =====
+// ===== PART 5: Delete the saved chat =====
 export function clearChat(store: TabStorage | null = tabStorage()): void {
   try {
     store?.removeItem(STORAGE_KEY);
@@ -87,7 +86,7 @@ export function clearChat(store: TabStorage | null = tabStorage()): void {
   }
 }
 
-// ===== BAGIAN 6: Memeriksa bentuk satu pesan yang dibaca kembali =====
+// ===== PART 6: Check the shape of one message read back =====
 function isMessage(value: unknown): value is ChatMessage {
   if (typeof value !== "object" || value === null) return false;
   const m = value as Record<string, unknown>;
@@ -97,10 +96,10 @@ function isMessage(value: unknown): value is ChatMessage {
   return m.role === "assistant" && (m.response === undefined || isChatResponse(m.response));
 }
 
-// ===== BAGIAN 7: Pembantu: apakah ada balasan krisis =====
+// ===== PART 7: Helper: whether there is a crisis reply =====
 const hasCrisis = (messages: ChatMessage[]) => messages.some((m) => m.response?.kind === "crisis");
 
-// ===== BAGIAN 8: Menyimpan obrolan (atau menghapus bila kosong atau krisis) =====
+// ===== PART 8: Save the chat (or delete it if it is empty or a crisis) =====
 /** Saves the chat, or erases the saved one when there is nothing worth keeping (empty, or it contains a crisis reply). */
 export function saveChat(sessionId: string, messages: ChatMessage[], store: TabStorage | null = tabStorage()): void {
   if (!store) return;
@@ -125,7 +124,7 @@ export function saveChat(sessionId: string, messages: ChatMessage[], store: TabS
   }
 }
 
-// ===== BAGIAN 9: Membaca obrolan tersimpan (null bila tidak bisa dipercaya) =====
+// ===== PART 9: Read the saved chat (null if it cannot be trusted) =====
 /** The saved chat, or null when there is none or it cannot be trusted. */
 export function loadChat(store: TabStorage | null = tabStorage()): SavedChat | null {
   if (!store) return null;
@@ -149,7 +148,7 @@ export function loadChat(store: TabStorage | null = tabStorage()): SavedChat | n
   }
 }
 
-// ===== BAGIAN 10: Menyusun riwayat yang dikirim bersama pertanyaan berikutnya =====
+// ===== PART 10: Build the history that is sent with the next question =====
 /**
  * The earlier exchanges to send with the next question, oldest first: complete question + answer pairs only, no failed or crisis
  * replies, the last MAX_HISTORY_ENTRIES / 2 pairs, long answers cut. The question being sent now is not part of it.

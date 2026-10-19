@@ -1,19 +1,19 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : packages/embed/src/types.ts
- * TUJUAN  : Kontrak Embedder: satu cara mengubah teks menjadi vektor. Alat
- *           ingest dan server API memakai embedder yang sama karena
- *           pertanyaan hanya bisa dicocokkan dengan teks yang di-embed oleh
- *           model yang sama.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Tipe: Embedder (nama model, dims, embedPassages, embedQuery)
- *    2. Panjang vektor di database (384)
- * KALAU DIMINTA MENGUBAH:
- *    - Mengganti dimensi vektor: ubah juga kolom vector(384) di db/migrations
- *      (BAGIAN 2)
+ * PURPOSE : The Embedder contract: one way to turn text into a vector. The
+ *           ingest tool and the API server use the same embedder,
+ *           because a question can only be matched against text
+ *           embedded by the same model.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Type: Embedder (model name, dims, embedPassages, embedQuery)
+ *    2. Vector length in the database (384)
+ * IF ASKED TO CHANGE:
+ *    - Change the vector dimension: also change the vector(384) column in
+ *      db/migrations (PART 2)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Tipe: Embedder (nama model, dims, embedPassages, embedQuery) =====
+// ===== PART 1: Type: Embedder (model name, dims, embedPassages, embedQuery) =====
 /**
  * One way to turn text into vectors. The ingest tool and the API server use the same one, because a
  * question can only be matched against passages that were embedded by the same model.
@@ -29,5 +29,5 @@ export interface Embedder {
   embedQuery(text: string): Promise<number[]>;
 }
 
-// ===== BAGIAN 2: Panjang vektor di database (384) =====
+// ===== PART 2: Vector length in the database (384) =====
 export const DB_VECTOR_DIMS = 384;

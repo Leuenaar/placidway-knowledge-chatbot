@@ -1,20 +1,20 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/web/src/components/Welcome.tsx
- * TUJUAN  : Layar pertama sebelum pesan pertama. Menyatakan tiga hal sebelum
- *           pengunjung mengetik: ini AI, ini hanya mencakup 7 halaman, dan
- *           apa yang tidak bisa dilakukan. Kartu topik menjawab 'apa yang
- *           boleh saya tanya?' dan mengirim pertanyaan nyata saat disentuh.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Impor
- *    2. Daftar kartu topik (label dan pertanyaan)
- *    3. Komponen sambutan
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah atau menambah kartu topik: edit TOPICS (BAGIAN 2)
- *    - Mengubah teks sambutan: cari 'Ask about the ITC' (BAGIAN 3)
+ * PURPOSE : First screen before the first message. It states three things
+ *           before the visitor types: this is an AI, it covers only 7 pages,
+ *           and what it cannot do. The topic cards answer 'what may I ask?'
+ *           and send a real question when touched.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Imports
+ *    2. List of topic cards (label and question)
+ *    3. Welcome component
+ * IF ASKED TO CHANGE:
+ *    - Change or add the topic cards: edit TOPICS (PART 2)
+ *    - Change the welcome text: search for 'Ask about the ITC' (PART 3)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Impor =====
+// ===== PART 1: Imports =====
 /**
  * First screen, shown until the first message. It says three things before the user types
  * anything: what this is (an AI), what it covers (7 pages), and what it cannot do. The topic
@@ -23,7 +23,7 @@
 import { QUOTE_URL } from "@pwbot/shared";
 import markUrl from "../assets/placidway-mark.png";
 
-// ===== BAGIAN 2: Daftar kartu topik (label dan pertanyaan) =====
+// ===== PART 2: List of topic cards (label and question) =====
 const TOPICS = [
   { label: "Cost", question: "How much does the treatment cost?" },
   { label: "Included", question: "What is included in the package?" },
@@ -31,7 +31,7 @@ const TOPICS = [
   { label: "Afterwards", question: "What happens after the program?" },
 ];
 
-// ===== BAGIAN 3: Komponen sambutan =====
+// ===== PART 3: Welcome component =====
 export function Welcome({ onPick, disabled }: { onPick: (text: string) => void; disabled: boolean }) {
   return (
     <section className="welcome" aria-labelledby="welcome-title">

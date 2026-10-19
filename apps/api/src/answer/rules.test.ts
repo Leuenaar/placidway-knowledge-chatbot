@@ -1,13 +1,14 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/answer/rules.test.ts
- * TUJUAN  : Uji berkas aturan model (apps/api/rules/*.md): semua berkas ada,
- *           urutan benar, dan error jelas bila hilang.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the model rules files (apps/api/rules/*.md): all files
+ *           exist, the order is correct, and the error is clear when one is
+ *           missing.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. rule files
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 import assert from "node:assert/strict";
@@ -15,7 +16,7 @@ import { describe, it } from "node:test";
 import { AnswerError } from "./config";
 import { RULE_GROUPS, loadRules } from "./rules";
 
-// ===== BAGIAN 1: rule files =====
+// ===== PART 1: rule files =====
 describe("rule files", () => {
   it("loads the five real files, trimmed and non-empty", () => {
     const rules = loadRules();

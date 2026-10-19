@@ -1,15 +1,16 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/rewrite/rewriter.test.ts
- * TUJUAN  : Uji penulis ulang pertanyaan (rewrite): prompt, flag wants_quote,
- *           dan perilaku bila model gagal atau membalas format salah.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the question rewriter (rewrite): the prompt, the
+ *           wants_quote flag, and the behaviour when the model fails or
+ *           replies in the wrong format.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. rewriter prompt
  *    2. rewriter: wants_quote
  *    3. rewriter
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 import assert from "node:assert/strict";
@@ -31,7 +32,7 @@ function model(text: string, stopReason = "end_turn") {
 const good = { language: "tr", query: "Is the ITC treatment price $50? Compare with the listed treatment price", category: "in_scope" };
 const quiet = () => {};
 
-// ===== BAGIAN 1: rewriter prompt =====
+// ===== PART 1: rewriter prompt =====
 describe("rewriter prompt", () => {
   it("defines crisis narrowly: self-harm or not wanting to live, never fear of an illness", () => {
     assert.match(REWRITE_SYSTEM_PROMPT, /"crisis"/);
@@ -40,7 +41,7 @@ describe("rewriter prompt", () => {
   });
 });
 
-// ===== BAGIAN 2: rewriter: wants_quote =====
+// ===== PART 2: rewriter: wants_quote =====
 describe("rewriter: wants_quote", () => {
   it("is asked for in the prompt, narrowly (a personal quote, being contacted, booking), and false when unsure", () => {
     assert.match(REWRITE_SYSTEM_PROMPT, /"wants_quote": true \| false/);
@@ -65,7 +66,7 @@ describe("rewriter: wants_quote", () => {
   });
 });
 
-// ===== BAGIAN 3: rewriter =====
+// ===== PART 3: rewriter =====
 describe("rewriter", () => {
   it("returns the language, the English query and the category", async () => {
     const m = model(JSON.stringify(good));

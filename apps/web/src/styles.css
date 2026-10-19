@@ -1,36 +1,36 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/web/src/styles.css
- * TUJUAN  : Gaya layar obrolan. Warna adalah token di :root, jadi tema terang
- *           dan gelap hanya mendefinisikan ulang nilai. Koral PlacidWay
- *           (#E85A4F) dipakai apa adanya untuk logo dan avatar; tombol dan
- *           gelembung pengunjung memakai koral lebih gelap (--accent) agar
- *           teks putih terbaca. Tata letak: satu kolom di tengah memenuhi
- *           layar (header, area obrolan bergulir, kotak input).
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Warna dan token tema terang (ubah warna di sini)
- *    2. Tema gelap (nilai warna yang diganti)
- *    3. Dasar: reset, html, body, tombol, sr-only, fokus
- *    4. Tata letak utama
- *    5. Header (logo, label AI, tombol)
- *    6. Layar sambutan dan kartu topik
- *    7. Pesan: baris, gelembung, catatan, tombol penawaran
- *    8. Daftar sumber
- *    9. Saran pertanyaan lanjutan
- *    10. Penanda mengetik
- *    11. Kotak input
- *    12. Layar kecil (di bawah 520px dan 440px)
- *    13. Layar tersempit (di bawah 359px)
- *    14. Kartu kontak
- *    15. Kolom jebakan bot (di luar layar)
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah warna: BAGIAN 1 (terang) dan BAGIAN 2 (gelap)
- *    - Mengubah tampilan gelembung chat: BAGIAN 7
- *    - Mengubah tampilan kartu kontak: BAGIAN 14
- *    - Mengubah ukuran di HP: BAGIAN 12 dan 13
+ * PURPOSE : Styles for the chat screen. Colours are tokens on :root, so the
+ *           light and dark themes only redefine values. PlacidWay coral
+ *           (#E85A4F) is used as is for the logo and avatar; the buttons and
+ *           the visitor bubble use a darker coral (--accent) so white text
+ *           stays readable. Layout: one centred column fills the screen
+ *           (header, scrolling chat area, input box).
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Colours and tokens of the light theme (change the colours here)
+ *    2. Dark theme (the colour values that are replaced)
+ *    3. Base: reset, html, body, button, sr-only, focus
+ *    4. Main layout
+ *    5. Header (logo, AI label, buttons)
+ *    6. Welcome screen and topic cards
+ *    7. Message: row, bubble, note, quote button
+ *    8. List of sources
+ *    9. Follow-up question suggestions
+ *    10. Typing indicator
+ *    11. Input box
+ *    12. Small screens (below 520px and 440px)
+ *    13. Narrowest screens (below 359px)
+ *    14. Contact card
+ *    15. Bot trap field (off screen)
+ * IF ASKED TO CHANGE:
+ *    - Change the colours: PART 1 (light) and PART 2 (dark)
+ *    - Change how the chat bubbles look: PART 7
+ *    - Change how the contact card looks: PART 14
+ *    - Change the sizes on phones: PART 12 and 13
  * ============================================================================ */
 
-/* ===== BAGIAN 1: Warna dan token tema terang (ubah warna di sini) ===== */
+/* ===== PART 1: Colours and tokens of the light theme (change the colours here) ===== */
 /*
  * Styles for the chat screen.
  *
@@ -74,7 +74,7 @@
   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Noto Naskh Arabic", sans-serif;
 }
 
-/* ===== BAGIAN 2: Tema gelap (nilai warna yang diganti) ===== */
+/* ===== PART 2: Dark theme (the colour values that are replaced) ===== */
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #151110;
@@ -101,7 +101,7 @@
   }
 }
 
-/* ===== BAGIAN 3: Dasar: reset, html, body, tombol, sr-only, fokus ===== */
+/* ===== PART 3: Base: reset, html, body, button, sr-only, focus ===== */
 * {
   box-sizing: border-box;
 }
@@ -152,7 +152,7 @@ textarea {
   outline: none;
 }
 
-/* ===== BAGIAN 4: Tata letak utama ===== */
+/* ===== PART 4: Main layout ===== */
 /* ---------- Layout ---------- */
 
 .app {
@@ -178,7 +178,7 @@ textarea {
   padding: 20px var(--gutter) 12px;
 }
 
-/* ===== BAGIAN 5: Header (logo, label AI, tombol) ===== */
+/* ===== PART 5: Header (logo, AI label, buttons) ===== */
 /* ---------- Header ---------- */
 
 .demo-banner {
@@ -274,7 +274,7 @@ textarea {
   background: var(--accent-hover);
 }
 
-/* ===== BAGIAN 6: Layar sambutan dan kartu topik ===== */
+/* ===== PART 6: Welcome screen and topic cards ===== */
 /* ---------- Welcome screen ---------- */
 
 .welcome {
@@ -360,7 +360,7 @@ textarea {
   font-weight: 600;
 }
 
-/* ===== BAGIAN 7: Pesan: baris, gelembung, catatan, tombol penawaran ===== */
+/* ===== PART 7: Message: row, bubble, note, quote button ===== */
 /* ---------- Messages ---------- */
 
 .messages {
@@ -477,7 +477,7 @@ textarea {
   line-height: 1.5;
 }
 
-/* ===== BAGIAN 8: Daftar sumber ===== */
+/* ===== PART 8: List of sources ===== */
 /* ---------- Sources ---------- */
 
 .sources {
@@ -559,7 +559,7 @@ textarea {
   background: var(--accent-hover);
 }
 
-/* ===== BAGIAN 9: Saran pertanyaan lanjutan ===== */
+/* ===== PART 9: Follow-up question suggestions ===== */
 /* ---------- Follow-up suggestions ---------- */
 
 .followups {
@@ -594,7 +594,7 @@ textarea {
   cursor: default;
 }
 
-/* ===== BAGIAN 10: Penanda mengetik ===== */
+/* ===== PART 10: Typing indicator ===== */
 /* ---------- Typing indicator ---------- */
 
 .typing {
@@ -649,7 +649,7 @@ textarea {
   }
 }
 
-/* ===== BAGIAN 11: Kotak input ===== */
+/* ===== PART 11: Input box ===== */
 /* ---------- Composer ---------- */
 
 .composer-wrap {
@@ -732,7 +732,7 @@ textarea {
   font-size: 0.75rem;
 }
 
-/* ===== BAGIAN 12: Layar kecil (di bawah 520px dan 440px) ===== */
+/* ===== PART 12: Small screens (below 520px and 440px) ===== */
 /* ---------- Small screens ---------- */
 
 @media (max-width: 520px) {
@@ -816,7 +816,7 @@ textarea {
   }
 }
 
-/* ===== BAGIAN 13: Layar tersempit (di bawah 359px) ===== */
+/* ===== PART 13: Narrowest screens (below 359px) ===== */
 /* On the narrowest phones the label shrinks to "AI" so it cannot collide with the buttons.
    The rest of the words stay in the page for screen readers. */
 @media (max-width: 359px) {
@@ -834,7 +834,7 @@ textarea {
   }
 }
 
-/* ===== BAGIAN 14: Kartu kontak ===== */
+/* ===== PART 14: Contact card ===== */
 /* ---------- Lead card (contact form offered once) ---------- */
 
 .lead {
@@ -890,7 +890,7 @@ textarea {
   accent-color: var(--accent);
 }
 
-/* ===== BAGIAN 15: Kolom jebakan bot (di luar layar) ===== */
+/* ===== PART 15: Bot trap field (off screen) ===== */
 /* Off-screen bait for bots. Not display:none, because some bots skip fields that are hidden that way. */
 .lead-trap {
   position: absolute;

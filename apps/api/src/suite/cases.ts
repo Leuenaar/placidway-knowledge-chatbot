@@ -1,26 +1,27 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/suite/cases.ts
- * TUJUAN  : Daftar kasus uji: 8 pertanyaan resmi (dengan perilaku yang
- *           diharapkan dari PDF tugas, diisi dengan data klinik ini), jebakan
- *           tambahan, dan pertanyaan kunci dalam 4 bahasa lain. Setiap kasus
- *           hanya menyatakan apa yang WAJIB benar; sisanya dibaca manusia di
- *           laporan.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Tipe: bahasa dan kelompok kasus
- *    2. Tipe: apa yang boleh diharapkan dari sebuah kasus
- *    3. Tipe: satu kasus uji
- *    4. Pola pembantu: kata 'dokter' per bahasa dan larangan cerita pasien
- *    5. Kasus bahasa Inggris (8 resmi + tambahan en-9 sampai en-17)
- *    6. Teks pertanyaan yang sama dalam id, tr, es, ar
- *    7. Pembuat kasus multibahasa (5 kasus per bahasa)
- *    8. Daftar akhir semua kasus
- *    9. Nama bahasa dalam bahasa Inggris (dipakai untuk mencocokkan hasil rewrite)
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah kasus uji baru: tambahkan satu objek di EN_OFFICIAL (id,
- *      group, lang, turns, expect, review) (BAGIAN 5)
- *    - Menambah pertanyaan multibahasa: edit teks di MULTI (BAGIAN 6)
- *    - Mengubah syarat sebuah kasus: edit objek expect miliknya (BAGIAN 5)
+ * PURPOSE : List of test cases: the 8 official questions (with the behaviour
+ *           expected in the assignment PDF, filled in with this clinic's
+ *           data), extra traps, and the key questions in 4 other languages.
+ *           Each case states only what MUST be true; a person reads the rest
+ *           in the report.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Type: language and case group
+ *    2. Type: what can be expected of a case
+ *    3. Type: one test case
+ *    4. Helper patterns: the word 'doctor' per language and the ban on patient
+ *       stories
+ *    5. English cases (8 official + extra en-9 to en-17)
+ *    6. The same question text in id, tr, es, ar
+ *    7. Builder of the multilingual cases (5 cases per language)
+ *    8. Final list of all cases
+ *    9. Language names in English (used to match the rewrite result)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test case: add one object in EN_OFFICIAL (id, group, lang,
+ *      turns, expect, review) (PART 5)
+ *    - Add a multilingual question: edit the text in MULTI (PART 6)
+ *    - Change a case's conditions: edit its expect object (PART 5)
  * ============================================================================ */
 
 /**
@@ -33,11 +34,11 @@
  */
 import type { AnswerKind } from "@pwbot/shared";
 
-// ===== BAGIAN 1: Tipe: bahasa dan kelompok kasus =====
+// ===== PART 1: Type: language and case group =====
 export type Lang = "en" | "id" | "tr" | "es" | "ar";
 export type Group = "official" | "extra" | "multilingual" | "baseline";
 
-// ===== BAGIAN 2: Tipe: apa yang boleh diharapkan dari sebuah kasus =====
+// ===== PART 2: Type: what can be expected of a case =====
 export interface Expect {
   /** The kind of reply the bot must give (a list: any of these kinds). */
   kind?: AnswerKind | AnswerKind[];
@@ -64,7 +65,7 @@ export interface Expect {
   pages?: number[];
 }
 
-// ===== BAGIAN 3: Tipe: satu kasus uji =====
+// ===== PART 3: Type: one test case =====
 export interface Case {
   id: string;
   group: Group;
@@ -76,7 +77,7 @@ export interface Case {
   review: string;
 }
 
-// ===== BAGIAN 4: Pola pembantu: kata 'dokter' per bahasa dan larangan cerita pasien =====
+// ===== PART 4: Helper patterns: the word 'doctor' per language and the ban on patient stories =====
 const DOCTOR: Record<Lang, RegExp> = {
   en: /doctor|physician|oncologist|healthcare provider|medical professional/i,
   id: /dokter/i,
@@ -87,7 +88,7 @@ const DOCTOR: Record<Lang, RegExp> = {
 /** A medical answer must not quote a patient story or a review of a result. */
 const PATIENT_STORY = /patient stor|one patient|a patient whose|testimonial|reported to be gone|after \d+ weeks/i;
 
-// ===== BAGIAN 5: Kasus bahasa Inggris (8 resmi + tambahan en-9 sampai en-17) =====
+// ===== PART 5: English cases (8 official + extra en-9 to en-17) =====
 const EN_OFFICIAL: Case[] = [
   {
     id: "en-1-cost", group: "official", lang: "en",
@@ -199,7 +200,7 @@ const EN_OFFICIAL: Case[] = [
   },
 ];
 
-// ===== BAGIAN 6: Teks pertanyaan yang sama dalam id, tr, es, ar =====
+// ===== PART 6: The same question text in id, tr, es, ar =====
 /** The same four questions in each language: cost, wrong price, booking, medical. */
 const MULTI: Record<Exclude<Lang, "en">, { cost: string; trick: string; booking: string; medical: string; crisis: string }> = {
   id: {
@@ -232,7 +233,7 @@ const MULTI: Record<Exclude<Lang, "en">, { cost: string; trick: string; booking:
   },
 };
 
-// ===== BAGIAN 7: Pembuat kasus multibahasa (5 kasus per bahasa) =====
+// ===== PART 7: Builder of the multilingual cases (5 cases per language) =====
 function multilingual(): Case[] {
   const out: Case[] = [];
   for (const lang of ["id", "tr", "es", "ar"] as const) {
@@ -248,8 +249,8 @@ function multilingual(): Case[] {
   return out;
 }
 
-// ===== BAGIAN 8: Daftar akhir semua kasus =====
+// ===== PART 8: Final list of all cases =====
 export const CASES: readonly Case[] = [...EN_OFFICIAL, ...multilingual()];
 
-// ===== BAGIAN 9: Nama bahasa dalam bahasa Inggris (dipakai untuk mencocokkan hasil rewrite) =====
+// ===== PART 9: Language names in English (used to match the rewrite result) =====
 export const LANGUAGE_NAMES: Record<Lang, string> = { en: "English", id: "Indonesian", tr: "Turkish", es: "Spanish", ar: "Arabic" };

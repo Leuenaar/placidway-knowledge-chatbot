@@ -1,14 +1,13 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/crisis.test.ts
- * TUJUAN  : Uji jaring kata kunci krisis (src/crisis.ts): kalimat krisis
- *           harus tertangkap dalam beberapa bahasa, kalimat biasa tidak
- *           boleh.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the crisis keyword net (src/crisis.ts): crisis sentences
+ *           must be caught in several languages, ordinary sentences must not.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. crisis keyword net
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 import assert from "node:assert/strict";
@@ -37,7 +36,7 @@ const NO = [
   "Can I die during the treatment?",
 ];
 
-// ===== BAGIAN 1: crisis keyword net =====
+// ===== PART 1: crisis keyword net =====
 describe("crisis keyword net", () => {
   for (const [lang, phrases] of Object.entries(YES)) {
     it(`catches self-harm and not-wanting-to-live phrases in ${lang}`, () => {

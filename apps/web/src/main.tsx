@@ -1,21 +1,21 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/web/src/main.tsx
- * TUJUAN  : Titik awal web: memasang aplikasi React ke elemen #root di
- *           index.html. Tidak ada hal lain di sini.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Impor
- *    2. Memasang aplikasi ke halaman
+ * PURPOSE : Starting point of the web app: mounts the React app on the #root
+ *           element in index.html. Nothing else is here.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Imports
+ *    2. Mount the app on the page
  * ============================================================================ */
 
-// ===== BAGIAN 1: Impor =====
+// ===== PART 1: Imports =====
 /** Mounts the React app. Nothing else belongs here. */
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import "./styles.css";
 
-// ===== BAGIAN 2: Memasang aplikasi ke halaman =====
+// ===== PART 2: Mount the app on the page =====
 const container = document.getElementById("root");
 if (!container) throw new Error("Root element #root not found in index.html");
 

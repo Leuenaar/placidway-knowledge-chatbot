@@ -1,23 +1,23 @@
 -- ============================================================================
--- PETA FILE
+-- FILE MAP
 -- FILE    : db/migrations/004_leads.sql
--- TUJUAN  : Migrasi 004 (nice-to-have N4): tabel leads untuk nama dan email
---           pengunjung yang setuju dihubungi tentang penawaran. Yang
---           disimpan: nama, email, bahasa, versi teks persetujuan, waktu.
---           Tanpa IP dan tanpa isi obrolan. Baris lebih dari 90 hari dihapus
---           oleh purge_old_leads(). Pengamanan sama seperti tabel lain.
--- BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
---    1. Mulai transaksi
---    2. Tabel leads dan indeks waktu
---    3. Fungsi penghapus lead lebih dari 90 hari
---    4. Pengamanan: RLS, cabut hak, beri service_role
---    5. Selesai
--- KALAU DIMINTA MENGUBAH:
---    - Mengubah lama simpan lead (90 hari): BAGIAN 3 dan LEAD_RETENTION_DAYS
---      di apps/api/src/leads/store.ts
+-- PURPOSE : Migration 004 (nice-to-have N4): the leads table for the name and
+--           email of visitors who agree to be contacted about a quote. What is
+--           stored: name, email, language, consent text version, time. No IP
+--           and no chat content. Rows older than 90 days are deleted by
+--           purge_old_leads(). The same security as the other tables.
+-- PARTS   : (in the code, search for the text PART n with Ctrl+F)
+--    1. Start the transaction
+--    2. Table leads and the time index
+--    3. Function that deletes leads older than 90 days
+--    4. Security: RLS, revoke rights, grant service_role
+--    5. Done
+-- IF ASKED TO CHANGE:
+--    - Change how long leads are kept (90 days): PART 3 and
+--      LEAD_RETENTION_DAYS in apps/api/src/leads/store.ts
 -- ============================================================================
 
--- ===== BAGIAN 1: Mulai transaksi =====
+-- ===== PART 1: Start the transaction =====
 -- 004_leads.sql
 -- Lead capture (nice-to-have N4): a visitor may leave a name and an email so the PlacidWay team can contact them about a quote.
 --
@@ -28,7 +28,7 @@
 -- Safe to run twice. Run it once in the Supabase SQL editor (or any psql session as the owner) before the lead card is used.
 begin;
 
--- ===== BAGIAN 2: Tabel leads dan indeks waktu =====
+-- ===== PART 2: Table leads and the time index =====
 create table if not exists public.leads (
   id               bigint      generated always as identity primary key,
   name             text        not null check (char_length(name) between 1 and 100),
@@ -42,7 +42,7 @@ create index if not exists leads_created_at_idx on public.leads (created_at);
 
 comment on table public.leads is 'Name and email left by a visitor who agreed to be contacted about a quote. 90 day retention, no IP address, no chat text.';
 
--- ===== BAGIAN 3: Fungsi penghapus lead lebih dari 90 hari =====
+-- ===== PART 3: Function that deletes leads older than 90 days =====
 create or replace function public.purge_old_leads(
   retention interval default interval '90 days'
 )
@@ -61,7 +61,7 @@ begin
 end;
 $$;
 
--- ===== BAGIAN 4: Pengamanan: RLS, cabut hak, beri service_role =====
+-- ===== PART 4: Security: RLS, revoke rights, grant service_role =====
 alter table public.leads enable row level security;
 
 revoke all on table public.leads from public, anon, authenticated;
@@ -72,5 +72,5 @@ grant select, insert, update, delete on table public.leads to service_role;
 grant usage, select on sequence public.leads_id_seq to service_role;
 grant execute on function public.purge_old_leads(interval) to service_role;
 
--- ===== BAGIAN 5: Selesai =====
+-- ===== PART 5: Done =====
 commit;

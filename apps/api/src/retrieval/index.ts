@@ -1,7 +1,7 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/retrieval/index.ts
- * TUJUAN  : Pintu keluar modul retrieval (pencarian potongan halaman).
+ * PURPOSE : Exit door of the retrieval module (search for page pieces).
  * ============================================================================ */
 
 export { dollarAmounts, normalizeNumbers } from "./amounts";

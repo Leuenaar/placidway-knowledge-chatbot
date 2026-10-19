@@ -1,25 +1,25 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/answer/text.ts
- * TUJUAN  : Pembersih teks sebelum ditempel ke dalam tag prompt, dan
- *           pemformat riwayat percakapan (pesan panjang dipotong supaya tidak
- *           menyingkirkan potongan halaman).
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Menghapus tag palsu dari teks
- *    2. Format riwayat percakapan (potong 600 karakter)
- * KALAU DIMINTA MENGUBAH:
- *    - Panjang maksimum satu pesan riwayat (MAX_TURN_CHARS) (BAGIAN 2)
+ * PURPOSE : Text cleaner before it is pasted into a prompt tag, and the
+ *           conversation history formatter (long messages are cut so they do
+ *           not push out the page pieces).
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Remove fake tags from the text
+ *    2. Format of the conversation history (cut at 600 characters)
+ * IF ASKED TO CHANGE:
+ *    - Maximum length of one history message (MAX_TURN_CHARS) (PART 2)
  * ============================================================================ */
 
 import type { Turn } from "../history";
 
-// ===== BAGIAN 1: Menghapus tag palsu dari teks =====
+// ===== PART 1: Remove fake tags from the text =====
 /** Remove anything that could close or fake our own tags from text we paste inside them. */
 export function neutralize(text: string): string {
   return text.replace(/<\/?\s*(excerpts?|question|conversation|turn|reply_language|message|reminder|care_note)\b[^>]*>/gi, "");
 }
 
-// ===== BAGIAN 2: Format riwayat percakapan (potong 600 karakter) =====
+// ===== PART 2: Format of the conversation history (cut at 600 characters) =====
 const MAX_TURN_CHARS = 600;
 
 /** The recent conversation as tagged text. Long messages are cut, so history can never crowd out the excerpts. */

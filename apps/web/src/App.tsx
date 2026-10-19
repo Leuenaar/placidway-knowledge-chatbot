@@ -1,32 +1,33 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/web/src/App.tsx
- * TUJUAN  : Layar obrolan. Memegang status percakapan dan bicara dengan API;
- *           komponen lain hanya menggambar. Obrolan juga disimpan di
- *           sessionStorage tab (storage.ts) sehingga reload menampilkannya
- *           lagi dengan id sesi yang sama. Tiap pertanyaan membawa pertukaran
- *           terakhir sebagai cadangan bila server lupa sesi. Obrolan dengan
- *           balasan krisis tidak pernah disimpan. 'New chat' menghapusnya.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Impor
- *    2. Konstanta: balasan lebih tinggi dari 80% layar digulir ke awalnya
- *    3. Status obrolan (pesan, sesi, sibuk, mode) dan penunjuk
- *    4. Menyimpan obrolan ke tab dan mengecek mode server
- *    5. Menggulir ke isi terbaru (balasan panjang digulir ke awalnya)
- *    6. Pembuat id pesan
- *    7. ask: mengirim satu pertanyaan dan menambahkan balasan
- *    8. pick: kartu topik atau saran lanjutan dipilih
- *    9. retry: kirim ulang pertanyaan setelah error
- *    10. Mencatat hasil kartu kontak pada pesan
- *    11. newChat: hapus obrolan dan mulai sesi baru
- *    12. Tampilan: header, sambutan, daftar pesan, kotak input
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah cara layar menggulir: BAGIAN 5
- *    - Mengubah apa yang terjadi saat 'New chat': BAGIAN 10
- *    - Mengubah susunan layar: BAGIAN 11
+ * PURPOSE : Chat screen. Holds the conversation state and talks to the API;
+ *           the other components only draw. The chat is also saved in the
+ *           tab's sessionStorage (storage.ts), so a reload shows it again with
+ *           the same session id. Each question carries the last exchanges as a
+ *           backup in case the server forgot the session. A chat with a crisis
+ *           reply is never saved. 'New chat' deletes it.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Imports
+ *    2. Constant: a reply taller than 80% of the screen is scrolled to its
+ *       start
+ *    3. Chat state (messages, session, busy, mode) and pointers
+ *    4. Save the chat in the tab and check the server mode
+ *    5. Scroll to the newest content (a long reply is scrolled to its start)
+ *    6. Message id builder
+ *    7. ask: send one question and add the reply
+ *    8. pick: a topic card or a follow-up suggestion is chosen
+ *    9. retry: send the question again after an error
+ *    10. Record the contact card result on the message
+ *    11. newChat: delete the chat and start a new session
+ *    12. View: header, welcome, message list, input box
+ * IF ASKED TO CHANGE:
+ *    - Change how the screen scrolls: PART 5
+ *    - Change what happens on 'New chat': PART 10
+ *    - Change the screen layout: PART 11
  * ============================================================================ */
 
-// ===== BAGIAN 1: Impor =====
+// ===== PART 1: Imports =====
 /**
  * Chat screen. It owns the conversation state and talks to the API; the components
  * only draw what they are given.
@@ -46,11 +47,11 @@ import { createSessionId } from "./ids";
 import { buildHistory, clearChat, loadChat, saveChat } from "./storage";
 import type { ChatMessage, LeadOutcome } from "./types";
 
-// ===== BAGIAN 2: Konstanta: balasan lebih tinggi dari 80% layar digulir ke awalnya =====
+// ===== PART 2: Constant: a reply taller than 80% of the screen is scrolled to its start =====
 /** A reply taller than this share of the visible area is scrolled to its start, not its end. */
 const TALL_REPLY_SHARE = 0.8;
 
-// ===== BAGIAN 3: Status obrolan (pesan, sesi, sibuk, mode) dan penunjuk =====
+// ===== PART 3: Chat state (messages, session, busy, mode) and pointers =====
 export function App() {
   // Read once, on the first render: the chat of this tab before a reload, if there was one.
   const [restored] = useState(loadChat);
@@ -68,7 +69,7 @@ export function App() {
   const scrollRef = useRef<HTMLElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  // ===== BAGIAN 4: Menyimpan obrolan ke tab dan mengecek mode server =====
+  // ===== PART 4: Save the chat in the tab and check the server mode =====
   // Keep the tab's copy up to date. saveChat erases it when the chat is empty or contains a crisis reply.
   useEffect(() => {
     saveChat(sessionId, messages);
@@ -78,7 +79,7 @@ export function App() {
     void fetchHealth().then((health) => setMode(health?.mode ?? null));
   }, []);
 
-  // ===== BAGIAN 5: Menggulir ke isi terbaru (balasan panjang digulir ke awalnya) =====
+  // ===== PART 5: Scroll to the newest content (a long reply is scrolled to its start) =====
   // Keep the newest content in view. A short reply is scrolled to its end. A long reply is
   // scrolled to its start, so the reader begins at the first line instead of the last.
   // Reduced-motion users get an instant jump.
@@ -97,10 +98,10 @@ export function App() {
     }
   }, [messages, busy]);
 
-  // ===== BAGIAN 6: Pembuat id pesan =====
+  // ===== PART 6: Message id builder =====
   const nextId = () => `m${++counter.current}`;
 
-  // ===== BAGIAN 7: ask: mengirim satu pertanyaan dan menambahkan balasan =====
+  // ===== PART 7: ask: send one question and add the reply =====
   /** Sends one question. `addUserMessage` is false when retrying, because the question is already shown. */
   const ask = useCallback(
     async (text: string, addUserMessage: boolean) => {
@@ -124,14 +125,14 @@ export function App() {
     [busy, sessionId],
   );
 
-  // ===== BAGIAN 8: pick: kartu topik atau saran lanjutan dipilih =====
+  // ===== PART 8: pick: a topic card or a follow-up suggestion is chosen =====
   /** A topic card or follow-up was chosen. Its button disappears, so focus moves to the chat area. */
   function pick(text: string) {
     scrollRef.current?.focus({ preventScroll: true });
     void ask(text, true);
   }
 
-  // ===== BAGIAN 9: retry: kirim ulang pertanyaan setelah error =====
+  // ===== PART 9: retry: send the question again after an error =====
   function retry(errorMessageId: string) {
     const index = messages.findIndex((m) => m.id === errorMessageId);
     const question = messages[index - 1];
@@ -140,12 +141,12 @@ export function App() {
     void ask(question.text, false);
   }
 
-  // ===== BAGIAN 10: Mencatat hasil kartu kontak pada pesan =====
+  // ===== PART 10: Record the contact card result on the message =====
   function setLeadOutcome(messageId: string, outcome: LeadOutcome) {
     setMessages((current) => current.map((m) => (m.id === messageId ? { ...m, lead: outcome } : m)));
   }
 
-  // ===== BAGIAN 11: newChat: hapus obrolan dan mulai sesi baru =====
+  // ===== PART 11: newChat: delete the chat and start a new session =====
   function newChat() {
     epoch.current += 1;
     clearChat();
@@ -154,7 +155,7 @@ export function App() {
     setBusy(false);
   }
 
-  // ===== BAGIAN 12: Tampilan: header, sambutan, daftar pesan, kotak input =====
+  // ===== PART 12: View: header, welcome, message list, input box =====
   const started = messages.length > 0;
   const latestId = messages[messages.length - 1]?.id;
 

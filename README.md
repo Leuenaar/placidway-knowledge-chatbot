@@ -159,8 +159,7 @@ WRITEUP.md          Half-page write-up: what to improve next and the known limit
 
 Why separate packages: the web app and the server can be changed, tested and deployed alone, and the contract in `shared` makes any mismatch fail at
 typecheck time instead of in the browser. Every source file starts with a **file map** (what the file is for, its numbered parts, and "if asked to
-change X, look at part N") and numbered `BAGIAN n` ("part n") banners, so a part can be found by searching the text `BAGIAN`. The file maps are
-written in Indonesian, the owner's working language; the code and its other comments are English.
+change X, look at part N") and numbered `PART n` banners, so a part can be found by searching the text `PART`. Everything, including the code comments, is in English.
 
 ### Data model (Supabase)
 

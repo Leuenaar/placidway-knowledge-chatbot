@@ -1,17 +1,17 @@
 -- ============================================================================
--- PETA FILE
+-- FILE MAP
 -- FILE    : db/migrations/002_lock_rls_auto_enable.sql
--- TUJUAN  : Migrasi 002 (khusus Supabase): mengunci fungsi rls_auto_enable()
---           dari PUBLIC, anon dan authenticated lewat percobaan aman dalam
---           satu transaksi (tabel uji dibuat, dicek, dihapus). Bila
---           pemeriksaan gagal, semuanya dibatalkan.
--- BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
---    1. Mulai transaksi
---    2. Percobaan: RLS otomatis aktif sebelum dan sesudah pencabutan
---    3. Selesai
+-- PURPOSE : Migration 002 (Supabase only): locks the rls_auto_enable()
+--           function from PUBLIC, anon and authenticated, using a safe trial
+--           inside one transaction (a test table is created, checked and
+--           dropped). If the check fails, everything is rolled back.
+-- PARTS   : (in the code, search for the text PART n with Ctrl+F)
+--    1. Start the transaction
+--    2. Trial: RLS is switched on automatically before and after the revoke
+--    3. Done
 -- ============================================================================
 
--- ===== BAGIAN 1: Mulai transaksi =====
+-- ===== PART 1: Start the transaction =====
 -- 002_lock_rls_auto_enable.sql
 -- Supabase's "Enable automatic RLS" option installs an event trigger function,
 -- public.rls_auto_enable(), that turns on RLS for every new table. By default
@@ -29,7 +29,7 @@
 -- database is left exactly as it was.
 begin;
 
--- ===== BAGIAN 2: Percobaan: RLS otomatis aktif sebelum dan sesudah pencabutan =====
+-- ===== PART 2: Trial: RLS is switched on automatically before and after the revoke =====
 do $$
 declare
   rls_on boolean;
@@ -54,5 +54,5 @@ begin
 end;
 $$;
 
--- ===== BAGIAN 3: Selesai =====
+-- ===== PART 3: Done =====
 commit;

@@ -1,23 +1,23 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/chunk/types.ts
- * TUJUAN  : Tipe data pemotong: 13 jenis chunk (sesuai check constraint tabel
- *           chunks), batas ukuran (LIMITS), masukan halaman, bentuk chunk,
- *           dan hasil.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Daftar 13 jenis chunk
- *    2. Batas ukuran chunk
- *    3. Tipe: masukan satu halaman
- *    4. Tipe: satu chunk
- *    5. Tipe: hasil memotong satu halaman
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah batas ukuran chunk (minimal, maksimal, target) (BAGIAN 2)
- *    - Menambah jenis chunk (BAGIAN 1)
+ * PURPOSE : Data types of the chunker: the 13 chunk kinds (matching the chunks
+ *           table check constraint), size limits (LIMITS), page input, chunk
+ *           shape, and result.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. List of the 13 chunk kinds
+ *    2. Chunk size limit
+ *    3. Type: input of one page
+ *    4. Type: one chunk
+ *    5. Type: result of chunking one page
+ * IF ASKED TO CHANGE:
+ *    - Change the chunk size limits (minimum, maximum, target) (PART 2)
+ *    - Add a chunk kind (PART 1)
  * ============================================================================ */
 
 import type { DbPageType } from "../pages.js";
 
-// ===== BAGIAN 1: Daftar 13 jenis chunk =====
+// ===== PART 1: List of the 13 chunk kinds =====
 /** The 13 kinds allowed by the check constraint on public.chunks (R8). */
 export const KINDS = [
   "price",
@@ -36,7 +36,7 @@ export const KINDS = [
 ] as const;
 export type Kind = (typeof KINDS)[number];
 
-// ===== BAGIAN 2: Batas ukuran chunk =====
+// ===== PART 2: Chunk size limit =====
 /** Limits. Body = chunk text without the prefix. Total = prefix + body, which is what the database checks. */
 export const LIMITS = {
   /** C3: a body shorter than this is merged into a neighbour. */
@@ -52,7 +52,7 @@ export const LIMITS = {
   videosPerChunk: 15,
 } as const;
 
-// ===== BAGIAN 3: Tipe: masukan satu halaman =====
+// ===== PART 3: Type: input of one page =====
 /** What the chunker needs about one cleaned page. */
 export interface PageInput {
   pageNo: number;
@@ -65,7 +65,7 @@ export interface PageInput {
   modifiedDate?: string;
 }
 
-// ===== BAGIAN 4: Tipe: satu chunk =====
+// ===== PART 4: Type: one chunk =====
 /** One row for public.chunks, minus the columns the database fills (char_len, fts) or later stages add. */
 export interface Chunk {
   id: string;
@@ -83,7 +83,7 @@ export interface Chunk {
   overlap_chars?: number;
 }
 
-// ===== BAGIAN 5: Tipe: hasil memotong satu halaman =====
+// ===== PART 5: Type: result of chunking one page =====
 export interface ChunkResult {
   chunks: Chunk[];
   warnings: string[];

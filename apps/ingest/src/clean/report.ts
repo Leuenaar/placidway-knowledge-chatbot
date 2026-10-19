@@ -1,17 +1,17 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/clean/report.ts
- * TUJUAN  : Membuat laporan pembersihan yang mudah dibaca (R10): apa yang
- *           dibuang, dan setiap jumlah $ yang dibuang.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Membuat laporan markdown pembersihan
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah isi laporan pembersihan (BAGIAN 1)
+ * PURPOSE : Build the easy-to-read cleaning report (R10): what was removed,
+ *           and every $ amount that was removed.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Build the markdown cleaning report
+ * IF ASKED TO CHANGE:
+ *    - Change the content of the cleaning report (PART 1)
  * ============================================================================ */
 
 import type { CleanResult } from "./types.js";
 
-// ===== BAGIAN 1: Membuat laporan markdown pembersihan =====
+// ===== PART 1: Build the markdown cleaning report =====
 /** Human-readable cleaning report (R10): what was removed, and every removed $ amount. */
 export function renderReportMd(results: CleanResult[]): string {
   const out: string[] = [];

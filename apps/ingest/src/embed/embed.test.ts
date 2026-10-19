@@ -1,17 +1,19 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/embed/embed.test.ts
- * TUJUAN  : Uji pembuat vektor (embed): jalan pertama membuat semua, chunk
- *           tidak berubah memakai ulang vektor lama, vektor dari model lain
- *           tidak dipakai ulang.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the vector builder (embed): the first run creates
+ *           everything, unchanged chunks reuse the old vector, and vectors
+ *           from another model are not reused.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. embedChunks: first run embeds everything, in chunk order
- *    2. embedChunks: an unchanged chunk keeps its vector, only the changed one goes...
- *    3. embedChunks: vectors from another model are never reused, removed chunks ar...
+ *    2. embedChunks: an unchanged chunk keeps its vector, only the changed one
+ *       goes...
+ *    3. embedChunks: vectors from another model are never reused, removed
+ *       chunks ar...
  *    4. embedChunks: no change gives a byte-identical file
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 import assert from "node:assert/strict";
@@ -39,7 +41,7 @@ function counting(): { embedder: Embedder; calls: string[][] } {
   return { calls, embedder: { ...base, embedPassages: (t) => (calls.push(t), base.embedPassages(t)) } };
 }
 
-// ===== BAGIAN 1: embedChunks: first run embeds everything, in chunk order =====
+// ===== PART 1: embedChunks: first run embeds everything, in chunk order =====
 test("embedChunks: first run embeds everything, in chunk order", async () => {
   const { embedder, calls } = counting();
   const run = await embedChunks([chunk("P1-a-1", "first text here"), chunk("P1-a-2", "second text here")], embedder);
@@ -49,7 +51,7 @@ test("embedChunks: first run embeds everything, in chunk order", async () => {
   assert.equal(calls.length, 1);
 });
 
-// ===== BAGIAN 2: embedChunks: an unchanged chunk keeps its vector, only the changed one goes... =====
+// ===== PART 2: embedChunks: an unchanged chunk keeps its vector, only the changed one goes... =====
 test("embedChunks: an unchanged chunk keeps its vector, only the changed one goes to the model", async () => {
   const first = await embedChunks([chunk("P1-a-1", "same text"), chunk("P1-a-2", "old text")], counting().embedder);
   const { embedder, calls } = counting();
@@ -60,7 +62,7 @@ test("embedChunks: an unchanged chunk keeps its vector, only the changed one goe
   assert.notDeepEqual(run.file.items["P1-a-2"]!.vector, first.file.items["P1-a-2"]!.vector);
 });
 
-// ===== BAGIAN 3: embedChunks: vectors from another model are never reused, removed chunks ar... =====
+// ===== PART 3: embedChunks: vectors from another model are never reused, removed chunks ar... =====
 test("embedChunks: vectors from another model are never reused, removed chunks are counted and dropped", async () => {
   const first = await embedChunks([chunk("P1-a-1", "text"), chunk("P1-a-2", "gone")], counting().embedder);
   const other = { ...first.file, model: "some-other-model" };
@@ -73,7 +75,7 @@ test("embedChunks: vectors from another model are never reused, removed chunks a
   assert.deepEqual(Object.keys(same.file.items), ["P1-a-1"]);
 });
 
-// ===== BAGIAN 4: embedChunks: no change gives a byte-identical file =====
+// ===== PART 4: embedChunks: no change gives a byte-identical file =====
 test("embedChunks: no change gives a byte-identical file", async () => {
   const chunks = [chunk("P1-a-1", "alpha beta"), chunk("P1-a-2", "gamma delta")];
   const a = await embedChunks(chunks, counting().embedder);

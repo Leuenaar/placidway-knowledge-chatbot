@@ -1,23 +1,23 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/retrieval/retriever.ts
- * TUJUAN  : Retrieval: pertanyaan masuk, potongan terdekat keluar. Pertanyaan
- *           diembed dengan model yang sama dengan potongan, vektornya dikirim
- *           ke fungsi database match_chunks, hasilnya diperiksa. Tidak ada
- *           yang menulis ke database. Juga membaca halaman penuh dan mencari
- *           potongan berisi nominal tertentu.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Batas jumlah hasil dan batas waktu database
- *    2. Bentuk satu potongan hasil
- *    3. Pemeriksaan baris dari database
- *    4. Kontrak retriever
- *    5. Pembuat retriever (embed, panggil database, periksa)
- *    6. containing: cari potongan berisi nominal dolar
- *    7. pages: baca semua potongan halaman tertentu
- *    8. search: embed pertanyaan lalu panggil match_chunks
- * KALAU DIMINTA MENGUBAH:
- *    - Batas waktu database (8 detik) (BAGIAN 1)
- *    - Jumlah hasil bawaan (5) dan maksimum (20) (BAGIAN 1)
+ * PURPOSE : Retrieval: a question goes in, the nearest pieces come out. The
+ *           question is embedded with the same model as the pieces, its vector
+ *           is sent to the database function match_chunks, and the result is
+ *           checked. Nothing writes to the database. It also reads full pages
+ *           and looks for pieces that contain a given amount.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Limit on the number of results and the database timeout
+ *    2. Shape of one result piece
+ *    3. Check of a row from the database
+ *    4. Retriever contract
+ *    5. Retriever builder (embed, call the database, check)
+ *    6. containing: find the pieces that contain a dollar amount
+ *    7. pages: read all the pieces of certain pages
+ *    8. search: embed the question, then call match_chunks
+ * IF ASKED TO CHANGE:
+ *    - Database timeout (8 seconds) (PART 1)
+ *    - Default number of results (5) and maximum (20) (PART 1)
  * ============================================================================ */
 
 /**
@@ -32,14 +32,14 @@ import { DB_VECTOR_DIMS, toPgVector, type Embedder } from "@pwbot/embed";
 import { mentionsDollarAmount, writtenForms } from "./amounts";
 import { RetrievalError, type DbConfig } from "./config";
 
-// ===== BAGIAN 1: Batas jumlah hasil dan batas waktu database =====
+// ===== PART 1: Limit on the number of results and the database timeout =====
 /** Same limits as the SQL function, checked here too so a bad caller gets a clear error instead of a clamp. */
 export const MIN_RESULTS = 1;
 export const MAX_RESULTS = 20;
 export const DEFAULT_RESULTS = 5;
 const REQUEST_TIMEOUT_MS = 8000;
 
-// ===== BAGIAN 2: Bentuk satu potongan hasil =====
+// ===== PART 2: Shape of one result piece =====
 export interface RetrievedChunk {
   id: string;
   pageNo: number;
@@ -53,7 +53,7 @@ export interface RetrievedChunk {
   similarity: number;
 }
 
-// ===== BAGIAN 3: Pemeriksaan baris dari database =====
+// ===== PART 3: Check of a row from the database =====
 /** Shape of one row from match_chunks. Anything else means the function or the migration is not what we expect. */
 const rowSchema = z.object({
   id: z.string().regex(/^P[1-7]-[A-Za-z0-9_-]+$/),
@@ -74,7 +74,7 @@ const PAGE_COLUMNS = "id,page_no,source_url,h1,section,kind,text,page_modified";
 /** "P2-faq-10" after "P2-faq-9": numbers inside ids compare as numbers. */
 const byId = (a: { id: string }, b: { id: string }) => a.id.localeCompare(b.id, "en", { numeric: true });
 
-// ===== BAGIAN 4: Kontrak retriever =====
+// ===== PART 4: Retriever contract =====
 export interface Retriever {
   search(question: string, k?: number): Promise<RetrievedChunk[]>;
   /** Every chunk of the given pages (1 to 7), in a stable order. Their similarity is 0: they were not ranked, they were added for context. */
@@ -90,7 +90,7 @@ export interface RetrieverOptions {
   fetchFn?: typeof fetch;
 }
 
-// ===== BAGIAN 5: Pembuat retriever (embed, panggil database, periksa) =====
+// ===== PART 5: Retriever builder (embed, call the database, check) =====
 export function createRetriever({ db, embedder, fetchFn = fetch }: RetrieverOptions): Retriever {
   const toChunk = (r: z.infer<typeof pageRowsSchema>[number], similarity: number): RetrievedChunk => ({
     id: r.id,
@@ -125,7 +125,7 @@ export function createRetriever({ db, embedder, fetchFn = fetch }: RetrieverOpti
 
   return {
 
-    // ===== BAGIAN 6: containing: cari potongan berisi nominal dolar =====
+    // ===== PART 6: containing: find the pieces that contain a dollar amount =====
     async containing(amounts) {
       const wanted = [...new Set(amounts.filter((a) => /^\d+(\.\d+)?$/.test(a)))].slice(0, 3);
       if (wanted.length === 0) return [];
@@ -139,14 +139,14 @@ export function createRetriever({ db, embedder, fetchFn = fetch }: RetrieverOpti
       return [...found.values()].sort(byId).slice(0, 6);
     },
 
-    // ===== BAGIAN 7: pages: baca semua potongan halaman tertentu =====
+    // ===== PART 7: pages: read all the pieces of certain pages =====
     async pages(pageNos) {
       const wanted = [...new Set(pageNos)].filter((n) => Number.isInteger(n) && n >= 1 && n <= 7).sort((a, b) => a - b);
       if (wanted.length === 0) return [];
       return readTable(`page_no=in.(${wanted.join(",")})`, "Reading the pages");
     },
 
-    // ===== BAGIAN 8: search: embed pertanyaan lalu panggil match_chunks =====
+    // ===== PART 8: search: embed the question, then call match_chunks =====
     async search(question, k = DEFAULT_RESULTS) {
       const q = question.trim();
       if (!q) throw new RetrievalError("The question is empty");

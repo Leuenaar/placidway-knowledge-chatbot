@@ -1,14 +1,12 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/clean/run.ts
- * TUJUAN  : Menjalankan pembersihan untuk semua berkas mentah di sebuah
- *           folder: memeriksa jumlah halaman (7), membersihkan satu per satu,
- *           menulis hasil dan laporan.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Membersihkan semua halaman mentah dan menulis hasil serta laporan
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah folder masukan atau keluaran: lihat arg(...) di cli.ts BAGIAN
- *      5
+ * PURPOSE : Run the cleaning for all the raw files in a folder: check the page
+ *           count (7), clean them one by one, write the result and the report.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Clean all the raw pages and write the result and the report
+ * IF ASKED TO CHANGE:
+ *    - Change the input or output folder: see arg(...) in cli.ts PART 5
  * ============================================================================ */
 
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -19,7 +17,7 @@ import { renderReportMd } from "./report.js";
 import type { CleanResult } from "./types.js";
 import { parseRawFile } from "./util.js";
 
-// ===== BAGIAN 1: Membersihkan semua halaman mentah dan menulis hasil serta laporan =====
+// ===== PART 1: Clean all the raw pages and write the result and the report =====
 /** Read every raw page in rawDir, clean it, and write the stage files into outDir. */
 export function cleanDirectory(rawDir: string, outDir: string): CleanResult[] {
   const files = readdirSync(rawDir)

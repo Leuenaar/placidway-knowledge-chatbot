@@ -1,19 +1,19 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/suite/suite.test.ts
- * TUJUAN  : Uji alat suite sendiri: pembantu angka, pemeriksaan pada jawaban
- *           yang tampak nyata, daftar kasus, dan menjalankan suite dengan bot
- *           tiruan.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the suite tool itself: the number helpers, the checks on
+ *           real-looking answers, the case list, and running the suite with a
+ *           stand-in bot.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. number helpers
  *    2. checks on real-looking answers
  *    3. cases
  *    4. running the suite
  *    5. suite check refinements
  *    6. suite check refinements 2
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 import assert from "node:assert/strict";
@@ -39,7 +39,7 @@ function obs(over: Partial<Observed>): Observed {
 const failed = (rs: ReturnType<typeof runChecks>) => rs.filter((r) => r.verdict === "FAIL").map((r) => r.name);
 const flagged = (rs: ReturnType<typeof runChecks>) => rs.filter((r) => r.verdict !== "PASS").map((r) => r.name);
 
-// ===== BAGIAN 1: number helpers =====
+// ===== PART 1: number helpers =====
 describe("number helpers", () => {
   it("reads digits in any script and removes thousands separators", () => {
     assert.equal(normalizeNumbers("$18,995"), "$18995");
@@ -60,7 +60,7 @@ describe("number helpers", () => {
   });
 });
 
-// ===== BAGIAN 2: checks on real-looking answers =====
+// ===== PART 2: checks on real-looking answers =====
 describe("checks on real-looking answers", () => {
   it("passes the Indonesian cost answer the tests produced", () => {
     const c = byId("id-1-cost");
@@ -124,7 +124,7 @@ describe("checks on real-looking answers", () => {
   });
 });
 
-// ===== BAGIAN 3: cases =====
+// ===== PART 3: cases =====
 describe("cases", () => {
   it("has unique ids, a message in every case, and covers the 8 official tests in English and the four languages", () => {
     const ids = CASES.map((c) => c.id);
@@ -145,7 +145,7 @@ describe("cases", () => {
   });
 });
 
-// ===== BAGIAN 4: running the suite =====
+// ===== PART 4: running the suite =====
 describe("running the suite", () => {
   /** A harness whose bot answers from a table, and whose probe reports fixed chunks and tokens. */
   function fakeHarness(reply: (message: string) => { status: number; answer: string; kind?: "answer" | "not_in_content" }) {
@@ -215,7 +215,7 @@ describe("running the suite", () => {
   });
 });
 
-// ===== BAGIAN 5: suite check refinements =====
+// ===== PART 5: suite check refinements =====
 describe("suite check refinements", () => {
   it("does not flag a sentence that says it CANNOT tell whether something is safe", () => {
     const c = byId("en-7-medical");
@@ -231,7 +231,7 @@ describe("suite check refinements", () => {
   });
 });
 
-// ===== BAGIAN 6: suite check refinements 2 =====
+// ===== PART 6: suite check refinements 2 =====
 describe("suite check refinements 2", () => {
   it("lets the visitor's own amount be repeated while correcting it, but still flags the real price said twice", () => {
     const c = byId("en-8-trick");

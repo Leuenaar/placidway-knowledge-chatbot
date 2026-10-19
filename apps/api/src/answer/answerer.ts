@@ -1,20 +1,19 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/answer/answerer.ts
- * TUJUAN  : Mengubah (pertanyaan + potongan halaman) menjadi jawaban yang
- *           sudah diperiksa. Model hanya menulis kata-kata. Server yang
- *           memutuskan: id mana yang dianggap dikutip, link sumber mana yang
- *           tampil (dari 7 halaman tetap, bukan dari model), dan apakah
- *           jawaban berdasar atau tidak.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Batas panjang keluaran model dan bentuk JSON yang diterima
- *    2. Bentuk hasil jawaban
- *    3. Link sumber dari potongan yang dikutip (dari daftar 7 halaman)
- *    4. Pembuat jawaban: panggil model, periksa JSON, periksa id yang dikutip
- * KALAU DIMINTA MENGUBAH:
- *    - Batas token keluaran model (4096) (BAGIAN 1)
- *    - Panjang jawaban maksimum yang diterima (3000 karakter) (BAGIAN 1)
- *    - Cara menentukan jawaban 'tidak berdasar' (BAGIAN 4)
+ * PURPOSE : Turn (question + page pieces) into a checked answer. The model
+ *           only writes words. The server decides: which ids count as quoted,
+ *           which source links are shown (from the 7 fixed pages, not from the
+ *           model), and whether the answer is grounded or not.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Limit on the model output length and the accepted JSON shape
+ *    2. Shape of the answer result
+ *    3. Source links from the quoted pieces (from the list of 7 pages)
+ *    4. Answerer builder: call the model, check the JSON, check the quoted ids
+ * IF ASKED TO CHANGE:
+ *    - Limit on the model output tokens (4096) (PART 1)
+ *    - Maximum accepted answer length (3000 characters) (PART 1)
+ *    - How a 'not grounded' answer is decided (PART 4)
  * ============================================================================ */
 
 /**
@@ -32,7 +31,7 @@ import { AnswerError } from "./config";
 import { extractJson } from "./json";
 import { buildUserMessage, type AnswerContext } from "./prompt";
 
-// ===== BAGIAN 1: Batas panjang keluaran model dan bentuk JSON yang diterima =====
+// ===== PART 1: Limit on the model output length and the accepted JSON shape =====
 /** A hard cap on everything the model writes, internal reasoning included. The visible answer is short; the rest is room for thinking. */
 /** Reasoning tokens count toward this limit. 2000 was too small for effort "high" (six cut-off replies in the effort comparison). */
 const MAX_OUTPUT_TOKENS = 4096;
@@ -43,7 +42,7 @@ const outputSchema = z.object({
   used_chunk_ids: z.array(z.string()).max(50).default([]),
 });
 
-// ===== BAGIAN 2: Bentuk hasil jawaban =====
+// ===== PART 2: Shape of the answer result =====
 export interface AnswerResult {
   /** "refused" means the model declined to answer at all (its stop reason was "refusal"); the pipeline decides what to say. */
   kind: "answer" | "not_in_content" | "refused";
@@ -65,7 +64,7 @@ export interface Answerer {
   answer(question: string, chunks: RetrievedChunk[], ctx?: AnswerContext): Promise<AnswerResult>;
 }
 
-// ===== BAGIAN 3: Link sumber dari potongan yang dikutip (dari daftar 7 halaman) =====
+// ===== PART 3: Source links from the quoted pieces (from the list of 7 pages) =====
 export function sourcesFor(chunks: RetrievedChunk[]): Source[] {
   const out: Source[] = [];
   const seen = new Set<number>();
@@ -78,7 +77,7 @@ export function sourcesFor(chunks: RetrievedChunk[]): Source[] {
   return out;
 }
 
-// ===== BAGIAN 4: Pembuat jawaban: panggil model, periksa JSON, periksa id yang dikutip =====
+// ===== PART 4: Answerer builder: call the model, check the JSON, check the quoted ids =====
 /** `systemPrompt` is built once at startup from the rule files (see rules.ts and prompt.ts). */
 export function createAnswerer(client: ModelClient, systemPrompt: string): Answerer {
   return {

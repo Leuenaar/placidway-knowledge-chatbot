@@ -1,31 +1,43 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/clean/clean.test.ts
- * TUJUAN  : Uji unit pembersih halaman (aturan R1 sampai R10 dan X1, X3):
- *           wilayah isi, header, gambar dan widget, tautan, tabel jadi
- *           kalimat, video, daftar isi, hash, pemeriksaan jumlah $.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Unit test of the page cleaner (rules R1 to R10 and X1, X3):
+ *           content region, header, images and widgets, links, tables to
+ *           sentences, videos, table of contents, hash, the $ amount check.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. R1 keeps only the region from the H1 to the quote marker
  *    2. R1 fails loudly when the page shape is not what the rule expects
- *    3. R2 drops counts and share buttons, keeps metadata and prose in the header b...
- *    4. R3 drops image lines, the booking widget (with its dummy date), Read More c...
+ *    3. R2 drops counts and share buttons, keeps metadata and prose in the
+ *       header b...
+ *    4. R3 drops image lines, the booking widget (with its dummy date), Read
+ *       More c...
  *    5. R4 removes links, keeps a space when a link was glued to the next word
- *    6. R5 turns a two-value table into one sentence per row and reports the unname...
- *    7. R5 handles lists inside cells and money in the first column (page 1 style)
- *    8. R5 keeps a note that continues a cell (Modified date) and removes the link
- *    9. R5 keeps the cells as plain lines and warns when a table does not fit its c...
- *    10. R6 turns each video block into one Video line and keeps the list tight
+ *    6. R5 turns a two-value table into one sentence per row and reports the
+ *       unname...
+ *    7. R5 handles lists inside cells and money in the first column (page 1
+ *       style)
+ *    8. R5 keeps a note that continues a cell (Modified date) and removes the
+ *       link
+ *    9. R5 keeps the cells as plain lines and warns when a table does not fit
+ *       its c...
+ *    10. R6 turns each video block into one Video line and keeps the list
+ *        tight
  *    11. R7 drops the table of contents but keeps the disclaimer above it
  *    12. X1 drops Related card lists (they change on every visit)
- *    13. R9 the hash is the sha256 of the cleaned text, stable across runs, and chan...
- *    14. R9 the hash ignores things R1 removes (cookie banner and footer change, has...
- *    15. R10 amount check: lost and invented amounts are detected, dropped amounts a...
+ *    13. R9 the hash is the sha256 of the cleaned text, stable across runs,
+ *        and chan...
+ *    14. R9 the hash ignores things R1 removes (cookie banner and footer
+ *        change, has...
+ *    15. R10 amount check: lost and invented amounts are detected, dropped
+ *        amounts a...
  *    16. R10 amounts are read exactly as written
- *    17. R10 end to end: an amount removed on purpose is listed, the check still passes
- *    18. X3 drops a Medical Center Videos item that only repeats the video titles, k...
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ *    17. R10 end to end: an amount removed on purpose is listed, the check
+ *        still passes
+ *    18. X3 drops a Medical Center Videos item that only repeats the video
+ *        titles, k...
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 import assert from "node:assert/strict";
@@ -39,7 +51,7 @@ function page(body: string, pageNo = 2) {
   return parseRawFile(pageNo, `source_url: https://example.test/p\npage_type: Test\nfetched_at: now\n---\n${body}${body.includes("## Request your Free Quote") ? "" : FOOT}`);
 }
 
-// ===== BAGIAN 1: R1 keeps only the region from the H1 to the quote marker =====
+// ===== PART 1: R1 keeps only the region from the H1 to the quote marker =====
 test("R1 keeps only the region from the H1 to the quote marker", () => {
   const r = cleanPage(page("cookie banner\n- Home <https://x.test/>\n\n# Title\n\nHello world.\n"));
   assert.ok(r.text.startsWith("# Title\n"));
@@ -49,14 +61,14 @@ test("R1 keeps only the region from the H1 to the quote marker", () => {
   assert.equal(r.report.amounts.ok, true);
 });
 
-// ===== BAGIAN 2: R1 fails loudly when the page shape is not what the rule expects =====
+// ===== PART 2: R1 fails loudly when the page shape is not what the rule expects =====
 test("R1 fails loudly when the page shape is not what the rule expects", () => {
   assert.throws(() => cleanPage(page("# Title\ntext\n## Request your Free Quote\n## Request your Free Quote\n")), /exactly one/);
   assert.throws(() => cleanPage(parseRawFile(2, "source_url: u\n---\n# Title\ntext\n")), /exactly one/);
   assert.throws(() => cleanPage(page("no heading here\n")), /no "# " heading/);
 });
 
-// ===== BAGIAN 3: R2 drops counts and share buttons, keeps metadata and prose in the header b... =====
+// ===== PART 3: R2 drops counts and share buttons, keeps metadata and prose in the header b... =====
 test("R2 drops counts and share buttons, keeps metadata and prose in the header block", () => {
   const body = [
     "# Title",
@@ -106,7 +118,7 @@ test("R2 drops counts and share buttons, keeps metadata and prose in the header 
   assert.equal(r.report.amounts.ok, true);
 });
 
-// ===== BAGIAN 4: R3 drops image lines, the booking widget (with its dummy date), Read More c... =====
+// ===== PART 4: R3 drops image lines, the booking widget (with its dummy date), Read More c... =====
 test("R3 drops image lines, the booking widget (with its dummy date), Read More copies and empty markers", () => {
   const body = [
     "# Title",
@@ -155,7 +167,7 @@ test("R3 drops image lines, the booking widget (with its dummy date), Read More 
   assert.equal(r.report.amounts.ok, true);
 });
 
-// ===== BAGIAN 5: R4 removes links, keeps a space when a link was glued to the next word =====
+// ===== PART 5: R4 removes links, keeps a space when a link was glued to the next word =====
 test("R4 removes links, keeps a space when a link was glued to the next word", () => {
   assert.equal(stripUrls("Name <https://x.test/a>Bangkok, Thailand").text, "Name Bangkok, Thailand");
   assert.equal(stripUrls("A <https://x.test/1>, B <https://x.test/2>").text, "A, B");
@@ -165,7 +177,7 @@ test("R4 removes links, keeps a space when a link was glued to the next word", (
   assert.equal(r.meta.quoteUrl, "https://www.placidway.com/rfi/5/Some-Clinic");
 });
 
-// ===== BAGIAN 6: R5 turns a two-value table into one sentence per row and reports the unname... =====
+// ===== PART 6: R5 turns a two-value table into one sentence per row and reports the unname... =====
 test("R5 turns a two-value table into one sentence per row and reports the unnamed row", () => {
   const body = [
     "# Prices",
@@ -205,7 +217,7 @@ test("R5 turns a two-value table into one sentence per row and reports the unnam
   assert.deepEqual(r.report.warnings, []);
 });
 
-// ===== BAGIAN 7: R5 handles lists inside cells and money in the first column (page 1 style) =====
+// ===== PART 7: R5 handles lists inside cells and money in the first column (page 1 style) =====
 test("R5 handles lists inside cells and money in the first column (page 1 style)", () => {
   const body = [
     "# Cost",
@@ -245,7 +257,7 @@ test("R5 handles lists inside cells and money in the first column (page 1 style)
   assert.deepEqual(r.report.warnings, []);
 });
 
-// ===== BAGIAN 8: R5 keeps a note that continues a cell (Modified date) and removes the link =====
+// ===== PART 8: R5 keeps a note that continues a cell (Modified date) and removes the link =====
 test("R5 keeps a note that continues a cell (Modified date) and removes the link", () => {
   const body = [
     "# Compare",
@@ -272,7 +284,7 @@ test("R5 keeps a note that continues a cell (Modified date) and removes the link
   assert.ok(r.text.includes("## Next section"));
 });
 
-// ===== BAGIAN 9: R5 keeps the cells as plain lines and warns when a table does not fit its c... =====
+// ===== PART 9: R5 keeps the cells as plain lines and warns when a table does not fit its c... =====
 test("R5 keeps the cells as plain lines and warns when a table does not fit its columns", () => {
   const body = ["# T", "", "| A", "| B", "", "| one", "| two", "", "| three", "", "tail", ""].join("\n");
   const r = cleanPage(page(body));
@@ -280,7 +292,7 @@ test("R5 keeps the cells as plain lines and warns when a table does not fit its 
   for (const w of ["one", "two", "three"]) assert.ok(r.text.includes(w));
 });
 
-// ===== BAGIAN 10: R6 turns each video block into one Video line and keeps the list tight =====
+// ===== PART 10: R6 turns each video block into one Video line and keeps the list tight =====
 test("R6 turns each video block into one Video line and keeps the list tight", () => {
   const body = [
     "# Videos",
@@ -311,7 +323,7 @@ test("R6 turns each video block into one Video line and keeps the list tight", (
   assert.ok(r.text.includes("## Recent Reviews"));
 });
 
-// ===== BAGIAN 11: R7 drops the table of contents but keeps the disclaimer above it =====
+// ===== PART 11: R7 drops the table of contents but keeps the disclaimer above it =====
 test("R7 drops the table of contents but keeps the disclaimer above it", () => {
   const body = [
     "# Compare",
@@ -339,7 +351,7 @@ test("R7 drops the table of contents but keeps the disclaimer above it", () => {
   assert.ok(r.text.includes("## Next"));
 });
 
-// ===== BAGIAN 12: X1 drops Related card lists (they change on every visit) =====
+// ===== PART 12: X1 drops Related card lists (they change on every visit) =====
 test("X1 drops Related card lists (they change on every visit)", () => {
   const body = ["# T", "", "Text.", "", "### Related Experiences:", "Dental implants <https://x.test/e>", "", "00", "", "### About Package", "", "- Location: Tijuana", ""].join("\n");
   const r = cleanPage(page(body));
@@ -348,7 +360,7 @@ test("X1 drops Related card lists (they change on every visit)", () => {
   assert.ok(r.text.includes("- Location: Tijuana"));
 });
 
-// ===== BAGIAN 13: R9 the hash is the sha256 of the cleaned text, stable across runs, and chan... =====
+// ===== PART 13: R9 the hash is the sha256 of the cleaned text, stable across runs, and chan... =====
 test("R9 the hash is the sha256 of the cleaned text, stable across runs, and changes with the text", () => {
   const p = page("# T\n\nSame text.\n");
   const a = cleanPage(p);
@@ -359,14 +371,14 @@ test("R9 the hash is the sha256 of the cleaned text, stable across runs, and cha
   assert.notEqual(cleanPage(page("# T\n\nOther text.\n")).hash, a.hash);
 });
 
-// ===== BAGIAN 14: R9 the hash ignores things R1 removes (cookie banner and footer change, has... =====
+// ===== PART 14: R9 the hash ignores things R1 removes (cookie banner and footer change, has... =====
 test("R9 the hash ignores things R1 removes (cookie banner and footer change, hash stays)", () => {
   const a = cleanPage(page("banner v1\n\n# T\n\nBody $10.\n\n## Request your Free Quote\nfooter v1\n"));
   const b = cleanPage(page("banner v2 totally different\n\n# T\n\nBody $10.\n\n## Request your Free Quote\nfooter v2\n"));
   assert.equal(a.hash, b.hash);
 });
 
-// ===== BAGIAN 15: R10 amount check: lost and invented amounts are detected, dropped amounts a... =====
+// ===== PART 15: R10 amount check: lost and invented amounts are detected, dropped amounts a... =====
 test("R10 amount check: lost and invented amounts are detected, dropped amounts are accounted for", () => {
   assert.equal(checkAmounts(["$1", "$2"], ["$1", "$2"], []).ok, true);
   assert.equal(checkAmounts(["$1", "$2"], ["$1"], ["$2"]).ok, true);
@@ -380,12 +392,12 @@ test("R10 amount check: lost and invented amounts are detected, dropped amounts 
   assert.equal(dup.ok, false, "a repeated amount counts as many times as it appears");
 });
 
-// ===== BAGIAN 16: R10 amounts are read exactly as written =====
+// ===== PART 16: R10 amounts are read exactly as written =====
 test("R10 amounts are read exactly as written", () => {
   assert.deepEqual(extractAmounts("From $18,995 or $18995; extras $3,950 to $4,250; $ 35 - $30000"), ["$18,995", "$18995", "$3,950", "$4,250", "$35", "$30000"]);
 });
 
-// ===== BAGIAN 17: R10 end to end: an amount removed on purpose is listed, the check still passes =====
+// ===== PART 17: R10 end to end: an amount removed on purpose is listed, the check still passes =====
 test("R10 end to end: an amount removed on purpose is listed, the check still passes", () => {
   const body = ["# T", "", "## Book a consultation with X", "", "Slot price $5 today.", "", "## Real", "", "Price $10.", ""].join("\n");
   const r = cleanPage(page(body));
@@ -395,7 +407,7 @@ test("R10 end to end: an amount removed on purpose is listed, the check still pa
   assert.ok(r.report.dropped.some((d) => d.amounts.includes("$5")));
 });
 
-// ===== BAGIAN 18: X3 drops a Medical Center Videos item that only repeats the video titles, k... =====
+// ===== PART 18: X3 drops a Medical Center Videos item that only repeats the video titles, k... =====
 test("X3 drops a Medical Center Videos item that only repeats the video titles, keeps one that adds text", () => {
   const dup = [
     "# Videos", "", "## About", "",

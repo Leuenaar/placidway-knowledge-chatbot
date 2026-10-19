@@ -1,19 +1,19 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/web/src/types.ts
- * TUJUAN  : Tipe yang hanya dipakai di web: satu pesan obrolan dan hasil
- *           kartu kontak. Kontrak API sendiri ada di packages/shared.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Impor
- *    2. Tipe: satu pesan obrolan
- *    3. Tipe: hasil kartu kontak (terkirim atau ditolak)
+ * PURPOSE : Types used only on the web side: one chat message and the contact
+ *           card result. The API contract itself is in packages/shared.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Imports
+ *    2. Type: one chat message
+ *    3. Type: contact card result (sent or refused)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Impor =====
+// ===== PART 1: Imports =====
 /** Types used only inside the web app. The API contract itself lives in @pwbot/shared. */
 import type { ChatResponse } from "@pwbot/shared";
 
-// ===== BAGIAN 2: Tipe: satu pesan obrolan =====
+// ===== PART 2: Type: one chat message =====
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant";
@@ -24,5 +24,5 @@ export interface ChatMessage {
   lead?: LeadOutcome;
 }
 
-// ===== BAGIAN 3: Tipe: hasil kartu kontak (terkirim atau ditolak) =====
+// ===== PART 3: Type: contact card result (sent or refused) =====
 export type LeadOutcome = "done" | "declined";

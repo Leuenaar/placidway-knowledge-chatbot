@@ -1,26 +1,26 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/web/src/components/Composer.tsx
- * TUJUAN  : Kotak input pesan. Enter mengirim, Shift+Enter baris baru. Batas
- *           panjang sama dengan API. Satu baris catatan di bawah kotak
- *           menyebut ini AI dan bukan saran medis, tempat orang melihat tepat
- *           sebelum mengetik.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Impor
- *    2. Tinggi maksimal kotak input
- *    3. Status dan penunjuk kotak input
- *    4. Menyesuaikan tinggi kotak
- *    5. Kirim pesan
- *    6. Penangan form
- *    7. Penangan tombol: Enter kirim, Shift+Enter baris baru
- *    8. Tampilan: kotak, tombol Send, penghitung, catatan AI
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah catatan di bawah kotak: cari 'AI assistant. Answers come
- *      from' (BAGIAN 8)
- *    - Mengubah placeholder: cari 'Type your question' (BAGIAN 8)
+ * PURPOSE : The message input box. Enter sends, Shift+Enter adds a new line.
+ *           The length limit is the same as the API. A note line under the box
+ *           says this is an AI and not medical advice, where people look just
+ *           before typing.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Imports
+ *    2. Maximum height of the input box
+ *    3. State and pointers of the input box
+ *    4. Adjust the box height
+ *    5. Send a message
+ *    6. Form handler
+ *    7. Key handler: Enter sends, Shift+Enter adds a new line
+ *    8. View: box, Send button, counter, AI note
+ * IF ASKED TO CHANGE:
+ *    - Change the note under the box: search for 'AI assistant. Answers come
+ *      from' (PART 8)
+ *    - Change the placeholder: search for 'Type your question' (PART 8)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Impor =====
+// ===== PART 1: Imports =====
 /**
  * The message input. Enter sends, Shift+Enter adds a new line. The length limit matches
  * the API, so users see the limit before the server has to reject anything. A one-line
@@ -31,15 +31,15 @@ import { useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { MAX_MESSAGE_LENGTH } from "@pwbot/shared";
 import { SendIcon } from "./Icons";
 
-// ===== BAGIAN 2: Tinggi maksimal kotak input =====
+// ===== PART 2: Maximum height of the input box =====
 const MAX_TEXTAREA_HEIGHT_PX = 140;
 
-// ===== BAGIAN 3: Status dan penunjuk kotak input =====
+// ===== PART 3: State and pointers of the input box =====
 export function Composer({ onSend, busy }: { onSend: (text: string) => void; busy: boolean }) {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // ===== BAGIAN 4: Menyesuaikan tinggi kotak =====
+  // ===== PART 4: Adjust the box height =====
   function resize() {
     const el = textareaRef.current;
     if (!el) return;
@@ -47,7 +47,7 @@ export function Composer({ onSend, busy }: { onSend: (text: string) => void; bus
     el.style.height = `${Math.min(el.scrollHeight, MAX_TEXTAREA_HEIGHT_PX)}px`;
   }
 
-  // ===== BAGIAN 5: Kirim pesan =====
+  // ===== PART 5: Send a message =====
   function submit() {
     const text = value.trim();
     if (!text || busy) return;
@@ -57,13 +57,13 @@ export function Composer({ onSend, busy }: { onSend: (text: string) => void; bus
     requestAnimationFrame(resize);
   }
 
-  // ===== BAGIAN 6: Penangan form =====
+  // ===== PART 6: Form handler =====
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
     submit();
   }
 
-  // ===== BAGIAN 7: Penangan tombol: Enter kirim, Shift+Enter baris baru =====
+  // ===== PART 7: Key handler: Enter sends, Shift+Enter adds a new line =====
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     // isComposing is true while an IME (Arabic, Chinese, Japanese) is still building a word.
     if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
@@ -72,7 +72,7 @@ export function Composer({ onSend, busy }: { onSend: (text: string) => void; bus
     }
   }
 
-  // ===== BAGIAN 8: Tampilan: kotak, tombol Send, penghitung, catatan AI =====
+  // ===== PART 8: View: box, Send button, counter, AI note =====
   const nearLimit = value.length >= MAX_MESSAGE_LENGTH * 0.8;
 
   return (

@@ -1,22 +1,22 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/unanswered/log.ts
- * TUJUAN  : Log pertanyaan tak terjawab (N5): pertanyaan yang tidak bisa
- *           dijawab bot, untuk menemukan celah isi. Yang disimpan: pesan
- *           dengan data pribadi yang jelas disamarkan, alasan, id sesi acak,
- *           waktu. Tanpa IP. Baris lebih dari 30 hari dihapus. Menulis log
- *           tidak boleh memperlambat atau merusak chat.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Alasan yang dicatat dan konstanta
- *    2. Bentuk data dan kontrak
- *    3. Penulis log: kirim ke Supabase, gagal hanya dicatat
- *    4. Hapus baris lebih dari 30 hari
- *    5. Jadwal hapus: saat start lalu tiap hari
- *    6. Daftar terbaru untuk npm run unanswered
- * KALAU DIMINTA MENGUBAH:
- *    - Alasan apa saja yang dicatat (REASONS, harus sama dengan batasan di
- *      migration 001) (BAGIAN 1)
- *    - Lama simpan 30 hari (juga di migration 001) (BAGIAN 5)
+ * PURPOSE : Log of unanswered questions (N5): questions the bot could not
+ *           answer, to find gaps in the content. What is stored: the message
+ *           with clear personal data masked, the reason, a random session id,
+ *           the time. No IP. Rows older than 30 days are deleted. Writing the
+ *           log must never slow down or break the chat.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Logged reasons and constants
+ *    2. Shape of the data and the contract
+ *    3. Log writer: send to Supabase, a failure is only noted
+ *    4. Delete rows older than 30 days
+ *    5. Deletion schedule: at start, then every day
+ *    6. List of the newest entries for npm run unanswered
+ * IF ASKED TO CHANGE:
+ *    - Which reasons are logged (REASONS, must match the constraint in
+ *      migration 001) (PART 1)
+ *    - Keep for 30 days (also in migration 001) (PART 5)
  * ============================================================================ */
 
 /**
@@ -32,7 +32,7 @@
 import type { DbConfig } from "../retrieval";
 import { questionForLog } from "./mask";
 
-// ===== BAGIAN 1: Alasan yang dicatat dan konstanta =====
+// ===== PART 1: Logged reasons and constants =====
 export const REASONS = ["not_in_content", "price_not_listed", "out_of_scope", "medical_declined"] as const;
 export type Reason = (typeof REASONS)[number];
 
@@ -40,7 +40,7 @@ const WRITE_TIMEOUT_MS = 2000;
 const PURGE_TIMEOUT_MS = 10_000;
 export const PURGE_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
-// ===== BAGIAN 2: Bentuk data dan kontrak =====
+// ===== PART 2: Shape of the data and the contract =====
 export interface UnansweredLog {
   /** Fire and forget. Never throws and never rejects. */
   record(entry: { question: string; reason: Reason; sessionId: string }): Promise<void>;
@@ -60,7 +60,7 @@ interface Options {
   log?: (message: string) => void;
 }
 
-// ===== BAGIAN 3: Penulis log: kirim ke Supabase, gagal hanya dicatat =====
+// ===== PART 3: Log writer: send to Supabase, a failure is only noted =====
 export function createUnansweredLog({ db, fetchFn = fetch, log = (m) => console.error(m) }: Options): UnansweredLog {
   return {
     async record({ question, reason, sessionId }) {
@@ -81,7 +81,7 @@ export function createUnansweredLog({ db, fetchFn = fetch, log = (m) => console.
   };
 }
 
-// ===== BAGIAN 4: Hapus baris lebih dari 30 hari =====
+// ===== PART 4: Delete rows older than 30 days =====
 /** Deletes rows older than 30 days. Returns how many were deleted, or undefined when it failed (the reason goes to the log). */
 export async function purgeOld({ db, fetchFn = fetch, log = (m) => console.error(m) }: Options): Promise<number | undefined> {
   try {
@@ -103,7 +103,7 @@ export async function purgeOld({ db, fetchFn = fetch, log = (m) => console.error
   }
 }
 
-// ===== BAGIAN 5: Jadwal hapus: saat start lalu tiap hari =====
+// ===== PART 5: Deletion schedule: at start, then every day =====
 /** Purge now and then every day. The timer does not keep the process alive. Returns a function that stops it. */
 export function startPurgeSchedule(options: Options, intervalMs = PURGE_INTERVAL_MS): () => void {
   const run = async () => {
@@ -116,7 +116,7 @@ export function startPurgeSchedule(options: Options, intervalMs = PURGE_INTERVAL
   return () => clearInterval(timer);
 }
 
-// ===== BAGIAN 6: Daftar terbaru untuk npm run unanswered =====
+// ===== PART 6: List of the newest entries for npm run unanswered =====
 /** The newest rows, for the `npm run unanswered` command. */
 export async function listRecent({ db, fetchFn = fetch }: Options, limit = 50): Promise<UnansweredRow[]> {
   const res = await fetchFn(`${db.url}/rest/v1/unanswered_questions?select=id,question,reason,session_id,created_at&order=created_at.desc&limit=${Math.min(500, Math.max(1, Math.trunc(limit)))}`, {

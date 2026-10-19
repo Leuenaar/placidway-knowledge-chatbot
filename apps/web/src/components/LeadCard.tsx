@@ -1,29 +1,29 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/web/src/components/LeadCard.tsx
- * TUJUAN  : Kartu kontak kecil yang ditawarkan bot sekali saja, saat
- *           pengunjung minta penawaran pribadi atau minta dihubungi. Semua
- *           teks datang dari server (bahasa pengunjung). Tidak ada yang
- *           dikirim sebelum kotak persetujuan dicentang dan tombol ditekan.
- *           Nama dan email hanya di state komponen, tidak pernah di
- *           penyimpanan, dan dihapus setelah terkirim. Kolom tersembunyi
- *           'website' adalah jebakan bot. 'No thanks' menutup kartu dan tidak
- *           ditanyakan lagi di obrolan ini.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Impor
- *    2. Pemeriksaan email dasar (server memeriksa lagi)
- *    3. Syarat tombol kirim aktif
- *    4. Komponen LeadCard dan propertinya
- *    5. Status isian (nama, email, persetujuan, jebakan, mengirim, gagal)
- *    6. Kartu sudah ditolak atau terkirim: tampilkan baris singkat atau tidak sama sekali
- *    7. Kirim kartu ke server
- *    8. Tampilan form: nama, email, jebakan bot, persetujuan, tombol
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah kolom isian: BAGIAN 8 dan LeadRequest di packages/shared
- *    - Mengubah aturan email: BAGIAN 2
+ * PURPOSE : A small contact card that the bot offers only once, when the
+ *           visitor asks for a personal quote or asks to be contacted. All
+ *           text comes from the server (in the visitor's language). Nothing is
+ *           sent before the consent box is ticked and the button is pressed.
+ *           The name and email live only in component state, never in storage,
+ *           and are cleared after sending. The hidden 'website' field is a bot
+ *           trap. 'No thanks' closes the card and it is not asked again in
+ *           this chat.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Imports
+ *    2. Basic email check (the server checks again)
+ *    3. Condition for the send button to be active
+ *    4. LeadCard component and its props
+ *    5. Form state (name, email, consent, trap, sending, failed)
+ *    6. The card was declined or sent: show a short line or nothing at all
+ *    7. Send the card to the server
+ *    8. Form view: name, email, bot trap, consent, button
+ * IF ASKED TO CHANGE:
+ *    - Add an input field: PART 8 and LeadRequest in packages/shared
+ *    - Change the email rules: PART 2
  * ============================================================================ */
 
-// ===== BAGIAN 1: Impor =====
+// ===== PART 1: Imports =====
 /**
  * The small contact card the bot offers once, when the visitor asks for a personal quote or to be contacted.
  *
@@ -38,19 +38,19 @@ import { MAX_LEAD_EMAIL_LENGTH, MAX_LEAD_NAME_LENGTH, type LeadTexts } from "@pw
 import { submitLead } from "../api";
 import type { LeadOutcome } from "../types";
 
-// ===== BAGIAN 2: Pemeriksaan email dasar (server memeriksa lagi) =====
+// ===== PART 2: Basic email check (the server checks again) =====
 /** A basic check before sending (the server checks again): something@something.tld, no spaces. */
 export function looksLikeEmail(value: string): boolean {
   const v = value.trim();
   return v.length <= MAX_LEAD_EMAIL_LENGTH && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
 }
 
-// ===== BAGIAN 3: Syarat tombol kirim aktif =====
+// ===== PART 3: Condition for the send button to be active =====
 export function canSubmit(name: string, email: string, consent: boolean): boolean {
   return consent && name.trim().length > 0 && name.trim().length <= MAX_LEAD_NAME_LENGTH && looksLikeEmail(email);
 }
 
-// ===== BAGIAN 4: Komponen LeadCard dan propertinya =====
+// ===== PART 4: LeadCard component and its props =====
 export function LeadCard({
   texts,
   sessionId,
@@ -67,7 +67,7 @@ export function LeadCard({
   onOutcome: (outcome: LeadOutcome) => void;
 }) {
 
-  // ===== BAGIAN 5: Status isian (nama, email, persetujuan, jebakan, mengirim, gagal) =====
+  // ===== PART 5: Form state (name, email, consent, trap, sending, failed) =====
   const id = useId();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -76,7 +76,7 @@ export function LeadCard({
   const [sending, setSending] = useState(false);
   const [failed, setFailed] = useState(false);
 
-  // ===== BAGIAN 6: Kartu sudah ditolak atau terkirim: tampilkan baris singkat atau tidak sama sekali =====
+  // ===== PART 6: The card was declined or sent: show a short line or nothing at all =====
   if (outcome === "declined") return null;
   if (outcome === "done") {
     return (
@@ -86,7 +86,7 @@ export function LeadCard({
     );
   }
 
-  // ===== BAGIAN 7: Kirim kartu ke server =====
+  // ===== PART 7: Send the card to the server =====
   async function send(event: React.FormEvent) {
     event.preventDefault();
     if (sending || !canSubmit(name, email, consent)) return;
@@ -103,7 +103,7 @@ export function LeadCard({
     }
   }
 
-  // ===== BAGIAN 8: Tampilan form: nama, email, jebakan bot, persetujuan, tombol =====
+  // ===== PART 8: Form view: name, email, bot trap, consent, button =====
   return (
     <form className="lead" onSubmit={(e) => void send(e)} aria-labelledby={`${id}-title`} noValidate>
       <p className="lead-title" id={`${id}-title`} dir="auto">

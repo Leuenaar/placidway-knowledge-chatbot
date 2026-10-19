@@ -1,16 +1,16 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/web/src/storage.test.tsx
- * TUJUAN  : Uji obrolan yang diingat browser: apa yang disimpan, dipulihkan,
- *           dan terutama apa yang TIDAK pernah disimpan (obrolan krisis) atau
- *           tidak dipercaya (data rusak atau lama).
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the chat the browser remembers: what is saved, what is
+ *           restored, and above all what is NEVER saved (a crisis chat) or not
+ *           trusted (broken or old data).
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. saveChat and loadChat
  *    2. buildHistory
  *    3. the contact card outcome
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 /**
@@ -45,7 +45,7 @@ const response = (kind: ChatResponse["kind"], answer: string): ChatResponse => (
 const user = (n: number, text: string): ChatMessage => ({ id: `m${n}`, role: "user", text });
 const bot = (n: number, text: string, kind: ChatResponse["kind"] = "answer"): ChatMessage => ({ id: `m${n}`, role: "assistant", text, response: response(kind, text) });
 
-// ===== BAGIAN 1: saveChat and loadChat =====
+// ===== PART 1: saveChat and loadChat =====
 describe("saveChat and loadChat", () => {
   it("restores the chat and the session id after a reload", () => {
     const store = memoryStore();
@@ -135,7 +135,7 @@ describe("saveChat and loadChat", () => {
   });
 });
 
-// ===== BAGIAN 2: buildHistory =====
+// ===== PART 2: buildHistory =====
 describe("buildHistory", () => {
   it("returns complete question + answer pairs, oldest first", () => {
     assert.deepEqual(buildHistory([user(1, "q1"), bot(2, "a1"), user(3, "q2"), bot(4, "a2")]), [
@@ -174,7 +174,7 @@ describe("buildHistory", () => {
   });
 });
 
-// ===== BAGIAN 3: the contact card outcome =====
+// ===== PART 3: the contact card outcome =====
 describe("the contact card outcome", () => {
   it("keeps 'sent' and 'declined' across a reload, and nothing else about the card", () => {
     const store = memoryStore();

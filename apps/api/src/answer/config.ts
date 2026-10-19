@@ -1,21 +1,20 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/answer/config.ts
- * TUJUAN  : Pengaturan model penulis jawaban: kunci API (hanya dari
- *           environment server), nama model, tingkat effort jawaban dan
- *           effort rewrite. Pesan error tidak pernah memuat kunci.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Jenis error khusus dan tingkat effort
- *    2. Bentuk pengaturan dan model bawaan
- *    3. Membaca pengaturan dari environment
- *    4. Salinan pengaturan dengan effort lain
- * KALAU DIMINTA MENGUBAH:
- *    - Model bawaan (DEFAULT_MODEL, atau ANTHROPIC_MODEL di .env.api) (BAGIAN
- *      2)
- *    - Effort jawaban (medium) dan effort rewrite (low) (BAGIAN 3)
+ * PURPOSE : Settings of the model that writes the answers: the API key (only
+ *           from the server environment), the model name, the answer effort
+ *           and the rewrite effort. Error messages never contain the key.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Custom error type and effort levels
+ *    2. Shape of the settings and the default model
+ *    3. Read the settings from the environment
+ *    4. The same settings with a different effort
+ * IF ASKED TO CHANGE:
+ *    - Default model (DEFAULT_MODEL, or ANTHROPIC_MODEL in .env.api) (PART 2)
+ *    - Answer effort (medium) and rewrite effort (low) (PART 3)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Jenis error khusus dan tingkat effort =====
+// ===== PART 1: Custom error type and effort levels =====
 /**
  * Settings for the model that writes the answers. The key comes from the server environment only
  * (.env.api), never from the browser, and error messages never contain it.
@@ -26,7 +25,7 @@ export class AnswerError extends Error {}
 export const EFFORT_LEVELS = ["low", "medium", "high", "xhigh", "max"] as const;
 export type Effort = (typeof EFFORT_LEVELS)[number];
 
-// ===== BAGIAN 2: Bentuk pengaturan dan model bawaan =====
+// ===== PART 2: Shape of the settings and the default model =====
 export interface AnthropicConfig {
   apiKey: string;
   model: string;
@@ -41,7 +40,7 @@ export interface AnthropicConfig {
 /** Verified against the Anthropic models page on 2026-10-18. Change it with ANTHROPIC_MODEL, no code edit needed. */
 export const DEFAULT_MODEL = "claude-haiku-5-5";
 
-// ===== BAGIAN 3: Membaca pengaturan dari environment =====
+// ===== PART 3: Read the settings from the environment =====
 export function loadAnthropicConfig(env: Record<string, string | undefined> = process.env): AnthropicConfig {
   const apiKey = env.ANTHROPIC_API_KEY?.trim();
   if (!apiKey) throw new AnswerError("ANTHROPIC_API_KEY is not set (see .env.api.example)");
@@ -62,7 +61,7 @@ function parseEffort(raw: string | undefined, fallback: Effort, name: string): E
   return value as Effort;
 }
 
-// ===== BAGIAN 4: Salinan pengaturan dengan effort lain =====
+// ===== PART 4: The same settings with a different effort =====
 /** The same settings with a different effort, for a second kind of call (the rewrite step). */
 export function withEffort(config: AnthropicConfig, effort: Effort | undefined): AnthropicConfig {
   const { effort: _old, rewriteEffort: _rw, ...rest } = config;

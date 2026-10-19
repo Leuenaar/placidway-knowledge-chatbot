@@ -1,16 +1,16 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/answer/rules.ts
- * TUJUAN  : Membaca lima file aturan (apps/api/rules/*.md) saat server start
- *           lalu menggabungkannya ke system prompt. File hilang, kosong, atau
- *           terlalu panjang menghentikan server, jadi bot tidak pernah jalan
- *           dengan aturan yang kurang.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Daftar lima file aturan dan batas panjang
- *    2. Pembaca aturan dengan pemeriksaan
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah atau menamai ulang file aturan (BAGIAN 1)
- *    - Batas panjang tiap file aturan (6000 karakter) (BAGIAN 1)
+ * PURPOSE : Read the five rules files (apps/api/rules/*.md) at server
+ *           start and merge them into the system prompt. A missing,
+ *           empty or too long file stops the server, so the bot never
+ *           runs with missing rules.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. List of the five rules files and their length limits
+ *    2. Rules reader with checks
+ * IF ASKED TO CHANGE:
+ *    - Add or rename a rules file (PART 1)
+ *    - Length limit of each rules file (6000 characters) (PART 1)
  * ============================================================================ */
 
 /**
@@ -25,7 +25,7 @@ import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { AnswerError } from "./config";
 
-// ===== BAGIAN 1: Daftar lima file aturan dan batas panjang =====
+// ===== PART 1: List of the five rules files and their length limits =====
 export const RULE_GROUPS = [
   { key: "conversation", file: "1-conversation.md" },
   { key: "scope", file: "2-scope.md" },
@@ -41,7 +41,7 @@ const MAX_RULE_CHARS = 6000;
 
 export const DEFAULT_RULES_DIR = fileURLToPath(new URL("../../rules/", import.meta.url));
 
-// ===== BAGIAN 2: Pembaca aturan dengan pemeriksaan =====
+// ===== PART 2: Rules reader with checks =====
 export function loadRules(dir: string = DEFAULT_RULES_DIR, read: (path: string) => string = (p) => readFileSync(p, "utf8")): Rules {
   const rules = {} as Rules;
   for (const { key, file } of RULE_GROUPS) {

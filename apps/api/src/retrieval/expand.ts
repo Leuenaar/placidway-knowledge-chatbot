@@ -1,24 +1,23 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/retrieval/expand.ts
- * TUJUAN  : Pencarian 'kecil ke besar'. Pencarian vektor pintar menemukan
- *           HALAMAN yang tepat tetapi bisa menaruh potongan pendek yang
- *           penting (misal harga) di bawah batas. Jadi setelah mencari,
- *           server juga mengirim semua potongan dari halaman terbaik, plus
- *           potongan yang memuat nominal dolar yang disebut pengunjung.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Halaman yang judulnya disebut di pertanyaan (titlePages)
- *    2. Menggabungkan dua daftar hasil (fuseHits)
- *    3. Memilih halaman yang dibaca penuh (pickPages)
- *    4. Menyatukan hasil pencarian dan halaman penuh
- *    5. Opsi pengumpulan
- *    6. Pengumpul utama: cari dua kali, nominal persis, halaman penuh
- * KALAU DIMINTA MENGUBAH:
- *    - Kata judul yang dianggap umum (GENERIC_TITLE_WORDS) (BAGIAN 1)
- *    - Seberapa kuat hasil kata asli pengunjung vs hasil rewrite (RRF_K)
- *      (BAGIAN 2)
- *    - Berapa halaman penuh ditambahkan (lihat EXPAND_PAGES di config)
- *      (BAGIAN 6)
+ * PURPOSE : 'Small to big' search. The smart vector search finds the right
+ *           PAGE but can rank an important short piece (such as a price) below
+ *           the cut. So after searching, the server also sends all the pieces
+ *           of the best page, plus the pieces that contain a dollar amount the
+ *           visitor mentioned.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Pages whose title is named in the question (titlePages)
+ *    2. Merge two result lists (fuseHits)
+ *    3. Choose the pages that are read in full (pickPages)
+ *    4. Merge the search results and the full pages
+ *    5. Collection options
+ *    6. Main collector: search twice, exact amounts, full pages
+ * IF ASKED TO CHANGE:
+ *    - Title words treated as generic (GENERIC_TITLE_WORDS) (PART 1)
+ *    - How strong the visitor's own words are versus the rewrite result
+ *      (RRF_K) (PART 2)
+ *    - How many full pages are added (see EXPAND_PAGES in the config) (PART 6)
  * ============================================================================ */
 
 /**
@@ -32,7 +31,7 @@ import { SOURCE_PAGES } from "@pwbot/shared";
 import { dollarAmounts } from "./amounts";
 import type { RetrievedChunk, Retriever } from "./retriever";
 
-// ===== BAGIAN 1: Halaman yang judulnya disebut di pertanyaan (titlePages) =====
+// ===== PART 1: Pages whose title is named in the question (titlePages) =====
 /** Words that are in a page title but that nearly every question about money contains, so they say nothing about WHICH page. */
 const GENERIC_TITLE_WORDS = new Set(["cost", "costs", "price", "prices", "list", "compare", "alternative", "treatment", "cancer", "center", "itc"]);
 
@@ -54,7 +53,7 @@ export function titlePages(query: string, count: number): number[] {
   return scored.filter((x) => x.score > 0).sort((a, b) => b.score - a.score || a.page - b.page).slice(0, count).map((x) => x.page);
 }
 
-// ===== BAGIAN 2: Menggabungkan dua daftar hasil (fuseHits) =====
+// ===== PART 2: Merge two result lists (fuseHits) =====
 const RRF_K = 60;
 
 /**
@@ -77,7 +76,7 @@ export function fuseHits(lists: RetrievedChunk[][], count: number): RetrievedChu
   return [...scored.values()].sort((a, b) => b.score - a.score || a.first - b.first).slice(0, count).map((x) => x.chunk);
 }
 
-// ===== BAGIAN 3: Memilih halaman yang dibaca penuh (pickPages) =====
+// ===== PART 3: Choose the pages that are read in full (pickPages) =====
 /**
  * The pages to read in full, best first: first the pages the question names in their title (see titlePages), then the pages most of the
  * hits come from. Ties go to the page whose hit ranked higher.
@@ -95,14 +94,14 @@ export function pickPages(hits: RetrievedChunk[], count: number, query = ""): nu
   return [...new Set([...named, ...byHits])].slice(0, count);
 }
 
-// ===== BAGIAN 4: Menyatukan hasil pencarian dan halaman penuh =====
+// ===== PART 4: Merge the search results and the full pages =====
 /** The hits in their ranked order, then the other chunks of the chosen pages. No chunk appears twice. */
 export function mergeHitsAndPages(hits: RetrievedChunk[], pageChunks: RetrievedChunk[]): RetrievedChunk[] {
   const seen = new Set(hits.map((h) => h.id));
   return [...hits, ...pageChunks.filter((c) => !seen.has(c.id))];
 }
 
-// ===== BAGIAN 5: Opsi pengumpulan =====
+// ===== PART 5: Collection options =====
 export interface GatherOptions {
   /** How many chunks the vector search returns. */
   resultCount: number;
@@ -113,7 +112,7 @@ export interface GatherOptions {
   log?: (message: string) => void;
 }
 
-// ===== BAGIAN 6: Pengumpul utama: cari dua kali, nominal persis, halaman penuh =====
+// ===== PART 6: Main collector: search twice, exact amounts, full pages =====
 /**
  * Search, then add (1) the chunks that contain a dollar amount the visitor mentioned and (2) the full best pages.
  * The search runs twice when the visitor's own words differ from the rewritten question, and the two result lists are fused

@@ -1,32 +1,33 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/chunk/chunk.ts
- * TUJUAN  : Pemotong satu halaman bersih. Mengimplementasikan aturan C1
- *           sampai C9 dan R8. Tiga langkah: bagi per judul '## ' (C1), ubah
- *           tiap bagian jadi potongan (satu per pertanyaan FAQ, ulasan, kisah
- *           pasien, kelompok ~15 video, atau berdasar ukuran), gabungkan
- *           potongan di bawah 200 karakter ke tetangga (C3), lalu beri nomor
- *           (C8). Fungsi murni: halaman sama selalu menghasilkan chunk, id
- *           dan hash sama.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Tipe: peran potongan (fixed, unit, text, tail) dan bentuk Piece
- *    2. Konstanta: nama bagian header, bulan, dan pembantu awalan
- *    3. Pengumpul peringatan
- *    4. Pemecahan berdasar ukuran (C2)
- *    5. FAQ: satu potongan per pertanyaan beserta jawabannya (C5)
- *    6. Jenis bagian: FAQ, ulasan, kisah pasien, video, umum
- *    7. Ulasan: satu potongan per ulasan (teks sebelum nama dan tanggal)
- *    8. Kisah pasien: satu potongan per kisah (C5)
- *    9. Video: sekitar 15 judul per chunk (C7)
- *    10. Bagian umum: berdasar ukuran, Included/Not included selalu dipisah
- *    11. Menggabungkan potongan kecil ke tetangga (C3)
- *    12. Fungsi publik: chunkPage dan toIsoDate
- *    13. chunkPage: dari satu halaman ke daftar chunk (C1, C8)
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah cara FAQ dipotong (BAGIAN 6)
- *    - Mengubah ukuran gabung chunk kecil (200 karakter) (BAGIAN 11)
- *    - Mengubah format id chunk (contoh P2-faq-3) (BAGIAN 13)
- *    - Mengubah jumlah video per chunk (BAGIAN 9)
+ * PURPOSE : Chunker for one clean page. Implements rules C1 to C9 and R8.
+ *           Three steps: split by '## ' heading (C1), turn each section into
+ *           pieces (one per FAQ question, review, patient story, a group of
+ *           about 15 videos, or by size), merge pieces under 200 characters
+ *           into a neighbour (C3), then number them (C8). A pure function: the
+ *           same page always gives the same chunks, ids and hashes.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Type: the role of a piece (fixed, unit, text, tail) and the Piece
+ *       shape
+ *    2. Constants: header section names, months and prefix helpers
+ *    3. Warning collector
+ *    4. Splitting by size (C2)
+ *    5. FAQ: one piece per question together with its answer (C5)
+ *    6. Section kinds: FAQ, review, patient story, video, general
+ *    7. Review: one piece per review (the text before the name and date)
+ *    8. Patient story: one piece per story (C5)
+ *    9. Videos: about 15 titles per chunk (C7)
+ *    10. General section: by size, Included/Not included are always kept apart
+ *    11. Merge small pieces into a neighbour (C3)
+ *    12. Public functions: chunkPage and toIsoDate
+ *    13. chunkPage: from one page to a list of chunks (C1, C8)
+ * IF ASKED TO CHANGE:
+ *    - Change how the FAQ is chunked (PART 6)
+ *    - Change the size under which small chunks are merged (200 characters)
+ *      (PART 11)
+ *    - Change the chunk id format (example P2-faq-3) (PART 13)
+ *    - Change the number of videos per chunk (PART 9)
  * ============================================================================ */
 
 import { sha256 } from "../clean/util.js";
@@ -34,7 +35,7 @@ import { type Atom, headingText, parseAtoms, renderAtoms, splitLongParagraph } f
 import { kindForHeading } from "./kinds.js";
 import { type Chunk, type ChunkResult, type Kind, LIMITS, type PageInput } from "./types.js";
 
-// ===== BAGIAN 1: Tipe: peran potongan (fixed, unit, text, tail) dan bentuk Piece =====
+// ===== PART 1: Type: the role of a piece (fixed, unit, text, tail) and the Piece shape =====
 /**
  * Chunker for one cleaned page. Implements C1 to C9 and R8 (kind tags).
  *
@@ -67,7 +68,7 @@ interface Piece {
   prefer?: "prev" | "next";
 }
 
-// ===== BAGIAN 2: Konstanta: nama bagian header, bulan, dan pembantu awalan =====
+// ===== PART 2: Constants: header section names, months and prefix helpers =====
 const HEADER_SECTION = "Page details";
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -75,7 +76,7 @@ const label = (p: Piece) => (p.sub ? `${p.section} > ${p.sub}` : p.section);
 const bodyOf = (p: Piece) => renderAtoms(p.atoms);
 const prefixOf = (h1: string, kind: Kind, section: string) => `[Page: ${h1} / Type: ${kind} / Section: ${section}]`;
 
-// ===== BAGIAN 3: Pengumpul peringatan =====
+// ===== PART 3: Warning collector =====
 class Warnings {
   list: string[] = [];
   add(m: string) {
@@ -83,7 +84,7 @@ class Warnings {
   }
 }
 
-// ===== BAGIAN 4: Pemecahan berdasar ukuran (C2) =====
+// ===== PART 4: Splitting by size (C2) =====
 // ---------------------------------------------------------------------------------------------
 // Size based splitting (C2)
 // ---------------------------------------------------------------------------------------------
@@ -154,9 +155,9 @@ function piecesFromGroups(groups: Group[], section: string, kind: Kind, role: Ro
   });
 }
 
-// ===== BAGIAN 5: FAQ: satu potongan per pertanyaan beserta jawabannya (C5) =====
+// ===== PART 5: FAQ: one piece per question together with its answer (C5) =====
 
-// ===== BAGIAN 6: Jenis bagian: FAQ, ulasan, kisah pasien, video, umum =====
+// ===== PART 6: Section kinds: FAQ, review, patient story, video, general =====
 // ---------------------------------------------------------------------------------------------
 // Section types
 // ---------------------------------------------------------------------------------------------
@@ -182,7 +183,7 @@ function faqPieces(h2: string, atoms: Atom[], warn: Warnings): Piece[] {
   return out;
 }
 
-// ===== BAGIAN 7: Ulasan: satu potongan per ulasan (teks sebelum nama dan tanggal) =====
+// ===== PART 7: Review: one piece per review (the text before the name and date) =====
 // No \b before the month: the crawler glues the clinic name to the date ("Immunity Therapy CenterJul 05 2023").
 const REVIEW_DATE = /(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2},? \d{4}$/;
 
@@ -222,7 +223,7 @@ function reviewPieces(h2: string, atoms: Atom[], warn: Warnings): Piece[] {
   return out;
 }
 
-// ===== BAGIAN 8: Kisah pasien: satu potongan per kisah (C5) =====
+// ===== PART 8: Patient story: one piece per story (C5) =====
 /** Patient stories: one piece per story, which starts at a #### heading that has text under it (C5). */
 function storyPieces(h2: string, atoms: Atom[], warn: Warnings): Piece[] {
   const rest = atoms.slice(1);
@@ -247,7 +248,7 @@ function storyPieces(h2: string, atoms: Atom[], warn: Warnings): Piece[] {
   return out;
 }
 
-// ===== BAGIAN 9: Video: sekitar 15 judul per chunk (C7) =====
+// ===== PART 9: Videos: about 15 titles per chunk (C7) =====
 /** Videos: about 15 titles per chunk, spread evenly (C7). */
 function videoPieces(h2: string, atoms: Atom[]): Piece[] {
   const items = atoms.slice(1);
@@ -268,7 +269,7 @@ function videoPieces(h2: string, atoms: Atom[]): Piece[] {
   return out;
 }
 
-// ===== BAGIAN 10: Bagian umum: berdasar ukuran, Included/Not included selalu dipisah =====
+// ===== PART 10: General section: by size, Included/Not included are always kept apart =====
 /** Everything else: by size, but a section whose ### parts have different kinds (Included / Not included) is always split there. */
 function genericPieces(h2: string, atoms: Atom[], kind: Kind, warn: Warnings): Piece[] {
   const disc = atoms.findIndex((a) => a.type === "para" && /^important disclaimer$/i.test(a.text.trim()));
@@ -307,7 +308,7 @@ function sectionPieces(h2: string, atoms: Atom[], warn: Warnings): Piece[] {
   return genericPieces(h2, atoms, kind ?? "overview", warn);
 }
 
-// ===== BAGIAN 11: Menggabungkan potongan kecil ke tetangga (C3) =====
+// ===== PART 11: Merge small pieces into a neighbour (C3) =====
 // ---------------------------------------------------------------------------------------------
 // Merging small pieces (C3)
 // ---------------------------------------------------------------------------------------------
@@ -364,7 +365,7 @@ function mergeSmall(pieces: Piece[], h1: string): Piece[] {
   return out;
 }
 
-// ===== BAGIAN 12: Fungsi publik: chunkPage dan toIsoDate =====
+// ===== PART 12: Public functions: chunkPage and toIsoDate =====
 // ---------------------------------------------------------------------------------------------
 // Public function
 // ---------------------------------------------------------------------------------------------
@@ -377,7 +378,7 @@ function toIsoDate(s: string | undefined): string | null {
   return `${m[3]}-${String(mi + 1).padStart(2, "0")}-${m[2]!.padStart(2, "0")}`;
 }
 
-// ===== BAGIAN 13: chunkPage: dari satu halaman ke daftar chunk (C1, C8) =====
+// ===== PART 13: chunkPage: from one page to a list of chunks (C1, C8) =====
 export function chunkPage(page: PageInput): ChunkResult {
   const warn = new Warnings();
   const atoms = parseAtoms(page.text);

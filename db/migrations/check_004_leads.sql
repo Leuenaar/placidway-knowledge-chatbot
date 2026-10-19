@@ -1,14 +1,15 @@
 -- ============================================================================
--- PETA FILE
+-- FILE MAP
 -- FILE    : db/migrations/check_004_leads.sql
--- TUJUAN  : Audit hanya-baca migrasi 004 (kontak). Satu tabel hasil, setiap
---           baris harus OK. Tidak membaca nama atau email, hanya jumlah dan
---           pengaturan.
--- BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
---    1. Tujuh pemeriksaan tabel leads: ada, RLS aktif, tanpa kebijakan, tanpa hak anon, hak service_role, fungsi purge
+-- PURPOSE : Read-only audit of migration 004 (contacts). One result table,
+--           every row must be OK. It reads no names or emails, only counts and
+--           settings.
+-- PARTS   : (in the code, search for the text PART n with Ctrl+F)
+--    1. Seven checks of the leads table: it exists, RLS is on, no policies, no
+--       anon rights, service_role rights, the purge function
 -- ============================================================================
 
--- ===== BAGIAN 1: Tujuh pemeriksaan tabel leads: ada, RLS aktif, tanpa kebijakan, tanpa hak anon, hak service_role, fungsi purge =====
+-- ===== PART 1: Seven checks of the leads table: it exists, RLS is on, no policies, no anon rights, service_role rights, the purge function =====
 -- check_004_leads.sql
 -- Read-only audit for migration 004 (lead capture). Run it in the Supabase SQL Editor after 004_leads.sql.
 -- One result table. Every row should say OK. "found" is what the database really has, "expected" is what it should have.

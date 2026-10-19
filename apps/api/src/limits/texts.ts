@@ -1,15 +1,15 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/limits/texts.ts
- * TUJUAN  : Teks yang dilihat pengunjung saat batas tercapai, ditulis tangan
- *           dalam lima bahasa dan tidak pernah lewat model (karena teks ini
- *           tampil tepat saat server tidak boleh membelanjakan apa pun).
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Tipe kunci teks batas
- *    2. Teks batas per bahasa (en, id, tr, es, ar)
- *    3. Tabel dan pemetaan alasan ke teks
- * KALAU DIMINTA MENGUBAH:
- *    - Kalimat saat batas tercapai (BAGIAN 2)
+ * PURPOSE : The text the visitor sees when a limit is reached, hand-written in
+ *           five languages and never passed through the model (because this
+ *           text appears exactly when the server must not spend anything).
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Type of the limit text keys
+ *    2. Limit text per language (en, id, tr, es, ar)
+ *    3. Table and the mapping of reasons to text
+ * IF ASKED TO CHANGE:
+ *    - Sentence shown when the limit is reached (PART 2)
  * ============================================================================ */
 
 /**
@@ -19,11 +19,11 @@
  */
 import type { LimitReason } from "./limiter";
 
-// ===== BAGIAN 1: Tipe kunci teks batas =====
+// ===== PART 1: Type of the limit text keys =====
 export type LimitTextKey = "rate_limited" | "busy" | "budget";
 export type LimitTexts = Record<LimitTextKey, string>;
 
-// ===== BAGIAN 2: Teks batas per bahasa (en, id, tr, es, ar) =====
+// ===== PART 2: Limit text per language (en, id, tr, es, ar) =====
 const EN: LimitTexts = {
   rate_limited: "You are sending messages quickly. Please wait a few minutes and try again.",
   busy: "The assistant is busy right now. Please try again in a moment.",
@@ -50,7 +50,7 @@ const AR: LimitTexts = {
   budget: "تم الوصول إلى حد الاستخدام لهذا اليوم. يرجى المحاولة مرة أخرى غدًا. يمكن لـ PlacidWay الإجابة عن أسئلتك مباشرة إذا طلبت عرض سعر مجانيًا.",
 };
 
-// ===== BAGIAN 3: Tabel dan pemetaan alasan ke teks =====
+// ===== PART 3: Table and the mapping of reasons to text =====
 export const LIMIT_TEXTS: Readonly<Record<string, LimitTexts>> = { en: EN, id: ID, tr: TR, es: ES, ar: AR };
 
 /** burst -> rate_limited, busy -> busy, budget and daily -> budget (both say "the limit for today"). */

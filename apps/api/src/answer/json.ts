@@ -1,15 +1,15 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/answer/json.ts
- * TUJUAN  : Mengambil objek JSON dari balasan model, walaupun model
- *           membungkusnya dengan pagar kode atau kalimat tambahan.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Pengambil JSON dari teks balasan
+ * PURPOSE : Get the JSON object from the model's reply, even if the model
+ *           wrapped it in code fences or extra sentences.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. JSON extractor from the reply text
  * ============================================================================ */
 
 import { AnswerError } from "./config";
 
-// ===== BAGIAN 1: Pengambil JSON dari teks balasan =====
+// ===== PART 1: JSON extractor from the reply text =====
 /** The model is asked for bare JSON, but may still wrap it in a code fence or add a sentence around it. */
 export function extractJson(text: string): unknown {
   const start = text.indexOf("{");

@@ -1,24 +1,25 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/chunk/verify.ts
- * TUJUAN  : Pemeriksa hasil pemotongan: tidak ada kalimat hilang, tidak ada
- *           jumlah $ hilang atau bertambah, ukuran dan jenis sesuai, dan
- *           seluruh teks bisa disusun ulang dari chunk.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Pembantu: hapus spasi untuk membandingkan teks
- *    2. Isi chunk tanpa baris awalan dan tanpa kalimat ulangan
- *    3. Pemeriksaan utama satu halaman (daftar masalah, kosong bila baik)
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah pemeriksaan hasil pemotongan: tambah di verifyPage (BAGIAN 3)
+ * PURPOSE : Checker of the chunking result: no sentence lost, no $ amount lost
+ *           or added, size and kind correct, and the whole text can be rebuilt
+ *           from the chunks.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Helper: remove spaces to compare texts
+ *    2. Chunk content without the prefix lines and without the repeated
+ *       sentence
+ *    3. Main check of one page (list of problems, empty if good)
+ * IF ASKED TO CHANGE:
+ *    - Add a chunking check: add it in verifyPage (PART 3)
  * ============================================================================ */
 
 import { extractAmounts } from "../clean/util.js";
 import { type Chunk, KINDS, LIMITS, type PageInput } from "./types.js";
 
-// ===== BAGIAN 1: Pembantu: hapus spasi untuk membandingkan teks =====
+// ===== PART 1: Helper: remove spaces to compare texts =====
 const squash = (s: string) => s.replace(/\s+/g, "");
 
-// ===== BAGIAN 2: Isi chunk tanpa baris awalan dan tanpa kalimat ulangan =====
+// ===== PART 2: Chunk content without the prefix lines and without the repeated sentence =====
 /** The text of a chunk without its prefix line and without the sentence it repeats from the chunk before (C8). */
 export function bodyWithoutPrefix(c: Chunk): string {
   const nl = c.text.indexOf("\n");
@@ -26,7 +27,7 @@ export function bodyWithoutPrefix(c: Chunk): string {
   return body.slice(c.overlap_chars ?? 0);
 }
 
-// ===== BAGIAN 3: Pemeriksaan utama satu halaman (daftar masalah, kosong bila baik) =====
+// ===== PART 3: Main check of one page (list of problems, empty if good) =====
 /**
  * The gates for P1 (handoff 6.3) that apply to chunks. Returns a list of problems, empty when all pass.
  * Reconstruction: the bodies joined in order must equal the cleaned page, ignoring whitespace, which

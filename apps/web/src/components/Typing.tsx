@@ -1,20 +1,21 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/web/src/components/Typing.tsx
- * TUJUAN  : Penanda 'sedang bekerja'. Tiga titik muncul langsung agar
- *           pengunjung tahu pesan diterima. Bila menunggu lama (6 detik),
- *           baris status menjelaskan, hanya berisi hal yang benar-benar
- *           terjadi (halaman sedang dicari).
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Impor
- *    2. Batas waktu sebelum baris status muncul
- *    3. Komponen: titik dan baris status
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah waktu tunggu: SLOW_AFTER_MS (BAGIAN 2)
- *    - Mengubah teks status: cari 'Checking the PlacidWay pages' (BAGIAN 3)
+ * PURPOSE : The 'working' indicator. Three dots appear at once so the visitor
+ *           knows the message was received. If the wait is long (6 seconds), a
+ *           status line explains, containing only what is really happening
+ *           (the pages are being searched).
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Imports
+ *    2. Time to wait before the status line appears
+ *    3. Component: dots and status line
+ * IF ASKED TO CHANGE:
+ *    - Change the wait time: SLOW_AFTER_MS (PART 2)
+ *    - Change the status text: search for 'Checking the PlacidWay pages' (PART
+ *      3)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Impor =====
+// ===== PART 1: Imports =====
 /**
  * Shown while the assistant is working. The three dots appear at once, so the user sees that
  * the message was received. If the wait runs long, a plain status line explains it. The line
@@ -23,10 +24,10 @@
 import { useEffect, useState } from "react";
 import markUrl from "../assets/placidway-mark.png";
 
-// ===== BAGIAN 2: Batas waktu sebelum baris status muncul =====
+// ===== PART 2: Time to wait before the status line appears =====
 const SLOW_AFTER_MS = 6000;
 
-// ===== BAGIAN 3: Komponen: titik dan baris status =====
+// ===== PART 3: Component: dots and status line =====
 export function Typing() {
   const [slow, setSlow] = useState(false);
 

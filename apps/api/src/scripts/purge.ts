@@ -1,21 +1,20 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/scripts/purge.ts
- * TUJUAN  : Perintah `npm run purge`: menghapus catatan pertanyaan tak
- *           terjawab yang lebih tua dari 30 hari, sekali jalan, lalu menyebut
- *           jumlahnya. Server melakukan hal yang sama sendiri saat start dan
- *           sekali sehari.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Impor (alat yang dipakai skrip ini)
- *    2. Fungsi utama skrip
- *    3. Muat rahasia dari .env.api
- *    4. Hapus baris lama dan laporkan jumlahnya
- *    5. Jalankan fungsi utama
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah pesan hasil penghapusan (BAGIAN 4)
+ * PURPOSE : The command `npm run purge`: deletes the unanswered-question
+ *           records older than 30 days, once, and reports the count. The
+ *           server does the same by itself at start and once a day.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Imports (tools this script uses)
+ *    2. Main function of the script
+ *    3. Load the secrets from .env.api
+ *    4. Delete old rows and report the count
+ *    5. Run the main function
+ * IF ASKED TO CHANGE:
+ *    - Change the message about the deletion result (PART 4)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Impor (alat yang dipakai skrip ini) =====
+// ===== PART 1: Imports (tools this script uses) =====
 /**
  * Deletes unanswered-questions rows older than 30 days, once, and says how many.
  *   npm run purge
@@ -26,14 +25,14 @@ import { loadEnvFile } from "../env";
 import { loadDbConfig } from "../retrieval";
 import { purgeOld } from "../unanswered";
 
-// ===== BAGIAN 2: Fungsi utama skrip =====
+// ===== PART 2: Main function of the script =====
 async function main(): Promise<void> {
 
-  // ===== BAGIAN 3: Muat rahasia dari .env.api =====
+  // ===== PART 3: Load the secrets from .env.api =====
   loadEnvFile(resolve(process.cwd(), "../../.env.api"));
   try {
 
-    // ===== BAGIAN 4: Hapus baris lama dan laporkan jumlahnya =====
+    // ===== PART 4: Delete old rows and report the count =====
     const n = await purgeOld({ db: loadDbConfig() });
     if (n === undefined) {
       console.error("PROBLEM: the purge did not work (see the message above)");
@@ -46,5 +45,5 @@ async function main(): Promise<void> {
   }
 }
 
-// ===== BAGIAN 5: Jalankan fungsi utama =====
+// ===== PART 5: Run the main function =====
 void main();

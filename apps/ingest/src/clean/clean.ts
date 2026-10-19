@@ -1,38 +1,38 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/clean/clean.ts
- * TUJUAN  : Pembersih satu halaman mentah. Aturan: R1 ambil wilayah dari
- *           judul H1 sampai penanda '## Request your Free Quote'; R2 header;
- *           R3 gambar, widget booking, 'Read More'; R4 buang tautan; R5 tabel
- *           jadi kalimat; R6 video jadi baris 'Video:'; R7 daftar isi; R9
- *           hash; R10 jumlah $ aman; X1 kartu Related; X3 duplikat video.
- *           Fungsi murni.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Konstanta: penanda akhir wilayah isi (R1)
- *    2. Konteks pembersih dan penghitung aturan
- *    3. Mencatat teks yang dibuang
- *    4. Membuang baris yang cocok
- *    5. Membuang blok dari awal ke akhir yang cocok
- *    6. Menentukan akhir blok header (R2)
- *    7. Mengambil metadata (judul, penulis, tanggal)
- *    8. R6: blok video jadi satu baris 'Video:'
- *    9. R5: tabel jadi kalimat
- *    10. R4: buang tautan di seluruh halaman
- *    11. X3: buang daftar video yang hanya mengulang judul
- *    12. R3: rapikan tanda butir daftar
- *    13. Rapikan baris kosong dan spasi akhir
- *    14. cleanPage: urutan semua aturan pembersihan
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah aturan pembersihan baru: tambah langkah di cleanPage (BAGIAN
- *      14) dan fungsinya di atas
- *    - Mengubah penanda akhir isi (BAGIAN 1)
+ * PURPOSE : Cleaner for one raw page. Rules: R1 take the region from the H1
+ *           heading to the '## Request your Free Quote' marker; R2 header; R3
+ *           images, booking widgets, 'Read More'; R4 remove links; R5 tables
+ *           become sentences; R6 videos become 'Video:' lines; R7 table of
+ *           contents; R9 hash; R10 safe $ amounts; X1 Related cards; X3
+ *           duplicate videos. A pure function.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Constant: marker for the end of the content region (R1)
+ *    2. Cleaner context and rule counters
+ *    3. Record the removed text
+ *    4. Remove the matching lines
+ *    5. Remove the matching block from start to end
+ *    6. Find the end of the header block (R2)
+ *    7. Get the metadata (title, author, date)
+ *    8. R6: a video block becomes one 'Video:' line
+ *    9. R5: tables become sentences
+ *    10. R4: remove links across the whole page
+ *    11. X3: remove a video list that only repeats the titles
+ *    12. R3: tidy the list bullet marks
+ *    13. Tidy blank lines and trailing spaces
+ *    14. cleanPage: the order of all the cleaning rules
+ * IF ASKED TO CHANGE:
+ *    - Add a new cleaning rule: add a step in cleanPage (PART 14) and its
+ *      function above
+ *    - Change the end-of-content marker (PART 1)
  * ============================================================================ */
 
 import { convertTable, isTableStart } from "./tables.js";
 import type { CleanMeta, CleanReport, CleanResult, DroppedItem, Line, RawPage } from "./types.js";
 import { checkAmounts, extractAmounts, sha256, stripUrls } from "./util.js";
 
-// ===== BAGIAN 1: Konstanta: penanda akhir wilayah isi (R1) =====
+// ===== PART 1: Constant: marker for the end of the content region (R1) =====
 /**
  * Cleaner for one page. Implements the approved rules R1 to R10 (see docs/INGESTION.md in the repo
  * for the plain-language version). The function is pure: same raw page in, same text and hash out.
@@ -47,7 +47,7 @@ export const QUOTE_MARKER = "## Request your Free Quote";
 /** Headings inside the header block that belong to the header (R2), not to the body. */
 const HEADER_HEADINGS = new Set(["Package Price", "Medical Center Reviews"]);
 
-// ===== BAGIAN 2: Konteks pembersih dan penghitung aturan =====
+// ===== PART 2: Cleaner context and rule counters =====
 interface Ctx {
   dropped: DroppedItem[];
   counts: Record<string, number>;
@@ -59,7 +59,7 @@ function count(ctx: Ctx, rule: string, n = 1): void {
   ctx.counts[rule] = (ctx.counts[rule] ?? 0) + n;
 }
 
-// ===== BAGIAN 3: Mencatat teks yang dibuang =====
+// ===== PART 3: Record the removed text =====
 /** Record removed text. Blank-only blocks are not worth reporting. */
 function recordDrop(ctx: Ctx, rule: string, removed: Line[]): void {
   const filled = removed.filter((l) => l.t.trim() !== "");
@@ -75,7 +75,7 @@ function recordDrop(ctx: Ctx, rule: string, removed: Line[]): void {
   count(ctx, rule, filled.length);
 }
 
-// ===== BAGIAN 4: Membuang baris yang cocok =====
+// ===== PART 4: Remove the matching lines =====
 function removeWhere(ctx: Ctx, lines: Line[], rule: string, pred: (l: Line) => boolean): Line[] {
   const keep: Line[] = [];
   const gone: Line[] = [];
@@ -84,7 +84,7 @@ function removeWhere(ctx: Ctx, lines: Line[], rule: string, pred: (l: Line) => b
   return keep;
 }
 
-// ===== BAGIAN 5: Membuang blok dari awal ke akhir yang cocok =====
+// ===== PART 5: Remove the matching block from start to end =====
 /** Remove every block that starts at a line matching isStart and ends before the next line matching isEnd. */
 function dropBlocks(
   ctx: Ctx,
@@ -110,7 +110,7 @@ function dropBlocks(
   return out;
 }
 
-// ===== BAGIAN 6: Menentukan akhir blok header (R2) =====
+// ===== PART 6: Find the end of the header block (R2) =====
 function headerEnd(lines: Line[]): number {
   for (let i = 1; i < lines.length; i++) {
     const m = /^## (.+?)\s*$/.exec(lines[i]!.t);
@@ -131,7 +131,7 @@ function isHeaderJunk(t: string): boolean {
   );
 }
 
-// ===== BAGIAN 7: Mengambil metadata (judul, penulis, tanggal) =====
+// ===== PART 7: Get the metadata (title, author, date) =====
 function extractMeta(lines: Line[]): CleanMeta {
   const h1 = lines[0]!.t.replace(/^#\s+/, "").trim();
   const head = lines.slice(0, headerEnd(lines));
@@ -156,7 +156,7 @@ function extractMeta(lines: Line[]): CleanMeta {
   return meta;
 }
 
-// ===== BAGIAN 8: R6: blok video jadi satu baris 'Video:' =====
+// ===== PART 8: R6: a video block becomes one 'Video:' line =====
 function convertVideos(ctx: Ctx, lines: Line[]): Line[] {
   const out: Line[] = [];
   const leftovers: Line[] = [];
@@ -184,7 +184,7 @@ function convertVideos(ctx: Ctx, lines: Line[]): Line[] {
   return out;
 }
 
-// ===== BAGIAN 9: R5: tabel jadi kalimat =====
+// ===== PART 9: R5: tables become sentences =====
 function convertTables(ctx: Ctx, lines: Line[]): Line[] {
   const out: Line[] = [];
   let i = 0;
@@ -209,7 +209,7 @@ function convertTables(ctx: Ctx, lines: Line[]): Line[] {
   return out;
 }
 
-// ===== BAGIAN 10: R4: buang tautan di seluruh halaman =====
+// ===== PART 10: R4: remove links across the whole page =====
 /** R4 plus tidy-up that must happen after tables and videos have used the links. */
 function stripUrlsEverywhere(ctx: Ctx, lines: Line[]): Line[] {
   return lines.map((l) => {
@@ -223,7 +223,7 @@ function stripUrlsEverywhere(ctx: Ctx, lines: Line[]): Line[] {
   });
 }
 
-// ===== BAGIAN 11: X3: buang daftar video yang hanya mengulang judul =====
+// ===== PART 11: X3: remove a video list that only repeats the titles =====
 /**
  * X3: page 5 ends with one list item "Medical Center Videos:" that repeats all video titles in one
  * 10,000+ character line. It is dropped only when, after removing every "Video:" title from it,
@@ -252,7 +252,7 @@ function dropVideoListDuplicate(ctx: Ctx, lines: Line[]): Line[] {
   return out;
 }
 
-// ===== BAGIAN 12: R3: rapikan tanda butir daftar =====
+// ===== PART 12: R3: tidy the list bullet marks =====
 /** R3: "-" followed directly by text becomes "- text"; a "-" with nothing after it is dropped. */
 function normalizeListMarkers(ctx: Ctx, lines: Line[]): Line[] {
   const out: Line[] = [];
@@ -279,7 +279,7 @@ function normalizeListMarkers(ctx: Ctx, lines: Line[]): Line[] {
   return out;
 }
 
-// ===== BAGIAN 13: Rapikan baris kosong dan spasi akhir =====
+// ===== PART 13: Tidy blank lines and trailing spaces =====
 function tidy(lines: Line[]): string {
   const out: string[] = [];
   const isItem = (s: string | undefined) => (s ?? "").startsWith("- ");
@@ -301,7 +301,7 @@ function tidy(lines: Line[]): string {
   return out.join("\n") + "\n";
 }
 
-// ===== BAGIAN 14: cleanPage: urutan semua aturan pembersihan =====
+// ===== PART 14: cleanPage: the order of all the cleaning rules =====
 export function cleanPage(raw: RawPage): CleanResult {
   const ctx: Ctx = { dropped: [], counts: {}, urlsRemoved: 0, warnings: [] };
 

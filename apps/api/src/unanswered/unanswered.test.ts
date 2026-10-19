@@ -1,16 +1,16 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/unanswered/unanswered.test.ts
- * TUJUAN  : Uji log pertanyaan tak terjawab: penyamaran data pribadi,
- *           penulisan log, penghapusan 30 hari, dan daftar terbaru.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the unanswered-question log: masking of personal data,
+ *           writing the log, the 30-day deletion, and the newest list.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. masking personal data
  *    2. unanswered log
  *    3. 30 day cleanup
  *    4. listing
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 import assert from "node:assert/strict";
@@ -31,7 +31,7 @@ function fakeFetch(handler: (url: string, init: RequestInit) => Response | Promi
   return { fetchFn, calls };
 }
 
-// ===== BAGIAN 1: masking personal data =====
+// ===== PART 1: masking personal data =====
 describe("masking personal data", () => {
   it("masks e-mail addresses, phone numbers and long digit runs", () => {
     assert.equal(maskPersonalData("write me at john.doe@mail.com please"), "write me at [email] please");
@@ -54,7 +54,7 @@ describe("masking personal data", () => {
   });
 });
 
-// ===== BAGIAN 2: unanswered log =====
+// ===== PART 2: unanswered log =====
 describe("unanswered log", () => {
   it("writes one row with the masked question, the reason and the session id, and no IP", async () => {
     const f = fakeFetch(() => new Response(null, { status: 201 }));
@@ -85,7 +85,7 @@ describe("unanswered log", () => {
   });
 });
 
-// ===== BAGIAN 3: 30 day cleanup =====
+// ===== PART 3: 30 day cleanup =====
 describe("30 day cleanup", () => {
   it("calls the database function and returns how many rows it deleted", async () => {
     const f = fakeFetch(() => new Response("7", { status: 200 }));
@@ -112,7 +112,7 @@ describe("30 day cleanup", () => {
   });
 });
 
-// ===== BAGIAN 4: listing =====
+// ===== PART 4: listing =====
 describe("listing", () => {
   it("asks for the newest rows, capped at 500", async () => {
     const f = fakeFetch(() => new Response(JSON.stringify([{ id: 1, question: "q", reason: "not_in_content", session_id: SESSION, created_at: "2026-10-19T00:00:00Z" }]), { status: 200 }));

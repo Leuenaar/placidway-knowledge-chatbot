@@ -1,21 +1,22 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/load/postgrest.ts
- * TUJUAN  : Klien kecil untuk REST Supabase (PostgREST) hanya dengan fetch.
- *           Alat ingest hanya butuh empat hal: upsert baris, baca satu kolom,
- *           hapus per id, hitung baris. Kunci hanya dikirim di header apikey
- *           dan tidak pernah dicetak.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Tipe: fetch dan konfigurasi database
- *    2. Kelas error database
- *    3. Id aman (hanya huruf, angka, _ dan -)
- *    4. Memeriksa URL dan kunci (tolak http, kunci publishable, JWT bukan service)
- *    5. Klien Rest: upsert, baca, hapus, hitung
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah pemeriksaan kunci atau URL Supabase (BAGIAN 4)
+ * PURPOSE : Small client for the Supabase REST API (PostgREST) using only
+ *           fetch. The ingest tool needs only four things: upsert rows, read
+ *           one column, delete by id, count rows. The key is sent only in the
+ *           apikey header and is never printed.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Type: fetch and database configuration
+ *    2. Database error class
+ *    3. Safe id (only letters, digits, _ and -)
+ *    4. Check the URL and the key (reject http, publishable keys, a JWT that
+ *       is not service)
+ *    5. Rest client: upsert, read, delete, count
+ * IF ASKED TO CHANGE:
+ *    - Change the check on the Supabase key or URL (PART 4)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Tipe: fetch dan konfigurasi database =====
+// ===== PART 1: Type: fetch and database configuration =====
 /**
  * A very small client for Supabase's REST layer (PostgREST), using only fetch. The ingest tool needs four things:
  * upsert rows, read a column, delete by id, and count rows. The key is sent in the `apikey` header only, as the
@@ -28,14 +29,14 @@ export interface DbConfig {
   key: string;
 }
 
-// ===== BAGIAN 2: Kelas error database =====
+// ===== PART 2: Database error class =====
 export class DbError extends Error {}
 
-// ===== BAGIAN 3: Id aman (hanya huruf, angka, _ dan -) =====
+// ===== PART 3: Safe id (only letters, digits, _ and -) =====
 /** The id characters the chunker produces. Anything else is refused before it can reach a URL. */
 const SAFE_ID = /^[A-Za-z0-9_-]+$/;
 
-// ===== BAGIAN 4: Memeriksa URL dan kunci (tolak http, kunci publishable, JWT bukan service) =====
+// ===== PART 4: Check the URL and the key (reject http, publishable keys, a JWT that is not service) =====
 export function checkConfig(url: string | undefined, key: string | undefined): DbConfig {
   if (!url || !key) throw new DbError("SUPABASE_URL and SUPABASE_INGEST_KEY must both be set (see apps/ingest/README.md)");
   let u: URL;
@@ -58,7 +59,7 @@ export function checkConfig(url: string | undefined, key: string | undefined): D
   return { url: u.origin, key };
 }
 
-// ===== BAGIAN 5: Klien Rest: upsert, baca, hapus, hitung =====
+// ===== PART 5: Rest client: upsert, read, delete, count =====
 export class Rest {
   constructor(
     private readonly cfg: DbConfig,

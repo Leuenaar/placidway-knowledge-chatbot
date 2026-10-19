@@ -1,25 +1,25 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/i18n/texts.ts
- * TUJUAN  : Semua teks tetap yang dilihat pengunjung (krisis, disclaimer,
- *           'tidak ditemukan', error, saran pertanyaan, teks kartu kontak)
- *           dalam lima bahasa tulisan tangan: Inggris (induk), Indonesia,
- *           Turki, Spanyol, Arab. Untuk bahasa lain, teks Inggris
- *           diterjemahkan sekali oleh model (lihat localizer.ts).
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Daftar kunci teks
- *    2. Alamat direktori bantuan krisis
- *    3. Teks Inggris (versi induk)
- *    4. Teks Indonesia
- *    5. Teks Turki (belum dicek penutur asli)
- *    6. Teks Spanyol (belum dicek penutur asli)
- *    7. Teks Arab (belum dicek penutur asli)
- *    8. Tabel bahasa tulisan tangan dan kode bahasa utama
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah kalimat krisis, disclaimer, atau teks kartu kontak: cari
- *      kuncinya di bahasa yang diminta (BAGIAN 3)
- *    - Menambah kunci teks baru: tambahkan di TEXT_KEYS lalu isi di kelima
- *      bahasa (BAGIAN 1)
+ * PURPOSE : All the fixed text the visitor sees (crisis, disclaimer, 'not
+ *           found', error, suggested questions, contact card text) in five
+ *           hand-written languages: English (the parent), Indonesian, Turkish,
+ *           Spanish, Arabic. For any other language, the English text is
+ *           translated once by the model (see localizer.ts).
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. List of text keys
+ *    2. Address of the crisis help directory
+ *    3. English text (the parent version)
+ *    4. Indonesian text
+ *    5. Turkish text (not yet checked by a native speaker)
+ *    6. Spanish text (not yet checked by a native speaker)
+ *    7. Arabic text (not yet checked by a native speaker)
+ *    8. Table of hand-written languages and the main language codes
+ * IF ASKED TO CHANGE:
+ *    - Change the crisis sentence, the disclaimer or the contact card text:
+ *      find the key in the requested language (PART 3)
+ *    - Add a new text key: add it in TEXT_KEYS, then fill it in all five
+ *      languages (PART 1)
  * ============================================================================ */
 
 /**
@@ -31,7 +31,7 @@
  */
 import { DISCLAIMER_TEXT } from "@pwbot/shared";
 
-// ===== BAGIAN 1: Daftar kunci teks =====
+// ===== PART 1: List of text keys =====
 export const TEXT_KEYS = [
   "crisis",
   "disclaimer",
@@ -57,11 +57,11 @@ export const TEXT_KEYS = [
 export type TextKey = (typeof TEXT_KEYS)[number];
 export type Texts = Record<TextKey, string>;
 
-// ===== BAGIAN 2: Alamat direktori bantuan krisis =====
+// ===== PART 2: Address of the crisis help directory =====
 /** The address the crisis text points to. A translation that loses it is not used. */
 export const HELPLINE_DIRECTORY = "findahelpline.com";
 
-// ===== BAGIAN 3: Teks Inggris (versi induk) =====
+// ===== PART 3: English text (the parent version) =====
 export const EN: Texts = {
   crisis:
     "I'm really sorry you're going through this. I'm an AI assistant that answers questions about the ITC clinic, so I can't give you the support you deserve right now. " +
@@ -90,7 +90,7 @@ export const EN: Texts = {
   lead_failed: "Sorry, I couldn't save your details. Please try again, or use the free quote link.",
 };
 
-// ===== BAGIAN 4: Teks Indonesia =====
+// ===== PART 4: Indonesian text =====
 const ID: Texts = {
   crisis:
     "Saya turut prihatin Anda sedang melewati hal seberat ini. Saya asisten AI yang menjawab pertanyaan seputar klinik ITC, jadi saya tidak bisa memberi dukungan yang Anda butuhkan saat ini. " +
@@ -121,7 +121,7 @@ const ID: Texts = {
   lead_failed: "Maaf, data Anda tidak bisa disimpan. Silakan coba lagi, atau gunakan tautan penawaran gratis.",
 };
 
-// ===== BAGIAN 5: Teks Turki (belum dicek penutur asli) =====
+// ===== PART 5: Turkish text (not yet checked by a native speaker) =====
 const TR: Texts = {
   crisis:
     "Bunları yaşadığınız için çok üzgünüm. Ben ITC kliniği hakkındaki soruları yanıtlayan bir yapay zekâ asistanıyım, bu yüzden şu anda ihtiyacınız olan desteği veremem. " +
@@ -151,7 +151,7 @@ const TR: Texts = {
   lead_failed: "Üzgünüz, bilgileriniz kaydedilemedi. Lütfen tekrar deneyin veya ücretsiz teklif bağlantısını kullanın.",
 };
 
-// ===== BAGIAN 6: Teks Spanyol (belum dicek penutur asli) =====
+// ===== PART 6: Spanish text (not yet checked by a native speaker) =====
 const ES: Texts = {
   crisis:
     "Lamento mucho que esté pasando por esto. Soy un asistente de IA que responde preguntas sobre la clínica ITC, así que no puedo darle el apoyo que merece en este momento. " +
@@ -181,7 +181,7 @@ const ES: Texts = {
   lead_failed: "Lo sentimos, no pudimos guardar sus datos. Inténtelo de nuevo o use el enlace de cotización gratuita.",
 };
 
-// ===== BAGIAN 7: Teks Arab (belum dicek penutur asli) =====
+// ===== PART 7: Arabic text (not yet checked by a native speaker) =====
 const AR: Texts = {
   crisis:
     "يؤسفني جدًا أنك تمر بهذا. أنا مساعد ذكاء اصطناعي أجيب عن الأسئلة المتعلقة بعيادة ITC، ولذلك لا أستطيع أن أقدم لك الدعم الذي تستحقه الآن. " +
@@ -211,7 +211,7 @@ const AR: Texts = {
   lead_failed: "عذرًا، تعذّر حفظ بياناتك. يُرجى المحاولة مرة أخرى أو استخدام رابط عرض السعر المجاني.",
 };
 
-// ===== BAGIAN 8: Tabel bahasa tulisan tangan dan kode bahasa utama =====
+// ===== PART 8: Table of hand-written languages and the main language codes =====
 /** Hand-written languages, by primary language code. */
 export const CURATED: Readonly<Record<string, Texts>> = { en: EN, id: ID, tr: TR, es: ES, ar: AR };
 

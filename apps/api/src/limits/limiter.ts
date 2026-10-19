@@ -1,23 +1,23 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/limits/limiter.ts
- * TUJUAN  : Batas yang menjaga panggilan model berbayar tetap terkendali,
- *           semuanya di memori. Empat batas berurutan: anggaran token harian,
- *           batas harian per alamat, batas burst per alamat, dan chat
- *           paralel. Pesan krisis melewati batas (dengan batas kecil sendiri)
- *           karena pengunjung harus selalu mendapat teks krisis. Alamat
- *           jaringan hanya dipakai sebagai kunci ter-hash dengan salt acak.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Tipe alasan penolakan dan opsi batas
- *    2. Kontrak limiter
- *    3. Konstanta dan batas krisis bawaan
- *    4. Pembuat limiter: kunci ter-hash, jendela waktu, hari UTC
- *    5. admit: cek empat batas berurutan dan jalur krisis
- *    6. addTokens dan stats: hitung token yang dipakai
- * KALAU DIMINTA MENGUBAH:
- *    - Urutan atau aturan keempat batas (BAGIAN 5)
- *    - Batas pesan krisis (5 per jendela, 200 per hari) (BAGIAN 3)
- *    - Jeda tunggu saat sibuk (10 detik) (BAGIAN 3)
+ * PURPOSE : Limits that keep the paid model calls under control, all in
+ *           memory. Four limits in order: the daily token budget, the daily
+ *           limit per address, the burst limit per address, and parallel
+ *           chats. Crisis messages pass the limits (with a small limit of
+ *           their own) because a visitor must always get the crisis text. A
+ *           network address is only used as a key hashed with a random salt.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Type of the refusal reason and the limit options
+ *    2. Limiter contract
+ *    3. Default crisis constants and limits
+ *    4. Limiter builder: hashed key, time window, UTC day
+ *    5. admit: check the four limits in order, and the crisis path
+ *    6. addTokens and stats: count the tokens used
+ * IF ASKED TO CHANGE:
+ *    - The order or rule of the four limits (PART 5)
+ *    - Limit on crisis messages (5 per window, 200 per day) (PART 3)
+ *    - Wait delay when busy (10 seconds) (PART 3)
  * ============================================================================ */
 
 /**
@@ -35,7 +35,7 @@
  */
 import { createHash, randomBytes } from "node:crypto";
 
-// ===== BAGIAN 1: Tipe alasan penolakan dan opsi batas =====
+// ===== PART 1: Type of the refusal reason and the limit options =====
 export type LimitReason = "burst" | "daily" | "budget" | "busy";
 
 export type Admission = { ok: true; release: () => void } | { ok: false; reason: LimitReason; retryAfterSec: number };
@@ -59,7 +59,7 @@ export interface LimiterOptions {
   salt?: string;
 }
 
-// ===== BAGIAN 2: Kontrak limiter =====
+// ===== PART 2: Limiter contract =====
 export interface Limiter {
   admit(address: string | undefined, options?: { crisis?: boolean }): Admission;
   /** Adds tokens the model API reported for one call. */
@@ -75,14 +75,14 @@ interface Entry {
   dayCount: number;
 }
 
-// ===== BAGIAN 3: Konstanta dan batas krisis bawaan =====
+// ===== PART 3: Default crisis constants and limits =====
 const DAY_MS = 86_400_000;
 const BUSY_RETRY_SEC = 10;
 
 export const DEFAULT_CRISIS_PER_WINDOW = 5;
 export const DEFAULT_CRISIS_PER_DAY = 200;
 
-// ===== BAGIAN 4: Pembuat limiter: kunci ter-hash, jendela waktu, hari UTC =====
+// ===== PART 4: Limiter builder: hashed key, time window, UTC day =====
 export function createLimiter(options: LimiterOptions): Limiter {
   const { perWindow, windowMs, perDay, dailyTokens, maxConcurrent } = options;
   const crisisPerWindow = options.crisisPerWindow ?? DEFAULT_CRISIS_PER_WINDOW;
@@ -154,7 +154,7 @@ export function createLimiter(options: LimiterOptions): Limiter {
 
   return {
 
-    // ===== BAGIAN 5: admit: cek empat batas berurutan dan jalur krisis =====
+    // ===== PART 5: admit: check the four limits in order, and the crisis path =====
     admit(address, opts = {}) {
       const ms = now();
       rollDay(ms);
@@ -184,7 +184,7 @@ export function createLimiter(options: LimiterOptions): Limiter {
       return { ok: true, release: releaser() };
     },
 
-    // ===== BAGIAN 6: addTokens dan stats: hitung token yang dipakai =====
+    // ===== PART 6: addTokens and stats: count the tokens used =====
     addTokens(n) {
       if (!Number.isFinite(n) || n <= 0) return;
       rollDay(now());

@@ -1,19 +1,19 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/clean/types.ts
- * TUJUAN  : Tipe data pembersih halaman: halaman mentah, baris, barang yang
- *           dibuang, metadata, pemeriksaan jumlah $, laporan dan hasil.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Tipe: halaman mentah dari tahap fetch
- *    2. Tipe: satu baris teks
- *    3. Tipe: barang yang dibuang beserta aturannya
- *    4. Tipe: metadata halaman (judul, tanggal, dll.)
- *    5. Tipe: hasil pemeriksaan jumlah $ (R10)
- *    6. Tipe: laporan pembersihan
- *    7. Tipe: hasil pembersihan satu halaman
+ * PURPOSE : Data types of the page cleaner: raw page, line, removed item,
+ *           metadata, $ amount check, report and result.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Type: raw page from the fetch stage
+ *    2. Type: one line of text
+ *    3. Type: the removed item together with its rule
+ *    4. Type: page metadata (title, date, and so on)
+ *    5. Type: result of the $ amount check (R10)
+ *    6. Type: cleaning report
+ *    7. Type: result of cleaning one page
  * ============================================================================ */
 
-// ===== BAGIAN 1: Tipe: halaman mentah dari tahap fetch =====
+// ===== PART 1: Type: raw page from the fetch stage =====
 /** A file as saved by the fetch step: a small "key: value" header, a line with ---, then the page text. */
 export interface RawPage {
   pageNo: number;
@@ -24,13 +24,13 @@ export interface RawPage {
   lines: Line[];
 }
 
-// ===== BAGIAN 2: Tipe: satu baris teks =====
+// ===== PART 2: Type: one line of text =====
 export interface Line {
   n: number;
   t: string;
 }
 
-// ===== BAGIAN 3: Tipe: barang yang dibuang beserta aturannya =====
+// ===== PART 3: Type: the removed item together with its rule =====
 /** One block of text the cleaner removed, kept so a human can review what disappeared. */
 export interface DroppedItem {
   rule: string;
@@ -43,7 +43,7 @@ export interface DroppedItem {
   amounts: string[];
 }
 
-// ===== BAGIAN 4: Tipe: metadata halaman (judul, tanggal, dll.) =====
+// ===== PART 4: Type: page metadata (title, date, and so on) =====
 export interface CleanMeta {
   h1: string;
   location?: string;
@@ -55,7 +55,7 @@ export interface CleanMeta {
   quoteUrl?: string;
 }
 
-// ===== BAGIAN 5: Tipe: hasil pemeriksaan jumlah $ (R10) =====
+// ===== PART 5: Type: result of the $ amount check (R10) =====
 export interface AmountCheck {
   /** $ amounts in the kept region of the raw file (after R1). */
   kept: string[];
@@ -71,7 +71,7 @@ export interface AmountCheck {
   invented: string[];
 }
 
-// ===== BAGIAN 6: Tipe: laporan pembersihan =====
+// ===== PART 6: Type: cleaning report =====
 export interface CleanReport {
   pageNo: number;
   keptFromLine: number;
@@ -83,7 +83,7 @@ export interface CleanReport {
   warnings: string[];
 }
 
-// ===== BAGIAN 7: Tipe: hasil pembersihan satu halaman =====
+// ===== PART 7: Type: result of cleaning one page =====
 export interface CleanResult {
   pageNo: number;
   sourceUrl: string;

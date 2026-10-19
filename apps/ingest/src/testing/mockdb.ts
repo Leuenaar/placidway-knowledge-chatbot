@@ -1,19 +1,20 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/testing/mockdb.ts
- * TUJUAN  : Database palsu di memori untuk uji: meniru aturan tabel asli
- *           (foreign key, panjang teks, panjang vektor) tanpa jaringan.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Kunci palsu untuk uji
- *    2. Database palsu PostgREST
+ * PURPOSE : Fake in-memory database for tests: it imitates the rules of the
+ *           real tables (foreign key, text length, vector length) without a
+ *           network.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Fake keys for tests
+ *    2. Fake PostgREST database
  * ============================================================================ */
 
 import { checkConfig, Rest } from "../load/postgrest.js";
 
-// ===== BAGIAN 1: Kunci palsu untuk uji =====
+// ===== PART 1: Fake keys for tests =====
 export const KEY = "sb_secret_TESTKEY_do_not_print";
 
-// ===== BAGIAN 2: Database palsu PostgREST =====
+// ===== PART 2: Fake PostgREST database =====
 /** A tiny in-memory stand-in for PostgREST that enforces the same rules as the real tables (foreign key, text length, vector shape). */
 export function mockDb() {
   const tables: Record<string, Map<string, Record<string, unknown>>> = { pages: new Map(), chunks: new Map() };

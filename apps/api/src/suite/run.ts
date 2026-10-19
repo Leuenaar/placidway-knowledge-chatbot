@@ -1,17 +1,18 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/suite/run.ts
- * TUJUAN  : Menjalankan kasus satu per satu lewat sebuah bot dan mengumpulkan
- *           semua yang dibutuhkan pemeriksaan dan laporan.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Tipe: opsi menjalankan suite
- *    2. Fungsi utama: loop tingkat usaha, putaran, kasus
- *    3. Kirim tiap pesan kasus ke bot (pesan sebelumnya ikut jadi riwayat)
- *    4. Kumpulkan hasil pesan terakhir lalu jalankan pemeriksaan
- *    5. Simpan hasil dan laporkan ke terminal
- *    6. Ekspor ulang pembantu cetak baris
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah data yang dicatat tiap kasus: edit objek observed (BAGIAN 4)
+ * PURPOSE : Run the cases one by one through a bot and collect everything the
+ *           checks and the report need.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Type: options for running the suite
+ *    2. Main function: loop over effort level, round, case
+ *    3. Send each case message to the bot (earlier messages become history)
+ *    4. Collect the result of the last message, then run the checks
+ *    5. Save the result and report to the terminal
+ *    6. Re-export of the line printing helper
+ * IF ASKED TO CHANGE:
+ *    - Change the data recorded for each case: edit the observed object (PART
+ *      4)
  * ============================================================================ */
 
 /** Runs the cases through a bot, one at a time, and collects what the checks and the report need. */
@@ -20,7 +21,7 @@ import { runChecks, type Observed } from "./checks";
 import type { Harness } from "./harness";
 import { lineFor, makeRun, type CaseRun } from "./report";
 
-// ===== BAGIAN 1: Tipe: opsi menjalankan suite =====
+// ===== PART 1: Type: options for running the suite =====
 export interface RunOptions {
   /** Builds the bot for one effort level (a separate answer client per level). */
   makeHarness: (effort: string) => Harness;
@@ -31,7 +32,7 @@ export interface RunOptions {
   now?: () => number;
 }
 
-// ===== BAGIAN 2: Fungsi utama: loop tingkat usaha, putaran, kasus =====
+// ===== PART 2: Main function: loop over effort level, round, case =====
 export async function runSuite({ makeHarness, efforts, runs, cases = CASES, onResult = () => {}, now = Date.now }: RunOptions): Promise<CaseRun[]> {
   const results: CaseRun[] = [];
   const total = efforts.length * runs * cases.length;
@@ -47,7 +48,7 @@ export async function runSuite({ makeHarness, efforts, runs, cases = CASES, onRe
         try {
           let last: Awaited<ReturnType<Harness["bot"]["reply"]>> | undefined;
 
-          // ===== BAGIAN 3: Kirim tiap pesan kasus ke bot (pesan sebelumnya ikut jadi riwayat) =====
+          // ===== PART 3: Send each case message to the bot (earlier messages become history) =====
           for (const turn of c.turns) {
             harness.take();
             const t0 = now();
@@ -57,7 +58,7 @@ export async function runSuite({ makeHarness, efforts, runs, cases = CASES, onRe
             if (turn === c.turns[c.turns.length - 1]) {
               if (last.status !== 200) throw new Error(`the bot answered with status ${last.status}: ${last.body.answer}`);
 
-              // ===== BAGIAN 4: Kumpulkan hasil pesan terakhir lalu jalankan pemeriksaan =====
+              // ===== PART 4: Collect the result of the last message, then run the checks =====
               const observed: Observed = {
                 answer: last.body.answer,
                 kind: last.body.kind,
@@ -78,7 +79,7 @@ export async function runSuite({ makeHarness, efforts, runs, cases = CASES, onRe
           result = makeRun(c, effort, run, timing, undefined, e instanceof Error ? e.message : String(e));
         }
 
-        // ===== BAGIAN 5: Simpan hasil dan laporkan ke terminal =====
+        // ===== PART 5: Save the result and report to the terminal =====
         results.push(result);
         onResult(result, index, total);
       }
@@ -87,5 +88,5 @@ export async function runSuite({ makeHarness, efforts, runs, cases = CASES, onRe
   return results;
 }
 
-// ===== BAGIAN 6: Ekspor ulang pembantu cetak baris =====
+// ===== PART 6: Re-export of the line printing helper =====
 export { lineFor };

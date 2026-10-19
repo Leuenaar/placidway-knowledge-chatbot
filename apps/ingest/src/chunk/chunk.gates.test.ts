@@ -1,25 +1,34 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/chunk/chunk.gates.test.ts
- * TUJUAN  : Uji gerbang pemotong pada 7 halaman asli: ukuran, jumlah, setiap
- *           jumlah $ ada tepat di satu chunk, FAQ, video, ulasan, tanggal,
- *           hasil identik dua kali jalan.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. gate 6.3: every page passes verifyPage (sizes, kinds, ids, prefix, FAQ, rec...
- *    2. gate: no warnings on the real pages (every review and FAQ layout was recogn...
- *    3. gate: no chunk is longer than 1800 or shorter than 40 characters, bodies st...
- *    4. gate: the number of chunks is in the expected range and ids are unique acro...
- *    5. gate: every $ amount of the cleaned pages is in exactly one chunk, nothing...
- *    6. gate: each package page has the price header chunk and both programme price...
- *    7. gate: FAQ counts and every FAQ chunk has a question and an answer in the sa...
+ * PURPOSE : Test of the chunker gate on the 7 real pages: size, count, every $
+ *           amount is in exactly one chunk, FAQ, videos, reviews, dates, and
+ *           an identical result across two runs.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. gate 6.3: every page passes verifyPage (sizes, kinds, ids, prefix,
+ *       FAQ, rec...
+ *    2. gate: no warnings on the real pages (every review and FAQ layout was
+ *       recogn...
+ *    3. gate: no chunk is longer than 1800 or shorter than 40 characters,
+ *       bodies st...
+ *    4. gate: the number of chunks is in the expected range and ids are unique
+ *       acro...
+ *    5. gate: every $ amount of the cleaned pages is in exactly one chunk,
+ *       nothing...
+ *    6. gate: each package page has the price header chunk and both programme
+ *       price...
+ *    7. gate: FAQ counts and every FAQ chunk has a question and an answer in
+ *       the sa...
  *    8. gate: all 123 video titles are present, none twice, about 15 per chunk
- *    9. gate: reviews and patient stories are one unit per chunk with the reviewer...
+ *    9. gate: reviews and patient stories are one unit per chunk with the
+ *       reviewer...
  *    10. gate: page_modified is a real date only where the page has one
- *    11. gate: chunking twice gives byte-identical output (stable ids and hashes)
+ *    11. gate: chunking twice gives byte-identical output (stable ids and
+ *        hashes)
  *    12. gate: ids are stable when text inside one section changes
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 import assert from "node:assert/strict";
@@ -75,18 +84,18 @@ const get = (n: number): Built => {
 };
 const all = built.flatMap((b) => b.chunks);
 
-// ===== BAGIAN 1: gate 6.3: every page passes verifyPage (sizes, kinds, ids, prefix, FAQ, rec... =====
+// ===== PART 1: gate 6.3: every page passes verifyPage (sizes, kinds, ids, prefix, FAQ, rec... =====
 test("gate 6.3: every page passes verifyPage (sizes, kinds, ids, prefix, FAQ, reconstruction, $ amounts)", opts, () => {
   assert.equal(built.length, 7);
   for (const b of built) assert.deepEqual(verifyPage(b.page, b.chunks), [], `page ${b.page.pageNo}`);
 });
 
-// ===== BAGIAN 2: gate: no warnings on the real pages (every review and FAQ layout was recogn... =====
+// ===== PART 2: gate: no warnings on the real pages (every review and FAQ layout was recogn... =====
 test("gate: no warnings on the real pages (every review and FAQ layout was recognised)", opts, () => {
   for (const b of built) assert.deepEqual(b.warnings, [], `page ${b.page.pageNo}`);
 });
 
-// ===== BAGIAN 3: gate: no chunk is longer than 1800 or shorter than 40 characters, bodies st... =====
+// ===== PART 3: gate: no chunk is longer than 1800 or shorter than 40 characters, bodies st... =====
 test("gate: no chunk is longer than 1800 or shorter than 40 characters, bodies stay within 1500", opts, () => {
   for (const c of all) {
     assert.ok(c.text.length >= LIMITS.minTotal && c.text.length <= LIMITS.maxTotal, `${c.id}: ${c.text.length}`);
@@ -94,14 +103,14 @@ test("gate: no chunk is longer than 1800 or shorter than 40 characters, bodies s
   }
 });
 
-// ===== BAGIAN 4: gate: the number of chunks is in the expected range and ids are unique acro... =====
+// ===== PART 4: gate: the number of chunks is in the expected range and ids are unique acro... =====
 test("gate: the number of chunks is in the expected range and ids are unique across pages", opts, () => {
   assert.ok(all.length >= 120 && all.length <= 200, `got ${all.length}`);
   assert.equal(new Set(all.map((c) => c.id)).size, all.length);
   assert.equal(new Set(all.map((c) => c.text_hash)).size > all.length * 0.95, true, "almost all texts are different");
 });
 
-// ===== BAGIAN 5: gate: every $ amount of the cleaned pages is in exactly one chunk, nothing... =====
+// ===== PART 5: gate: every $ amount of the cleaned pages is in exactly one chunk, nothing... =====
 test("gate: every $ amount of the cleaned pages is in exactly one chunk, nothing added", opts, () => {
   for (const b of built) {
     const want = extractAmounts(b.page.text).sort();
@@ -110,7 +119,7 @@ test("gate: every $ amount of the cleaned pages is in exactly one chunk, nothing
   }
 });
 
-// ===== BAGIAN 6: gate: each package page has the price header chunk and both programme price... =====
+// ===== PART 6: gate: each package page has the price header chunk and both programme price... =====
 test("gate: each package page has the price header chunk and both programme prices in the right kinds", opts, () => {
   for (const n of [2, 3, 4]) {
     const { chunks } = get(n);
@@ -124,7 +133,7 @@ test("gate: each package page has the price header chunk and both programme pric
   }
 });
 
-// ===== BAGIAN 7: gate: FAQ counts and every FAQ chunk has a question and an answer in the sa... =====
+// ===== PART 7: gate: FAQ counts and every FAQ chunk has a question and an answer in the sa... =====
 test("gate: FAQ counts and every FAQ chunk has a question and an answer in the same chunk", opts, () => {
   const expected: Record<number, number> = { 1: 7, 2: 8, 3: 8, 4: 8, 7: 12 };
   for (const [n, count] of Object.entries(expected)) {
@@ -138,7 +147,7 @@ test("gate: FAQ counts and every FAQ chunk has a question and an answer in the s
   }
 });
 
-// ===== BAGIAN 8: gate: all 123 video titles are present, none twice, about 15 per chunk =====
+// ===== PART 8: gate: all 123 video titles are present, none twice, about 15 per chunk =====
 test("gate: all 123 video titles are present, none twice, about 15 per chunk", opts, () => {
   const vids = get(5).chunks.filter((c) => c.kind === "video_list");
   const titles = vids.flatMap((c) => bodyWithoutPrefix(c).split("\n").filter((l) => l.startsWith("- Video:")));
@@ -147,7 +156,7 @@ test("gate: all 123 video titles are present, none twice, about 15 per chunk", o
   for (const c of vids) assert.ok((bodyWithoutPrefix(c).match(/- Video:/g) ?? []).length <= 15, c.id);
 });
 
-// ===== BAGIAN 9: gate: reviews and patient stories are one unit per chunk with the reviewer... =====
+// ===== PART 9: gate: reviews and patient stories are one unit per chunk with the reviewer... =====
 test("gate: reviews and patient stories are one unit per chunk with the reviewer in the section", opts, () => {
   for (const n of [1, 5, 6]) {
     const reviews = get(n).chunks.filter((c) => c.kind === "review");
@@ -158,19 +167,19 @@ test("gate: reviews and patient stories are one unit per chunk with the reviewer
   assert.equal(get(1).chunks.filter((c) => c.kind === "patient_story").length, 5);
 });
 
-// ===== BAGIAN 10: gate: page_modified is a real date only where the page has one =====
+// ===== PART 10: gate: page_modified is a real date only where the page has one =====
 test("gate: page_modified is a real date only where the page has one", opts, () => {
   for (const c of get(1).chunks) assert.equal(c.page_modified, "2026-10-12");
   for (const c of all) assert.ok(c.page_modified === null || /^\d{4}-\d{2}-\d{2}$/.test(c.page_modified), c.id);
 });
 
-// ===== BAGIAN 11: gate: chunking twice gives byte-identical output (stable ids and hashes) =====
+// ===== PART 11: gate: chunking twice gives byte-identical output (stable ids and hashes) =====
 test("gate: chunking twice gives byte-identical output (stable ids and hashes)", opts, () => {
   const again = build().flatMap((b) => b.chunks);
   assert.equal(JSON.stringify(again), JSON.stringify(all));
 });
 
-// ===== BAGIAN 12: gate: ids are stable when text inside one section changes =====
+// ===== PART 12: gate: ids are stable when text inside one section changes =====
 test("gate: ids are stable when text inside one section changes", opts, () => {
   const b = get(2);
   const edited = chunkPage({ ...b.page, text: b.page.text.replace("Out-patient", "Outpatient") });

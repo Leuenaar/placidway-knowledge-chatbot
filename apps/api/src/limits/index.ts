@@ -1,7 +1,7 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/limits/index.ts
- * TUJUAN  : Pintu keluar modul limits (batas pemakaian).
+ * PURPOSE : Exit door of the limits module (usage limits).
  * ============================================================================ */
 
 export { createLimiter, DEFAULT_CRISIS_PER_DAY, DEFAULT_CRISIS_PER_WINDOW, type Admission, type LimitReason, type Limiter, type LimiterOptions } from "./limiter";

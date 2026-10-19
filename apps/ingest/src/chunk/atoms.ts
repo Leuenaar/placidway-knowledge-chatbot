@@ -1,23 +1,22 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/chunk/atoms.ts
- * TUJUAN  : Memecah halaman bersih menjadi 'atom', potongan terkecil yang
- *           boleh dipindah pemotong: satu baris judul, satu butir daftar,
- *           atau satu paragraf. Aturan C2: baris tabel, butir daftar atau
- *           pertanyaan FAQ tidak boleh terbelah, jadi chunk dibangun dari
- *           atom utuh.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Tipe: satu atom
- *    2. Memecah teks halaman menjadi atom
- *    3. Mengambil teks judul dari atom
- *    4. Menyatukan atom kembali menjadi teks
- *    5. Memecah paragraf yang terlalu panjang di batas kalimat
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah cara teks dipecah jadi atom (BAGIAN 2)
- *    - Mengubah cara paragraf panjang dipecah (BAGIAN 5)
+ * PURPOSE : Split a clean page into 'atoms', the smallest pieces the chunker
+ *           may move: one heading line, one list item, or one paragraph. Rule
+ *           C2: a table row, list item or FAQ question must not be split, so
+ *           chunks are built from whole atoms.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Type: one atom
+ *    2. Split the page text into atoms
+ *    3. Get the heading text from an atom
+ *    4. Join the atoms back into text
+ *    5. Split a paragraph that is too long at a sentence boundary
+ * IF ASKED TO CHANGE:
+ *    - Change how the text is split into atoms (PART 2)
+ *    - Change how a long paragraph is split (PART 5)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Tipe: satu atom =====
+// ===== PART 1: Type: one atom =====
 /**
  * The cleaned page is cut into "atoms", the smallest pieces the chunker is allowed to move:
  * a heading line, one list item, or one paragraph. Rule C2 says a table row (a list item after
@@ -33,7 +32,7 @@ export interface Atom {
   overlap?: number;
 }
 
-// ===== BAGIAN 2: Memecah teks halaman menjadi atom =====
+// ===== PART 2: Split the page text into atoms =====
 export function parseAtoms(text: string): Atom[] {
   const atoms: Atom[] = [];
   let para: string[] = [];
@@ -61,13 +60,13 @@ export function parseAtoms(text: string): Atom[] {
   return atoms;
 }
 
-// ===== BAGIAN 3: Mengambil teks judul dari atom =====
+// ===== PART 3: Get the heading text from an atom =====
 /** Heading text without the #'s. */
 export function headingText(a: Atom): string {
   return a.text.replace(/^#+\s+/, "").trim();
 }
 
-// ===== BAGIAN 4: Menyatukan atom kembali menjadi teks =====
+// ===== PART 4: Join the atoms back into text =====
 /** Put atoms back into text. List items stay tight, everything else is separated by a blank line. */
 export function renderAtoms(atoms: Atom[]): string {
   let out = "";
@@ -78,7 +77,7 @@ export function renderAtoms(atoms: Atom[]): string {
   return out;
 }
 
-// ===== BAGIAN 5: Memecah paragraf yang terlalu panjang di batas kalimat =====
+// ===== PART 5: Split a paragraph that is too long at a sentence boundary =====
 /** Split a paragraph that is longer than `max` at sentence ends. Each part after the first starts with the last sentence of the part before it (C8). */
 export function splitLongParagraph(text: string, max: number): Atom[] {
   const sentences = (text.match(/[^.!?]+(?:[.!?]+["')\]]*)?\s*/g) ?? [text]).map((s) => s.trim()).filter(Boolean);

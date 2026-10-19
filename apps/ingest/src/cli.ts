@@ -1,32 +1,33 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/cli.ts
- * TUJUAN  : Pintu masuk semua perintah ingest: clean, chunk, embed, load,
- *           eval, refresh (lewat npm run ingest:clean, ingest:chunk,
- *           ingest:embed, ingest:load, ingest:eval, ingest:refresh). Berkas
- *           data/ tidak ikut git karena teks PlacidWay tidak di-commit.
- *           Membaca .env.api untuk perintah yang menyentuh database.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Impor (alat yang dipakai)
- *    2. Lokasi folder utama proyek dan pembantu baca pilihan (--nama nilai)
- *    3. Membaca rahasia dari file .env.api
- *    4. Pemilih perintah (clean, chunk, embed, load, eval, refresh)
- *    5. Perintah clean: bersihkan halaman mentah (data/raw ke data/cleaned)
- *    6. Perintah chunk: potong halaman bersih jadi chunk (data/chunks)
- *    7. Memilih model embedding (e5 asli atau palsu untuk uji)
- *    8. Perintah eval: uji mutu pencarian dengan set pertanyaan
- *    9. Perintah refresh: bandingkan dengan database, muat hanya yang berubah
- *    10. Perintah embed: ubah chunk jadi vektor 384 dimensi
- *    11. Perintah load: tulis halaman, chunk dan vektor ke Supabase
- *    12. Jalankan dan tangkap error
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah perintah ingest baru: tambah cabang di main (BAGIAN 4),
- *      fungsi run baru, dan skrip di package.json
- *    - Mengubah folder data bawaan: lihat arg(...) di tiap fungsi run (BAGIAN
+ * PURPOSE : Entry point of all ingest commands: clean, chunk, embed, load,
+ *           eval, refresh (through npm run ingest:clean, ingest:chunk,
+ *           ingest:embed, ingest:load, ingest:eval, ingest:refresh). The data/
+ *           folder is not in git because the PlacidWay text is not committed.
+ *           It reads .env.api for the commands that touch the database.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Imports (tools used)
+ *    2. Location of the project's main folder and the optional argument reader
+ *       (--name value)
+ *    3. Read the secrets from the .env.api file
+ *    4. Command chooser (clean, chunk, embed, load, eval, refresh)
+ *    5. Command clean: clean the raw pages (data/raw to data/cleaned)
+ *    6. Command chunk: cut the clean pages into chunks (data/chunks)
+ *    7. Choose the embedding model (real e5 or the fake one for tests)
+ *    8. Command eval: test the search quality with the question set
+ *    9. Command refresh: compare with the database, load only what changed
+ *    10. Command embed: turn the chunks into 384-dimension vectors
+ *    11. Command load: write the pages, chunks and vectors to Supabase
+ *    12. Run and catch errors
+ * IF ASKED TO CHANGE:
+ *    - Add a new ingest command: add a branch in main (PART 4), a new run
+ *      function, and a script in package.json
+ *    - Change the default data folder: see arg(...) in each run function (PART
  *      5)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Impor (alat yang dipakai) =====
+// ===== PART 1: Imports (tools used) =====
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import type { Chunk } from "./chunk/types.js";
 import { resolve } from "node:path";
@@ -41,7 +42,7 @@ import { refresh } from "./refresh/run.js";
 import { evaluate, readQuestions, renderEvalReport } from "./eval/run.js";
 import { readVectorFile } from "./embed/run.js";
 
-// ===== BAGIAN 2: Lokasi folder utama proyek dan pembantu baca pilihan (--nama nilai) =====
+// ===== PART 2: Location of the project's main folder and the optional argument reader (--name value) =====
 /**
  * Usage:  npm run ingest:clean            (reads data/raw, writes data/cleaned)
  *         npm run ingest:clean -- --raw some/dir --out other/dir
@@ -57,7 +58,7 @@ function arg(name: string, fallback: string): string {
 
 const flag = (name: string) => process.argv.includes(`--${name}`);
 
-// ===== BAGIAN 3: Membaca rahasia dari file .env.api =====
+// ===== PART 3: Read the secrets from the .env.api file =====
 /** Read KEY=VALUE lines from a git-ignored file at the repo root. Values already in the environment win. */
 function loadEnvFile(path: string): void {
   if (!existsSync(path)) return;
@@ -69,7 +70,7 @@ function loadEnvFile(path: string): void {
   }
 }
 
-// ===== BAGIAN 4: Pemilih perintah (clean, chunk, embed, load, eval, refresh) =====
+// ===== PART 4: Command chooser (clean, chunk, embed, load, eval, refresh) =====
 async function main(): Promise<void> {
   const cmd = process.argv[2];
   if (cmd === "clean") return runClean();
@@ -82,7 +83,7 @@ async function main(): Promise<void> {
   process.exit(2);
 }
 
-// ===== BAGIAN 5: Perintah clean: bersihkan halaman mentah (data/raw ke data/cleaned) =====
+// ===== PART 5: Command clean: clean the raw pages (data/raw to data/cleaned) =====
 function runClean(): void {
   const rawDir = resolve(root, arg("raw", "data/raw"));
   const outDir = resolve(root, arg("out", "data/cleaned"));
@@ -104,7 +105,7 @@ function runClean(): void {
   }
 }
 
-// ===== BAGIAN 6: Perintah chunk: potong halaman bersih jadi chunk (data/chunks) =====
+// ===== PART 6: Command chunk: cut the clean pages into chunks (data/chunks) =====
 function runChunk(): void {
   const cleanedDir = resolve(root, arg("cleaned", "data/cleaned"));
   const outDir = resolve(root, arg("out", "data/chunks"));
@@ -122,14 +123,14 @@ function runChunk(): void {
   }
 }
 
-// ===== BAGIAN 7: Memilih model embedding (e5 asli atau palsu untuk uji) =====
+// ===== PART 7: Choose the embedding model (real e5 or the fake one for tests) =====
 function makeEmbedder(): Embedder {
   if (flag("fake")) return createFakeEmbedder();
   const dtype = arg("dtype", "q8") === "fp32" ? "fp32" : "q8";
   return createE5Embedder({ model: arg("model", "Xenova/multilingual-e5-small"), dtype, cacheDir: resolve(root, "data/models") });
 }
 
-// ===== BAGIAN 8: Perintah eval: uji mutu pencarian dengan set pertanyaan =====
+// ===== PART 8: Command eval: test the search quality with the question set =====
 async function runEval(): Promise<void> {
   const vectorsPath = resolve(root, arg("vectors", defaultVectorPath(root)));
   const vectors = readVectorFile(vectorsPath);
@@ -148,7 +149,7 @@ async function runEval(): Promise<void> {
   console.log(`full report: ${outPath}`);
 }
 
-// ===== BAGIAN 9: Perintah refresh: bandingkan dengan database, muat hanya yang berubah =====
+// ===== PART 9: Command refresh: compare with the database, load only what changed =====
 async function runRefresh(): Promise<void> {
   loadEnvFile(resolve(root, ".env.ingest"));
   let db: Rest;
@@ -177,7 +178,7 @@ async function runRefresh(): Promise<void> {
   }
 }
 
-// ===== BAGIAN 10: Perintah embed: ubah chunk jadi vektor 384 dimensi =====
+// ===== PART 10: Command embed: turn the chunks into 384-dimension vectors =====
 async function runEmbed(): Promise<void> {
   const chunksFile = resolve(root, arg("chunks", "data/chunks/chunks.json"));
   const outFile = resolve(root, arg("out", defaultVectorPath(root)));
@@ -189,7 +190,7 @@ async function runEmbed(): Promise<void> {
   console.log(`written to ${outFile} in ${((Date.now() - started) / 1000).toFixed(1)} s`);
 }
 
-// ===== BAGIAN 11: Perintah load: tulis halaman, chunk dan vektor ke Supabase =====
+// ===== PART 11: Command load: write the pages, chunks and vectors to Supabase =====
 async function runLoad(): Promise<void> {
   loadEnvFile(resolve(root, ".env.ingest"));
   const dryRun = flag("dry-run");
@@ -232,7 +233,7 @@ async function runLoad(): Promise<void> {
   }
 }
 
-// ===== BAGIAN 12: Jalankan dan tangkap error =====
+// ===== PART 12: Run and catch errors =====
 main().catch((e) => {
   console.error(e);
   process.exit(1);

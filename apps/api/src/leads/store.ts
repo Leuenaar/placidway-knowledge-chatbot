@@ -1,23 +1,22 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/leads/store.ts
- * TUJUAN  : Tempat lead disimpan (N4): nama dan email yang sengaja
- *           ditinggalkan pengunjung. Yang disimpan hanya nama, email, bahasa,
- *           versi persetujuan, waktu. Nama atau email tidak pernah masuk log,
- *           pesan error, atau prompt model. Baris lebih dari 90 hari dihapus
- *           oleh fungsi database purge_old_leads.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Batas waktu dan interval
- *    2. Bentuk data lead dan kontrak penyimpanan
- *    3. Penyimpanan ke Supabase (PostgREST)
- *    4. Penyimpanan di memori untuk mode mock dan tes
- *    5. Hapus lead lebih dari 90 hari
- *    6. Jadwal hapus: saat start lalu tiap hari
- *    7. Daftar lead terbaru untuk npm run leads
- * KALAU DIMINTA MENGUBAH:
- *    - Lama simpan lead (LEAD_RETENTION_DAYS harus sama dengan migration 004)
- *      (BAGIAN 1)
- *    - Batas waktu menulis ke database (5 detik) (BAGIAN 1)
+ * PURPOSE : Where leads are stored (N4): the name and email a visitor chose to
+ *           leave. Only the name, email, language, consent version and time
+ *           are stored. The name or email never enters a log, an error message
+ *           or the model prompt. Rows older than 90 days are deleted by the
+ *           database function purge_old_leads.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Time limits and intervals
+ *    2. Shape of the lead data and the storage contract
+ *    3. Storage in Supabase (PostgREST)
+ *    4. In-memory storage for mock mode and tests
+ *    5. Delete leads older than 90 days
+ *    6. Deletion schedule: at start, then every day
+ *    7. List of the newest leads for npm run leads
+ * IF ASKED TO CHANGE:
+ *    - Lead retention (LEAD_RETENTION_DAYS must match migration 004) (PART 1)
+ *    - Timeout for writing to the database (5 seconds) (PART 1)
  * ============================================================================ */
 
 /**
@@ -31,13 +30,13 @@
  */
 import type { DbConfig } from "../retrieval";
 
-// ===== BAGIAN 1: Batas waktu dan interval =====
+// ===== PART 1: Time limits and intervals =====
 export const LEAD_RETENTION_DAYS = 90;
 const WRITE_TIMEOUT_MS = 5000;
 const PURGE_TIMEOUT_MS = 10_000;
 const PURGE_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
-// ===== BAGIAN 2: Bentuk data lead dan kontrak penyimpanan =====
+// ===== PART 2: Shape of the lead data and the storage contract =====
 export interface NewLead {
   name: string;
   email: string;
@@ -65,7 +64,7 @@ interface Options {
   log?: (message: string) => void;
 }
 
-// ===== BAGIAN 3: Penyimpanan ke Supabase (PostgREST) =====
+// ===== PART 3: Storage in Supabase (PostgREST) =====
 export function createLeadStore({ db, fetchFn = fetch, log = (m) => console.error(m) }: Options): LeadStore {
   return {
     async add({ name, email, language, consentVersion }) {
@@ -89,7 +88,7 @@ export function createLeadStore({ db, fetchFn = fetch, log = (m) => console.erro
   };
 }
 
-// ===== BAGIAN 4: Penyimpanan di memori untuk mode mock dan tes =====
+// ===== PART 4: In-memory storage for mock mode and tests =====
 /** For the mock mode and tests: leads are kept in memory and gone when the process ends. */
 export function createMemoryLeadStore(): LeadStore & { rows: NewLead[] } {
   const rows: NewLead[] = [];
@@ -102,7 +101,7 @@ export function createMemoryLeadStore(): LeadStore & { rows: NewLead[] } {
   };
 }
 
-// ===== BAGIAN 5: Hapus lead lebih dari 90 hari =====
+// ===== PART 5: Delete leads older than 90 days =====
 /** Deletes leads older than 90 days. Returns how many, or undefined when it failed. */
 export async function purgeOldLeads({ db, fetchFn = fetch, log = (m) => console.error(m) }: Options): Promise<number | undefined> {
   try {
@@ -124,7 +123,7 @@ export async function purgeOldLeads({ db, fetchFn = fetch, log = (m) => console.
   }
 }
 
-// ===== BAGIAN 6: Jadwal hapus: saat start lalu tiap hari =====
+// ===== PART 6: Deletion schedule: at start, then every day =====
 /** Purge now and then every day. The timer does not keep the process alive. Returns a function that stops it. */
 export function startLeadPurgeSchedule(options: Options, intervalMs = PURGE_INTERVAL_MS): () => void {
   const run = async () => {
@@ -137,7 +136,7 @@ export function startLeadPurgeSchedule(options: Options, intervalMs = PURGE_INTE
   return () => clearInterval(timer);
 }
 
-// ===== BAGIAN 7: Daftar lead terbaru untuk npm run leads =====
+// ===== PART 7: List of the newest leads for npm run leads =====
 /** The newest leads, for the `npm run leads` command (the owner reads them in their own terminal). */
 export async function listLeads({ db, fetchFn = fetch }: Options, limit = 50): Promise<LeadRow[]> {
   const res = await fetchFn(`${db.url}/rest/v1/leads?select=id,name,email,language,consent_version,created_at&order=created_at.desc&limit=${Math.min(500, Math.max(1, Math.trunc(limit)))}`, {

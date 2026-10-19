@@ -1,10 +1,10 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/retrieval/retriever.test.ts
- * TUJUAN  : Uji pencarian. Database diganti tiruan yang mencatat permintaan
- *           dan menjawab seperti PostgREST, embedder memakai versi palsu,
- *           jadi tidak butuh jaringan atau unduhan model.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the search. The database is replaced by a stand-in that
+ *           records requests and answers like PostgREST, and the embedder is
+ *           the fake version, so no network or model download is needed.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. retriever
  *    2. loadDbConfig
  *    3. loadRetrieveCount
@@ -13,9 +13,9 @@
  *    6. page expansion
  *    7. amount lookup
  *    8. title pages, fusion and the double search
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 /**
@@ -63,7 +63,7 @@ function stubDb(respond: (seen: Seen) => Response | Promise<Response>) {
 
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } });
 
-// ===== BAGIAN 1: retriever =====
+// ===== PART 1: retriever =====
 describe("retriever", () => {
   it("sends the question vector to match_chunks with the key in the apikey header only", async () => {
     const db = stubDb(() => json([ROW]));
@@ -172,7 +172,7 @@ describe("retriever", () => {
   });
 });
 
-// ===== BAGIAN 2: loadDbConfig =====
+// ===== PART 2: loadDbConfig =====
 describe("loadDbConfig", () => {
   const anonJwt = `x.${Buffer.from(JSON.stringify({ role: "anon" })).toString("base64url")}.y`;
   const serviceJwt = `eyJ.${Buffer.from(JSON.stringify({ role: "service_role" })).toString("base64url")}.y`;
@@ -202,7 +202,7 @@ describe("loadDbConfig", () => {
   });
 });
 
-// ===== BAGIAN 3: loadRetrieveCount =====
+// ===== PART 3: loadRetrieveCount =====
 describe("loadRetrieveCount", () => {
   it("defaults to 8, accepts 1 to 20, and refuses anything else with a clear message", () => {
     assert.equal(DEFAULT_RETRIEVE_COUNT, 8);
@@ -216,7 +216,7 @@ describe("loadRetrieveCount", () => {
   });
 });
 
-// ===== BAGIAN 4: loadExpandPages =====
+// ===== PART 4: loadExpandPages =====
 describe("loadExpandPages", () => {
   it("defaults to 2, accepts 0 to 7 and refuses anything else", () => {
     assert.equal(DEFAULT_EXPAND_PAGES, 2);
@@ -227,7 +227,7 @@ describe("loadExpandPages", () => {
   });
 });
 
-// ===== BAGIAN 5: retriever.pages =====
+// ===== PART 5: retriever.pages =====
 describe("retriever.pages", () => {
   const PAGE_ROW = { ...ROW, similarity: undefined };
   delete (PAGE_ROW as { similarity?: number }).similarity;
@@ -264,7 +264,7 @@ describe("retriever.pages", () => {
   });
 });
 
-// ===== BAGIAN 6: page expansion =====
+// ===== PART 6: page expansion =====
 describe("page expansion", () => {
   const hit = (id: string, pageNo: number, similarity: number): RetrievedChunk => ({ id, pageNo, sourceUrl: "https://x.example/", h1: "h", section: null, kind: "price", text: "t".repeat(50), pageModified: null, similarity });
 
@@ -297,7 +297,7 @@ describe("page expansion", () => {
   });
 });
 
-// ===== BAGIAN 7: amount lookup =====
+// ===== PART 7: amount lookup =====
 describe("amount lookup", () => {
   const P7 = { ...ROW, id: "P7-price-3", page_no: 7, text: "- Initial Holistic Consultation: Low (USD): $50; High (USD): $250; Notes: Complexity." };
   delete (P7 as { similarity?: number }).similarity;
@@ -345,7 +345,7 @@ describe("amount lookup", () => {
   });
 });
 
-// ===== BAGIAN 8: title pages, fusion and the double search =====
+// ===== PART 8: title pages, fusion and the double search =====
 describe("title pages, fusion and the double search", () => {
   const mk = (id: string, pageNo: number, similarity = 0.9): RetrievedChunk => ({ id, pageNo, sourceUrl: "https://x.example/", h1: "h", section: null, kind: "price", text: "t".repeat(50), pageModified: null, similarity });
 

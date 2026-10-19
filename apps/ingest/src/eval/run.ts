@@ -1,20 +1,20 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/eval/run.ts
- * TUJUAN  : Menguji mutu pencarian tanpa database: tiap pertanyaan diurutkan
- *           dengan cosine terhadap semua chunk, lalu dilihat di peringkat
- *           berapa chunk yang benar muncul, per bahasa.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Tipe: satu pertanyaan uji beserta chunk yang diharapkan
- *    2. Chunk yang dianggap benar untuk pertanyaan harga
- *    3. Tipe: hasil satu pertanyaan
- *    4. Tipe: ringkasan evaluasi
- *    5. Membaca set pertanyaan
- *    6. Menjalankan evaluasi: peringkat chunk benar
- *    7. Membuat laporan evaluasi
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah pertanyaan evaluasi: edit apps/ingest/eval/questions.json
- *      (BAGIAN 5)
+ * PURPOSE : Test the search quality without a database: each question is
+ *           ranked by cosine against all chunks, then we see at which rank the
+ *           correct chunk appears, per language.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Type: one test question together with the expected chunk
+ *    2. The chunk that counts as correct for a price question
+ *    3. Type: result of one question
+ *    4. Type: evaluation summary
+ *    5. Read the question set
+ *    6. Run the evaluation: rank of the correct chunk
+ *    7. Build the evaluation report
+ * IF ASKED TO CHANGE:
+ *    - Add an evaluation question: edit apps/ingest/eval/questions.json (PART
+ *      5)
  * ============================================================================ */
 
 import { readFileSync } from "node:fs";
@@ -22,7 +22,7 @@ import { cosine, type Embedder } from "@pwbot/embed";
 import type { Chunk } from "../chunk/types.js";
 import type { VectorFile } from "../embed/run.js";
 
-// ===== BAGIAN 1: Tipe: satu pertanyaan uji beserta chunk yang diharapkan =====
+// ===== PART 1: Type: one test question together with the expected chunk =====
 export interface EvalQuestion {
   id: string;
   lang: string;
@@ -31,7 +31,7 @@ export interface EvalQuestion {
   expect: string[];
 }
 
-// ===== BAGIAN 2: Chunk yang dianggap benar untuk pertanyaan harga =====
+// ===== PART 2: The chunk that counts as correct for a price question =====
 /**
  * Chunks that correctly answer "how much does the out-patient program cost": the packages share one price, so any of them is fine.
  * P7-price-2 is left out on purpose: it holds averages for alternative medicine in general, not this program.
@@ -41,7 +41,7 @@ export const PRICE_IDS = [
   "P4-price-1", "P4-price-2", "P4-included-1", "P6-price-1",
 ];
 
-// ===== BAGIAN 3: Tipe: hasil satu pertanyaan =====
+// ===== PART 3: Type: result of one question =====
 export interface EvalRow {
   id: string;
   lang: string;
@@ -51,7 +51,7 @@ export interface EvalRow {
   top: string[];
 }
 
-// ===== BAGIAN 4: Tipe: ringkasan evaluasi =====
+// ===== PART 4: Type: evaluation summary =====
 export interface EvalSummary {
   lang: string;
   n: number;
@@ -61,12 +61,12 @@ export interface EvalSummary {
   mrr: number;
 }
 
-// ===== BAGIAN 5: Membaca set pertanyaan =====
+// ===== PART 5: Read the question set =====
 export function readQuestions(path: string): EvalQuestion[] {
   return JSON.parse(readFileSync(path, "utf8")) as EvalQuestion[];
 }
 
-// ===== BAGIAN 6: Menjalankan evaluasi: peringkat chunk benar =====
+// ===== PART 6: Run the evaluation: rank of the correct chunk =====
 /** Rank every chunk by cosine similarity to each question and see where the first correct chunk lands. */
 export async function evaluate(questions: EvalQuestion[], chunks: Chunk[], vectors: VectorFile, embedder: Embedder): Promise<{ rows: EvalRow[]; byLang: EvalSummary[]; all: EvalSummary }> {
   if (vectors.model !== embedder.model) throw new Error(`the vectors were made by "${vectors.model}" but the questions would be embedded by "${embedder.model}"; they must be the same model`);
@@ -95,7 +95,7 @@ export async function evaluate(questions: EvalQuestion[], chunks: Chunk[], vecto
   return { rows, byLang: langs.map((l) => summarize(l, rows.filter((r) => r.lang === l))), all: summarize("all", rows) };
 }
 
-// ===== BAGIAN 7: Membuat laporan evaluasi =====
+// ===== PART 7: Build the evaluation report =====
 export function renderEvalReport(model: string, res: Awaited<ReturnType<typeof evaluate>>): string {
   const pct = (x: number) => `${Math.round(x * 100)}%`;
   const out = [`# Retrieval test`, "", `Model: \`${model}\`. A question counts as a hit@k when a correct chunk is among the k most similar chunks.`, "", "| Language | Questions | hit@1 | hit@3 | hit@5 | MRR |", "| --- | ---: | ---: | ---: | ---: | ---: |"];

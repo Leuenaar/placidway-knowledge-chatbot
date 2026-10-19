@@ -1,21 +1,21 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/load/run.ts
- * TUJUAN  : Memuat halaman, chunk dan vektor ke database: periksa masukan
- *           lebih dulu (tanpa database), tulis halaman lalu chunk, hitung dan
- *           verifikasi, hapus yang sudah tidak ada. Dijalankan dua kali tidak
- *           mengubah apa pun. Dry run hanya membaca.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Tipe: masukan dan laporan pemuatan
- *    2. Pemeriksaan masukan tanpa database
- *    3. Pesan langkah sebelumnya bila berkas hilang
- *    4. Membaca berkas masukan dari folder data
- *    5. Membatasi ke halaman tertentu (dipakai Refresh)
- *    6. Ukuran batch tulis
- *    7. Memuat ke database: tulis, verifikasi, hapus yang usang
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah ukuran batch penulisan (BAGIAN 6)
- *    - Mengubah pemeriksaan sebelum memuat (BAGIAN 2)
+ * PURPOSE : Load pages, chunks and vectors into the database: check the input
+ *           first (no database), write the pages then the chunks, count and
+ *           verify, delete what no longer exists. Running it twice changes
+ *           nothing. A dry run only reads.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Type: loading input and report
+ *    2. Input check without a database
+ *    3. Message of the previous step when the file is missing
+ *    4. Read the input files from the data folder
+ *    5. Limit to certain pages (used by Refresh)
+ *    6. Write batch size
+ *    7. Load into the database: write, verify, delete the stale ones
+ * IF ASKED TO CHANGE:
+ *    - Change the write batch size (PART 6)
+ *    - Change the check before loading (PART 2)
  * ============================================================================ */
 
 import { existsSync, readFileSync } from "node:fs";
@@ -27,7 +27,7 @@ import type { Chunk } from "../chunk/types.js";
 import type { VectorFile } from "../embed/run.js";
 import { Rest } from "./postgrest.js";
 
-// ===== BAGIAN 1: Tipe: masukan dan laporan pemuatan =====
+// ===== PART 1: Type: loading input and report =====
 export interface LoadInput {
   manifest: ManifestEntry[];
   chunks: Chunk[];
@@ -44,7 +44,7 @@ export interface LoadReport {
   problems: string[];
 }
 
-// ===== BAGIAN 2: Pemeriksaan masukan tanpa database =====
+// ===== PART 2: Input check without a database =====
 /** Checks that need no database. Returns a list of problems, empty when the files are fit to load. */
 export function checkLoadInput(input: LoadInput): string[] {
   const problems: string[] = [];
@@ -69,10 +69,10 @@ export function checkLoadInput(input: LoadInput): string[] {
   return problems;
 }
 
-// ===== BAGIAN 3: Pesan langkah sebelumnya bila berkas hilang =====
+// ===== PART 3: Message of the previous step when the file is missing =====
 const PREVIOUS_STEP: Record<string, string> = { cleaned: "npm run ingest:clean", chunks: "npm run ingest:chunk", embeddings: "npm run ingest:embed" };
 
-// ===== BAGIAN 4: Membaca berkas masukan dari folder data =====
+// ===== PART 4: Read the input files from the data folder =====
 export function readLoadInput(root: string): LoadInput {
   const read = <T>(...p: string[]): T => {
     const file = join(root, ...p);
@@ -86,7 +86,7 @@ export function readLoadInput(root: string): LoadInput {
   };
 }
 
-// ===== BAGIAN 5: Membatasi ke halaman tertentu (dipakai Refresh) =====
+// ===== PART 5: Limit to certain pages (used by Refresh) =====
 /** Keep only some pages: their manifest rows, chunks and vectors. Used by Refresh to leave unchanged pages alone. */
 export function restrictToPages(input: LoadInput, pageNos: number[]): LoadInput {
   const keep = new Set(pageNos);
@@ -100,10 +100,10 @@ export function restrictToPages(input: LoadInput, pageNos: number[]): LoadInput 
   };
 }
 
-// ===== BAGIAN 6: Ukuran batch tulis =====
+// ===== PART 6: Write batch size =====
 const BATCH = 40;
 
-// ===== BAGIAN 7: Memuat ke database: tulis, verifikasi, hapus yang usang =====
+// ===== PART 7: Load into the database: write, verify, delete the stale ones =====
 /**
  * Write pages and chunks to Supabase, remove chunks that no longer exist, then count what is in the database.
  * Order matters: pages first (chunks point at them), then chunks, then the stale ones. Running it again is safe,

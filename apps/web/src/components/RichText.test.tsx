@@ -1,14 +1,14 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/web/src/components/RichText.test.tsx
- * TUJUAN  : Uji penampil balasan: teks dari model tidak boleh menjadi HTML;
- *           hanya tebal dan daftar bullet yang dipahami.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the reply renderer: text from the model must not become
+ *           HTML; only bold and bullet lists are understood.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. parseBlocks
  *    2. RichText
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 /**
@@ -23,7 +23,7 @@ import { RichText, parseBlocks } from "./RichText";
 
 const render = (text: string) => renderToStaticMarkup(createElement(RichText, { text }));
 
-// ===== BAGIAN 1: parseBlocks =====
+// ===== PART 1: parseBlocks =====
 describe("parseBlocks", () => {
   it("splits paragraphs on blank lines", () => {
     assert.deepEqual(parseBlocks("one\n\ntwo"), [
@@ -52,7 +52,7 @@ describe("parseBlocks", () => {
   });
 });
 
-// ===== BAGIAN 2: RichText =====
+// ===== PART 2: RichText =====
 describe("RichText", () => {
   it("renders **bold** as <strong>", () => {
     assert.match(render("Price **$18,995** (USD)"), /<strong>\$18,995<\/strong>/);

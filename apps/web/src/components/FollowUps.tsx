@@ -1,16 +1,16 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/web/src/components/FollowUps.tsx
- * TUJUAN  : Saran pertanyaan berikutnya di bawah balasan terbaru. Langsung
- *           terkirim saat dipilih. Server memilihnya dari daftar tetap, jadi
- *           setiap saran adalah pertanyaan yang bisa dijawab bot.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Komponen saran lanjutan (chip pertanyaan)
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah judul 'Ask next': cari 'Ask next' (BAGIAN 1)
+ * PURPOSE : Suggested next questions under the newest reply. They are sent as
+ *           soon as they are chosen. The server picks them from a fixed list,
+ *           so every suggestion is a question the bot can answer.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Follow-up suggestions component (question chips)
+ * IF ASKED TO CHANGE:
+ *    - Change the 'Ask next' heading: search for 'Ask next' (PART 1)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Komponen saran lanjutan (chip pertanyaan) =====
+// ===== PART 1: Follow-up suggestions component (question chips) =====
 /**
  * Suggested next questions under the latest reply. They send immediately when chosen.
  * The server picks them from a fixed list, so each one is a question the bot can answer.

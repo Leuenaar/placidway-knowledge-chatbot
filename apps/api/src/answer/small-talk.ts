@@ -1,14 +1,14 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/answer/small-talk.ts
- * TUJUAN  : Obrolan ringan: salam, terima kasih, pamit, dan pertanyaan siapa
- *           bot ini. Tidak perlu mencari di halaman, jadi model hanya diberi
- *           beberapa fakta tetap tentang asisten.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Teks instruksi obrolan ringan
- *    2. Pembuat balasan obrolan ringan
- * KALAU DIMINTA MENGUBAH:
- *    - Apa yang boleh dikatakan bot tentang dirinya (BAGIAN 1)
+ * PURPOSE : Small talk: greetings, thanks, goodbyes, and the question of who
+ *           the bot is. No page search is needed, so the model is only given a
+ *           few fixed facts about the assistant.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Small talk instruction text
+ *    2. Builder of the small talk reply
+ * IF ASKED TO CHANGE:
+ *    - What the bot may say about itself (PART 1)
  * ============================================================================ */
 
 /**
@@ -21,7 +21,7 @@ import type { ModelClient } from "./anthropic";
 import { extractJson } from "./json";
 import { formatConversation, neutralize } from "./text";
 
-// ===== BAGIAN 1: Teks instruksi obrolan ringan =====
+// ===== PART 1: Small talk instruction text =====
 export const SMALL_TALK_SYSTEM = `You are the AI information assistant of PlacidWay, a medical travel information website. Visitors are often people with cancer or their families, so you are calm, plain and kind.
 
 Facts about you, the only things you may say about yourself:
@@ -35,7 +35,7 @@ Reply with ONE JSON object and nothing else: {"answer": "<text for the visitor>"
 
 const outputSchema = z.object({ answer: z.string().trim().min(1).max(600) });
 
-// ===== BAGIAN 2: Pembuat balasan obrolan ringan =====
+// ===== PART 2: Builder of the small talk reply =====
 export interface SmallTalker {
   /** Returns the reply text. Throws when the model fails or refuses; the caller decides what to do then. */
   reply(message: string, ctx: { language?: string | undefined; history?: Turn[] | undefined }): Promise<string>;

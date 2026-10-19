@@ -1,21 +1,20 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/chunk/kinds.ts
- * TUJUAN  : Aturan R8: sebuah judul masuk jenis (kind) yang mana. Aturan
- *           pertama yang cocok menang, jadi urutan penting. Contoh: 'Included
- *           in the Out-Patient Program ($18,995 USD)' harus 'included', bukan
- *           'price'.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Fungsi: judul ke jenis chunk (urutan aturan menentukan)
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah atau menambah jenis chunk untuk sebuah judul: edit daftar
- *      aturan dalam fungsi ini. Jenis baru juga harus ada di KINDS
- *      (chunk/types.ts) dan di check constraint database (BAGIAN 1)
+ * PURPOSE : Rule R8: which kind a heading belongs to. The first matching rule
+ *           wins, so the order matters. Example: 'Included in the Out-Patient
+ *           Program ($18,995 USD)' must be 'included', not 'price'.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Function: heading to chunk kind (the order of the rules decides)
+ * IF ASKED TO CHANGE:
+ *    - Change or add a chunk kind for a heading: edit the rules list in this
+ *      function. A new kind must also exist in KINDS (chunk/types.ts) and in
+ *      the database check constraint (PART 1)
  * ============================================================================ */
 
 import type { Kind } from "./types.js";
 
-// ===== BAGIAN 1: Fungsi: judul ke jenis chunk (urutan aturan menentukan) =====
+// ===== PART 1: Function: heading to chunk kind (the order of the rules decides) =====
 /**
  * R8: which kind a heading belongs to. The first matching line wins, so the order matters:
  * "Included in the Out-Patient Program ($18,995 USD)" must be "included", not "price".

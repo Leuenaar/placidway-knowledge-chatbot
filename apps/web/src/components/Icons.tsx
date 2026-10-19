@@ -1,19 +1,19 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/web/src/components/Icons.tsx
- * TUJUAN  : Ikon SVG kecil untuk hiasan. Tombol dan tautan yang memakainya
- *           membawa teksnya sendiri.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Pembungkus SVG dasar
- *    2. Ikon plus (New chat)
- *    3. Ikon kirim
- *    4. Ikon tautan keluar
+ * PURPOSE : Small SVG icons for decoration. The buttons and links that use
+ *           them carry their own text.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Basic SVG wrapper
+ *    2. Plus icon (New chat)
+ *    3. Send icon
+ *    4. External link icon
  * ============================================================================ */
 
 /** Small inline icons. They are decorative: the buttons and links that use them carry the text. */
 import type { SVGProps } from "react";
 
-// ===== BAGIAN 1: Pembungkus SVG dasar =====
+// ===== PART 1: Basic SVG wrapper =====
 function Icon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -32,7 +32,7 @@ function Icon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-// ===== BAGIAN 2: Ikon plus (New chat) =====
+// ===== PART 2: Plus icon (New chat) =====
 export function PlusIcon() {
   return (
     <Icon>
@@ -41,7 +41,7 @@ export function PlusIcon() {
   );
 }
 
-// ===== BAGIAN 3: Ikon kirim =====
+// ===== PART 3: Send icon =====
 export function SendIcon() {
   return (
     <Icon>
@@ -50,7 +50,7 @@ export function SendIcon() {
   );
 }
 
-// ===== BAGIAN 4: Ikon tautan keluar =====
+// ===== PART 4: External link icon =====
 export function ExternalIcon() {
   return (
     <Icon width="16" height="16">

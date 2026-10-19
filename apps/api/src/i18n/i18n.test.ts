@@ -1,14 +1,15 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/i18n/i18n.test.ts
- * TUJUAN  : Uji teks tetap dan penerjemah (src/i18n): kunci teks lengkap,
- *           teks kurasi per bahasa, dan penerjemah model dengan tiruan.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the fixed text and the translator (src/i18n): the text
+ *           keys are complete, the curated text per language, and the model
+ *           translator with a stand-in.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. fixed texts
  *    2. localizer
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 import assert from "node:assert/strict";
@@ -31,7 +32,7 @@ function model(handler: (user: string) => string | Error) {
 
 const translateAll = (prefix: string) => JSON.stringify(Object.fromEntries(TEXT_KEYS.map((k) => [k, k === "crisis" ? `${prefix} ${EN.crisis}` : `${prefix} ${EN[k]}`])));
 
-// ===== BAGIAN 1: fixed texts =====
+// ===== PART 1: fixed texts =====
 describe("fixed texts", () => {
   it("has every key in all five hand-written languages, none empty", () => {
     assert.deepEqual(Object.keys(CURATED).sort(), ["ar", "en", "es", "id", "tr"]);
@@ -64,7 +65,7 @@ describe("fixed texts", () => {
   });
 });
 
-// ===== BAGIAN 2: localizer =====
+// ===== PART 2: localizer =====
 describe("localizer", () => {
   it("gives hand-written languages from the table without calling the model", async () => {
     const m = model(() => new Error("must not be called"));

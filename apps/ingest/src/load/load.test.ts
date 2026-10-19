@@ -1,21 +1,27 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/load/load.test.ts
- * TUJUAN  : Uji pemuat ke database: konfigurasi aman (kunci tidak pernah
- *           dicetak), pemeriksaan input, tulis halaman lalu chunk, jalan dua
- *           kali tidak mengubah apa pun, dry run tidak menulis.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. checkConfig: refuses missing values, http, a publishable key and a non-serv...
- *    2. checkLoadInput: stand-in model, stale or missing vectors and bad shapes are...
- *    3. loadToDatabase: writes pages then chunks, verifies counts, sends the key on...
- *    4. loadToDatabase: running twice changes nothing; a changed chunk is updated;...
- *    5. loadToDatabase: dry run reads but never writes, and lists what would be rem...
+ * PURPOSE : Test of the database loader: safe configuration (the key is never
+ *           printed), input checks, write the pages then the chunks, running
+ *           twice changes nothing, and a dry run writes nothing.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. checkConfig: refuses missing values, http, a publishable key and a
+ *       non-serv...
+ *    2. checkLoadInput: stand-in model, stale or missing vectors and bad
+ *       shapes are...
+ *    3. loadToDatabase: writes pages then chunks, verifies counts, sends the
+ *       key on...
+ *    4. loadToDatabase: running twice changes nothing; a changed chunk is
+ *       updated;...
+ *    5. loadToDatabase: dry run reads but never writes, and lists what would
+ *       be rem...
  *    6. loadToDatabase: dry run without credentials only checks the files
- *    7. loadToDatabase: bad input stops before any request; database errors surface...
+ *    7. loadToDatabase: bad input stops before any request; database errors
+ *       surface...
  *    8. Rest.deleteIds: refuses an id that could change the URL
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 import assert from "node:assert/strict";
@@ -57,7 +63,7 @@ async function input(chunks: Chunk[], model = createFakeEmbedder()): Promise<Loa
 
 const base = [mk("P1-overview-1", 1, "alpha text for page one"), mk("P1-overview-2", 1, "beta text for page one"), mk("P2-overview-1", 2, "gamma text for page two")];
 
-// ===== BAGIAN 1: checkConfig: refuses missing values, http, a publishable key and a non-serv... =====
+// ===== PART 1: checkConfig: refuses missing values, http, a publishable key and a non-serv... =====
 test("checkConfig: refuses missing values, http, a publishable key and a non-service JWT; never echoes the key", () => {
   assert.throws(() => checkConfig(undefined, KEY), DbError);
   assert.throws(() => checkConfig("http://abc.supabase.co", KEY), /https/);
@@ -73,7 +79,7 @@ test("checkConfig: refuses missing values, http, a publishable key and a non-ser
   }
 });
 
-// ===== BAGIAN 2: checkLoadInput: stand-in model, stale or missing vectors and bad shapes are... =====
+// ===== PART 2: checkLoadInput: stand-in model, stale or missing vectors and bad shapes are... =====
 test("checkLoadInput: stand-in model, stale or missing vectors and bad shapes are caught before anything is written", async () => {
   const good = await input(base);
   assert.deepEqual(checkLoadInput(good), []);
@@ -100,7 +106,7 @@ test("checkLoadInput: stand-in model, stale or missing vectors and bad shapes ar
   assert.ok(checkLoadInput(orphan).some((p) => p.includes("without a chunk")));
 });
 
-// ===== BAGIAN 3: loadToDatabase: writes pages then chunks, verifies counts, sends the key on... =====
+// ===== PART 3: loadToDatabase: writes pages then chunks, verifies counts, sends the key on... =====
 test("loadToDatabase: writes pages then chunks, verifies counts, sends the key only in apikey", async () => {
   const db = mockDb();
   const report = await loadToDatabase(await input(base), db.rest, { dryRun: false, now: new Date("2026-10-18T12:00:00Z") });
@@ -121,7 +127,7 @@ test("loadToDatabase: writes pages then chunks, verifies counts, sends the key o
   }
 });
 
-// ===== BAGIAN 4: loadToDatabase: running twice changes nothing; a changed chunk is updated;... =====
+// ===== PART 4: loadToDatabase: running twice changes nothing; a changed chunk is updated;... =====
 test("loadToDatabase: running twice changes nothing; a changed chunk is updated; a removed chunk is deleted", async () => {
   const db = mockDb();
   await loadToDatabase(await input(base), db.rest, { dryRun: false });
@@ -137,7 +143,7 @@ test("loadToDatabase: running twice changes nothing; a changed chunk is updated;
   assert.ok(String(db.tables.chunks!.get("P1-overview-1")!.text).includes("now edited"));
 });
 
-// ===== BAGIAN 5: loadToDatabase: dry run reads but never writes, and lists what would be rem... =====
+// ===== PART 5: loadToDatabase: dry run reads but never writes, and lists what would be rem... =====
 test("loadToDatabase: dry run reads but never writes, and lists what would be removed", async () => {
   const db = mockDb();
   await loadToDatabase(await input(base), db.rest, { dryRun: false });
@@ -148,14 +154,14 @@ test("loadToDatabase: dry run reads but never writes, and lists what would be re
   assert.equal(db.tables.chunks!.size, 3, "nothing was deleted");
 });
 
-// ===== BAGIAN 6: loadToDatabase: dry run without credentials only checks the files =====
+// ===== PART 6: loadToDatabase: dry run without credentials only checks the files =====
 test("loadToDatabase: dry run without credentials only checks the files", async () => {
   const report = await loadToDatabase(await input(base), undefined, { dryRun: true });
   assert.deepEqual(report.problems, []);
   assert.equal(report.chunksUpserted, 3);
 });
 
-// ===== BAGIAN 7: loadToDatabase: bad input stops before any request; database errors surface... =====
+// ===== PART 7: loadToDatabase: bad input stops before any request; database errors surface... =====
 test("loadToDatabase: bad input stops before any request; database errors surface without the key", async () => {
   const db = mockDb();
   const bad = await input(base);
@@ -168,7 +174,7 @@ test("loadToDatabase: bad input stops before any request; database errors surfac
   await assert.rejects(loadToDatabase(await input(tooShort), db.rest, { dryRun: false }), (e: Error) => /HTTP 400/.test(e.message) && !e.message.includes(KEY));
 });
 
-// ===== BAGIAN 8: Rest.deleteIds: refuses an id that could change the URL =====
+// ===== PART 8: Rest.deleteIds: refuses an id that could change the URL =====
 test("Rest.deleteIds: refuses an id that could change the URL", async () => {
   const db = mockDb();
   await assert.rejects(db.rest.deleteIds("chunks", ["P1-a-1),page_no=gt.0"]), /unsafe id/);

@@ -1,16 +1,16 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/answer/anthropic.ts
- * TUJUAN  : Klien kecil untuk Anthropic Messages API, hanya memakai fetch.
- *           Semua yang keluar dari server terlihat di satu tempat: kunci,
- *           model, effort, batas waktu, dan penanganan error.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Alamat API, versi, batas waktu bawaan (30 detik)
- *    2. Bentuk hasil panggilan model
- *    3. Klien: kirim permintaan, tangani error dan timeout, baca token
- * KALAU DIMINTA MENGUBAH:
- *    - Batas waktu panggilan model (DEFAULT_TIMEOUT_MS) (BAGIAN 1)
- *    - Header atau isi permintaan ke Anthropic (BAGIAN 3)
+ * PURPOSE : Small client for the Anthropic Messages API, using only fetch.
+ *           Everything that leaves the server is visible in one place: key,
+ *           model, effort, timeout and error handling.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. API address, version, default timeout (30 seconds)
+ *    2. Shape of the model call result
+ *    3. Client: send the request, handle errors and timeouts, read the tokens
+ * IF ASKED TO CHANGE:
+ *    - Timeout for the model call (DEFAULT_TIMEOUT_MS) (PART 1)
+ *    - Header or body of the request to Anthropic (PART 3)
  * ============================================================================ */
 
 /**
@@ -20,12 +20,12 @@
  */
 import { AnswerError, type AnthropicConfig } from "./config";
 
-// ===== BAGIAN 1: Alamat API, versi, batas waktu bawaan (30 detik) =====
+// ===== PART 1: API address, version, default timeout (30 seconds) =====
 const API_URL = "https://api.anthropic.com/v1/messages";
 const API_VERSION = "2023-06-01";
 const DEFAULT_TIMEOUT_MS = 30_000;
 
-// ===== BAGIAN 2: Bentuk hasil panggilan model =====
+// ===== PART 2: Shape of the model call result =====
 export interface Completion {
   text: string;
   /** end_turn, max_tokens, refusal, ... exactly as the API reports it. */
@@ -41,7 +41,7 @@ export interface ModelClient {
   complete(input: { system: string; user: string; maxTokens: number }): Promise<Completion>;
 }
 
-// ===== BAGIAN 3: Klien: kirim permintaan, tangani error dan timeout, baca token =====
+// ===== PART 3: Client: send the request, handle errors and timeouts, read the tokens =====
 export function createAnthropicClient(
   config: AnthropicConfig,
   options: { fetchFn?: typeof fetch; timeoutMs?: number } = {},

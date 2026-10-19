@@ -1,16 +1,16 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/refresh/run.ts
- * TUJUAN  : Menjalankan refresh: bersihkan, potong, embed, bandingkan dengan
- *           database, lalu muat hanya halaman yang berubah. Berhenti sebelum
- *           menyentuh database bila berkas mentah rusak. --force memuat
- *           salinan lebih lama.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Tipe: opsi dan hasil refresh
- *    2. Alur refresh dari awal sampai akhir
- *    3. Masukan pemuatan tanpa vektor (rencana jalan sebelum model pernah dipakai)
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah langkah refresh (BAGIAN 2)
+ * PURPOSE : Run the refresh: clean, chunk, embed, compare with the database,
+ *           then load only the pages that changed. Stops before touching the
+ *           database if a raw file is broken. --force loads an older copy.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Type: refresh options and result
+ *    2. The refresh flow from start to finish
+ *    3. Loading input without vectors (a dry-run plan before the model has
+ *       ever been used)
+ * IF ASKED TO CHANGE:
+ *    - Change the refresh steps (PART 2)
  * ============================================================================ */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -23,7 +23,7 @@ import type { Rest } from "../load/postgrest.js";
 import { loadToDatabase, readLoadInput, restrictToPages, type LoadReport } from "../load/run.js";
 import { type DbChunkRef, type DbPage, type PagePlan, planRefresh, renderRefreshReport } from "./plan.js";
 
-// ===== BAGIAN 1: Tipe: opsi dan hasil refresh =====
+// ===== PART 1: Type: refresh options and result =====
 export interface RefreshOptions {
   root: string;
   db: Rest;
@@ -45,7 +45,7 @@ export interface RefreshResult {
   embedded?: { total: number; reused: number; embedded: number };
 }
 
-// ===== BAGIAN 2: Alur refresh dari awal sampai akhir =====
+// ===== PART 2: The refresh flow from start to finish =====
 /**
  * Raw files -> clean -> chunk -> compare with the database -> (with --apply) embed what changed and load those pages.
  * The raw files are put in data/raw by the person (option B); this command never fetches from the website.
@@ -94,7 +94,7 @@ export async function refresh(opts: RefreshOptions): Promise<RefreshResult> {
   return res;
 }
 
-// ===== BAGIAN 3: Masukan pemuatan tanpa vektor (rencana jalan sebelum model pernah dipakai) =====
+// ===== PART 3: Loading input without vectors (a dry-run plan before the model has ever been used) =====
 /** The load input without needing vectors yet (a plan must work before the model has ever run). */
 function readLoadInput0(root: string) {
   const read = <T>(...p: string[]): T => JSON.parse(readFileSync(join(root, ...p), "utf8")) as T;

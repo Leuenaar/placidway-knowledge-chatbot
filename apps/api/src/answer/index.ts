@@ -1,9 +1,9 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/answer/index.ts
- * TUJUAN  : Pintu keluar modul answer: satu tempat untuk mengambil klien
- *           model, pembuat jawaban, prompt, aturan, dan pembicara obrolan
- *           ringan.
+ * PURPOSE : Exit door of the answer module: one place to get the model client,
+ *           the answer builder, the prompt, the rules, and the small talk
+ *           speaker.
  * ============================================================================ */
 
 export { createAnthropicClient, type Completion, type ModelClient } from "./anthropic";

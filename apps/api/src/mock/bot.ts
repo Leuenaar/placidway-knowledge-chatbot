@@ -1,24 +1,26 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/mock/bot.ts
- * TUJUAN  : Bot contoh (mock): jawaban siap pakai yang dipilih lewat kata
- *           kunci. Dipakai saat server jalan tanpa .env.api, supaya tampilan
- *           bisa dibangun dan diuji tanpa model. Fakta di dalamnya diambil
- *           dari halaman asli, tapi teksnya tetap contoh: tidak membaca
+ * PURPOSE : Sample (mock) bot: ready-made answers picked by keywords. Used
+ *           when the server runs without .env.api, so the screen can be built
+ *           and tested without a model. The facts in it are taken from the
+ *           real pages, but the text is still a sample: it does not read the
  *           knowledge base.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Tipe data jawaban contoh
- *    2. Teks kartu kontak untuk mock (dari teks Inggris yang sama dengan bot live)
- *    3. Pembantu: ambil sumber dan pola bahasa
- *    4. Daftar aturan kata kunci (dari atas ke bawah, yang pertama cocok menang)
- *    5. Jawaban bila tidak ada aturan yang cocok
- *    6. Penanda error untuk uji tampilan (test rate limit, test error)
- *    7. Pembuat bot mock: pilih aturan, disclaimer dan kartu kontak sekali per sesi
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah atau mengubah jawaban contoh: cari kata kuncinya di dalam
- *      daftar aturan (BAGIAN 4)
- *    - Memicu error di tampilan: ketik 'test error' atau 'test rate limit'
- *      (BAGIAN 6)
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Data type of the sample answer
+ *    2. Contact card text for the mock (from the same English text as the live
+ *       bot)
+ *    3. Helper: get the sources and the language patterns
+ *    4. List of keyword rules (top to bottom, the first match wins)
+ *    5. Answer when no rule matches
+ *    6. Error triggers for testing the screen (test rate limit, test error)
+ *    7. Builder of the mock bot: choose a rule, the disclaimer and the contact
+ *       card once per session
+ * IF ASKED TO CHANGE:
+ *    - Add or change a sample answer: find its keyword in the rules list (PART
+ *      4)
+ *    - Trigger an error on screen: type 'test error' or 'test rate limit'
+ *      (PART 6)
  * ============================================================================ */
 
 /**
@@ -45,7 +47,7 @@ import { FOLLOW_UPS, type Topic } from "../follow-ups";
 import { EN } from "../i18n";
 import { buildResponse, errorResponse } from "../responses";
 
-// ===== BAGIAN 1: Tipe data jawaban contoh =====
+// ===== PART 1: Data type of the sample answer =====
 export interface MockResult {
   status: number;
   body: ChatResponse;
@@ -70,7 +72,7 @@ interface Rule {
   draft: () => Draft;
 }
 
-// ===== BAGIAN 2: Teks kartu kontak untuk mock (dari teks Inggris yang sama dengan bot live) =====
+// ===== PART 2: Contact card text for the mock (from the same English text as the live bot) =====
 /** The lead card's words for the mock (English only), taken from the same master texts the live bot uses. */
 const MOCK_LEAD_TEXTS: LeadTexts = {
   title: EN.lead_title,
@@ -83,7 +85,7 @@ const MOCK_LEAD_TEXTS: LeadTexts = {
   failed: EN.lead_failed,
 };
 
-// ===== BAGIAN 3: Pembantu: ambil sumber dan pola bahasa =====
+// ===== PART 3: Helper: get the sources and the language patterns =====
 /** Looks up a source by its number in the PDF list, and fails loudly on a typo. */
 function page(n: number): Source {
   const found = SOURCE_PAGES.find((p) => p.n === n);
@@ -94,7 +96,7 @@ function page(n: number): Source {
 const ARABIC_SCRIPT = /[؀-ۿ]/;
 const SPANISH_COST = /(cu[aá]nto|cuesta|precio)/;
 
-// ===== BAGIAN 4: Daftar aturan kata kunci (dari atas ke bawah, yang pertama cocok menang) =====
+// ===== PART 4: List of keyword rules (top to bottom, the first match wins) =====
 const RULES: Rule[] = [
   {
     // Manual triggers so every UI error state can be checked without breaking anything.
@@ -311,7 +313,7 @@ const RULES: Rule[] = [
   },
 ];
 
-// ===== BAGIAN 5: Jawaban bila tidak ada aturan yang cocok =====
+// ===== PART 5: Answer when no rule matches =====
 /** Used when no rule matches: the honest "I don't know" with the quote suggestion. */
 const FALLBACK: Draft = {
   kind: "not_in_content",
@@ -320,7 +322,7 @@ const FALLBACK: Draft = {
   withQuote: true,
 };
 
-// ===== BAGIAN 6: Penanda error untuk uji tampilan (test rate limit, test error) =====
+// ===== PART 6: Error triggers for testing the screen (test rate limit, test error) =====
 class RateLimited extends Error {}
 class ServerFailure extends Error {}
 
@@ -332,7 +334,7 @@ interface SessionState {
 /** The mock keeps state in memory only. This cap stops a long demo from growing it forever. */
 const MAX_SESSIONS = 1000;
 
-// ===== BAGIAN 7: Pembuat bot mock: pilih aturan, disclaimer dan kartu kontak sekali per sesi =====
+// ===== PART 7: Builder of the mock bot: choose a rule, the disclaimer and the contact card once per session =====
 export function createMockBot() {
   const sessions = new Map<string, SessionState>();
 

@@ -1,22 +1,23 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/limits/config.ts
- * TUJUAN  : Membaca pengaturan batas pemakaian dari environment. Semua
- *           opsional; nilai salah menghentikan server saat start dengan pesan
- *           jelas.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Nilai bawaan batas (15 per 10 menit, 100 per hari, 5 juta token, 8 chat paralel)
- *    2. Pembaca angka bulat dengan batas bawah dan atas
- *    3. Membaca semua pengaturan batas dan TRUST_PROXY
- * KALAU DIMINTA MENGUBAH:
- *    - Angka bawaan batas pemakaian (BAGIAN 1)
- *    - Nama variabel pengaturan di .env.api (BAGIAN 3)
+ * PURPOSE : Read the usage limit settings from the environment. All are
+ *           optional; a wrong value stops the server at start with a clear
+ *           message.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Default limit values (15 per 10 minutes, 100 per day, 5 million
+ *       tokens, 8 parallel chats)
+ *    2. Reader for whole numbers with a lower and an upper bound
+ *    3. Read all the limit settings and TRUST_PROXY
+ * IF ASKED TO CHANGE:
+ *    - Default values for the usage limits (PART 1)
+ *    - Names of the settings variables in .env.api (PART 3)
  * ============================================================================ */
 
 /** Reads the limit settings from the environment. Every setting is optional; a wrong value stops the server at startup with a plain message. */
 import { DEFAULT_CRISIS_PER_DAY, DEFAULT_CRISIS_PER_WINDOW, type LimiterOptions } from "./limiter";
 
-// ===== BAGIAN 1: Nilai bawaan batas (15 per 10 menit, 100 per hari, 5 juta token, 8 chat paralel) =====
+// ===== PART 1: Default limit values (15 per 10 minutes, 100 per day, 5 million tokens, 8 parallel chats) =====
 export const LIMIT_DEFAULTS = {
   perWindow: 15,
   windowMs: 10 * 60_000,
@@ -30,7 +31,7 @@ export interface LimitsConfig extends LimiterOptions {
   trustProxy: number;
 }
 
-// ===== BAGIAN 2: Pembaca angka bulat dengan batas bawah dan atas =====
+// ===== PART 2: Reader for whole numbers with a lower and an upper bound =====
 function intSetting(env: Record<string, string | undefined>, name: string, fallback: number, min: number, max: number): number {
   const raw = env[name];
   if (raw === undefined || raw.trim() === "") return fallback;
@@ -39,7 +40,7 @@ function intSetting(env: Record<string, string | undefined>, name: string, fallb
   return n;
 }
 
-// ===== BAGIAN 3: Membaca semua pengaturan batas dan TRUST_PROXY =====
+// ===== PART 3: Read all the limit settings and TRUST_PROXY =====
 export function loadLimitsConfig(env: Record<string, string | undefined> = process.env): LimitsConfig {
   return {
     perWindow: intSetting(env, "RATE_LIMIT_PER_10_MIN", LIMIT_DEFAULTS.perWindow, 1, 1000),

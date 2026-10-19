@@ -1,19 +1,19 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/web/src/components/Header.tsx
- * TUJUAN  : Bagian atas halaman: logo PlacidWay, label 'AI assistant', jalan
- *           permanen ke manusia (formulir penawaran gratis), dan 'New chat'
- *           setelah obrolan mulai. Saat backend mock, spanduk tipis di atas
- *           menyebut jawaban hanya contoh.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Impor
- *    2. Komponen Header (logo, label AI, New chat, Free quote)
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah teks spanduk demo: cari 'Demo mode' (BAGIAN 2)
- *    - Mengubah tombol 'Free quote': cari 'Free quote' (BAGIAN 2)
+ * PURPOSE : Top of the page: PlacidWay logo, the 'AI assistant' label, the
+ *           permanent path to a human (free quote form), and 'New chat' once a
+ *           conversation has started. With the mock backend, a thin banner at
+ *           the top says the answers are only examples.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Imports
+ *    2. Header component (logo, AI label, New chat, Free quote)
+ * IF ASKED TO CHANGE:
+ *    - Change the demo banner text: search for 'Demo mode' (PART 2)
+ *    - Change the 'Free quote' button: search for 'Free quote' (PART 2)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Impor =====
+// ===== PART 1: Imports =====
 /**
  * Page header: the PlacidWay logo, a label that says this is an AI assistant, a permanent
  * way to reach a person (the free quote form) and, once a chat has started, "New chat".
@@ -23,7 +23,7 @@ import { QUOTE_URL } from "@pwbot/shared";
 import logoUrl from "../assets/placidway-logo.png";
 import { PlusIcon } from "./Icons";
 
-// ===== BAGIAN 2: Komponen Header (logo, label AI, New chat, Free quote) =====
+// ===== PART 2: Header component (logo, AI label, New chat, Free quote) =====
 export function Header({
   mode,
   onNewChat,

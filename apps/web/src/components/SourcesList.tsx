@@ -1,20 +1,20 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/web/src/components/SourcesList.tsx
- * TUJUAN  : Menampilkan halaman asal sebuah jawaban sebagai kartu yang
- *           menyebut nama halaman (bukan sekadar 'Source') supaya pembaca
- *           tahu apa yang akan dibuka. Tiap kartu terbuka di tab baru.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Impor
- *    2. Label jenis halaman dari awalan path URL
- *    3. Membuat keterangan 'host · jenis halaman'
- *    4. Komponen daftar sumber
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah label jenis halaman: BAGIAN 2
- *    - Mengubah judul 'Sources': cari 'sources-title' (BAGIAN 4)
+ * PURPOSE : Show the page an answer came from as a card that names the page
+ *           (not just 'Source') so the reader knows what will open. Each card
+ *           opens in a new tab.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Imports
+ *    2. Page kind label from the start of the URL path
+ *    3. Build the 'host · page kind' description
+ *    4. Sources list component
+ * IF ASKED TO CHANGE:
+ *    - Change the page kind labels: PART 2
+ *    - Change the 'Sources' heading: search for 'sources-title' (PART 4)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Impor =====
+// ===== PART 1: Imports =====
 /**
  * Lists the pages an answer came from, as cards that name the page (not just "Source")
  * so the reader knows what they are about to open. Each card opens in a new tab.
@@ -22,7 +22,7 @@
 import type { Source } from "@pwbot/shared";
 import { ExternalIcon } from "./Icons";
 
-// ===== BAGIAN 2: Label jenis halaman dari awalan path URL =====
+// ===== PART 2: Page kind label from the start of the URL path =====
 /** Plain-language label for the kind of page, taken from the first part of the URL path. */
 const PAGE_KINDS: [prefix: string, label: string][] = [
   ["/profile-videos/", "Videos"],
@@ -32,7 +32,7 @@ const PAGE_KINDS: [prefix: string, label: string][] = [
   ["/search-medical-pricings/", "Price comparison"],
 ];
 
-// ===== BAGIAN 3: Membuat keterangan 'host · jenis halaman' =====
+// ===== PART 3: Build the 'host · page kind' description =====
 function describe(url: string): string {
   try {
     const { hostname, pathname } = new URL(url);
@@ -44,7 +44,7 @@ function describe(url: string): string {
   }
 }
 
-// ===== BAGIAN 4: Komponen daftar sumber =====
+// ===== PART 4: Sources list component =====
 export function SourcesList({ sources }: { sources: Source[] }) {
   if (sources.length === 0) return null;
 

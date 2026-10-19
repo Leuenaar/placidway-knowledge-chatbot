@@ -1,20 +1,20 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/unanswered/mask.ts
- * TUJUAN  : Menghapus data pribadi yang paling jelas (email, nomor telepon,
- *           deret angka panjang) dari pesan sebelum disimpan di log. Ini
- *           jaring, bukan jaminan: nama dan cerita kesehatan tidak dihapus.
- *           Nominal dolar tetap karena justru pertanyaan seperti 'katanya
- *           $50' yang ingin dilihat.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Pola email, telepon, angka panjang
- *    2. Fungsi penyamaran
- *    3. Teks akhir yang disimpan (maks 500 karakter)
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah pola yang disamarkan (BAGIAN 1)
+ * PURPOSE : Remove the most obvious personal data (email, phone number, long
+ *           digit runs) from a message before it is stored in the log. This is
+ *           a net, not a guarantee: names and health stories are not removed.
+ *           Dollar amounts stay, because a question like 'I heard $50' is
+ *           exactly what we want to see.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Patterns for email, phone, long numbers
+ *    2. Masking function
+ *    3. Final text that is stored (max 500 characters)
+ * IF ASKED TO CHANGE:
+ *    - Add a pattern to mask (PART 1)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Pola email, telepon, angka panjang =====
+// ===== PART 1: Patterns for email, phone, long numbers =====
 /**
  * Removes the most obvious personal data from a visitor's message before it is stored in the unanswered-questions log:
  * e-mail addresses, phone-like numbers and any long run of digits. Visitors can type health details and contact details
@@ -30,7 +30,7 @@ const EMAIL = /[^\s@<>()]+@[^\s@<>()]+\.[^\s@<>()]+/g;
 const PHONE_LIKE = /(?<![\w$])\+?\(?\d[\d\s().-]{5,}\d(?!\w)/g;
 const LONG_DIGITS = /\d{6,}/g;
 
-// ===== BAGIAN 2: Fungsi penyamaran =====
+// ===== PART 2: Masking function =====
 export function maskPersonalData(text: string): string {
   return text
     .replace(EMAIL, "[email]")
@@ -40,7 +40,7 @@ export function maskPersonalData(text: string): string {
     .trim();
 }
 
-// ===== BAGIAN 3: Teks akhir yang disimpan (maks 500 karakter) =====
+// ===== PART 3: Final text that is stored (max 500 characters) =====
 /** What is stored: masked, at most 500 characters (the column limit). Empty when nothing useful is left. */
 export function questionForLog(message: string): string {
   const masked = maskPersonalData(message);

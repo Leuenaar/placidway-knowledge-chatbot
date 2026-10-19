@@ -1,24 +1,25 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/scripts/search.ts
- * TUJUAN  : Perintah `npm run search -w @pwbot/api -- "pertanyaan"`: mencoba
- *           pencarian saja (tanpa model jawaban) ke database asli. Pertanyaan
- *           yang sama dijalankan dua kali: pertama termasuk memuat model,
- *           kedua menunjukkan kecepatan normal beserta 10 hasil teratas.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Impor (alat yang dipakai skrip ini)
- *    2. Fungsi utama skrip
- *    3. Baca pertanyaan dari baris perintah
- *    4. Muat rahasia dari .env.api
- *    5. Siapkan pencari
- *    6. Cari dua kali dan cetak 10 hasil teratas pada putaran kedua
- *    7. Jalankan fungsi utama
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah jumlah hasil yang ditampilkan atau lebar teks potongan
- *      (BAGIAN 6)
+ * PURPOSE : The command `npm run search -w @pwbot/api -- "question"`: tries
+ *           the search alone (without the answer model) against the real
+ *           database. The same question is run twice: the first includes
+ *           loading the model, the second shows the normal speed together with
+ *           the top 10 results.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Imports (tools this script uses)
+ *    2. Main function of the script
+ *    3. Read the question from the command line
+ *    4. Load the secrets from .env.api
+ *    5. Prepare the searcher
+ *    6. Search twice and print the top 10 results of the second round
+ *    7. Run the main function
+ * IF ASKED TO CHANGE:
+ *    - Change the number of results shown or the width of the piece text (PART
+ *      6)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Impor (alat yang dipakai skrip ini) =====
+// ===== PART 1: Imports (tools this script uses) =====
 /**
  * Try retrieval by hand, against the real database and the real embedding model.
  *   npm run search -w @pwbot/api -- "How much does the treatment cost?"
@@ -30,21 +31,21 @@ import { createE5Embedder } from "@pwbot/embed";
 import { loadEnvFile } from "../env";
 import { createRetriever, loadDbConfig, RetrievalError } from "../retrieval";
 
-// ===== BAGIAN 2: Fungsi utama skrip =====
+// ===== PART 2: Main function of the script =====
 async function main(): Promise<void> {
 
-  // ===== BAGIAN 3: Baca pertanyaan dari baris perintah =====
+  // ===== PART 3: Read the question from the command line =====
   const question = process.argv.slice(2).join(" ").trim();
   if (!question) {
     console.error('usage: npm run search -w @pwbot/api -- "your question"');
     process.exit(2);
   }
 
-  // ===== BAGIAN 4: Muat rahasia dari .env.api =====
+  // ===== PART 4: Load the secrets from .env.api =====
   // npm runs this from apps/api, so the repo root is two folders up.
   loadEnvFile(resolve(process.cwd(), "../../.env.api"));
 
-  // ===== BAGIAN 5: Siapkan pencari =====
+  // ===== PART 5: Prepare the searcher =====
   let retriever;
   try {
     retriever = createRetriever({ db: loadDbConfig(), embedder: createE5Embedder() });
@@ -54,7 +55,7 @@ async function main(): Promise<void> {
   }
   try {
 
-    // ===== BAGIAN 6: Cari dua kali dan cetak 10 hasil teratas pada putaran kedua =====
+    // ===== PART 6: Search twice and print the top 10 results of the second round =====
     for (const run of ["first run (loads the model)", "second run (normal speed)"]) {
       const t0 = Date.now();
       const hits = await retriever.search(question, 10);
@@ -72,5 +73,5 @@ async function main(): Promise<void> {
   }
 }
 
-// ===== BAGIAN 7: Jalankan fungsi utama =====
+// ===== PART 7: Run the main function =====
 void main();

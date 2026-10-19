@@ -1,28 +1,38 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/chunk/chunk.test.ts
- * TUJUAN  : Uji unit pemotong teks (chunk): aturan jenis, atom, pemecahan
- *           paragraf panjang, id stabil, FAQ utuh, ulasan satu per satu,
- *           video dikelompokkan.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Unit test of the text chunker (chunk): kind rules, atoms,
+ *           splitting a long paragraph, stable ids, whole FAQ, reviews one by
+ *           one, videos grouped.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. kindForHeading: the order of the rules decides (R8)
  *    2. parseAtoms: headings, list items and paragraphs are separate atoms
- *    3. splitLongParagraph: parts stay under the limit and each repeats one sentence
+ *    3. splitLongParagraph: parts stay under the limit and each repeats one
+ *       sentence
  *    4. chunkPage: kinds, prefix, ids and date of a small package page
- *    5. chunkPage: the price header is its own chunk and keeps the amount verbatim...
- *    6. chunkPage: every FAQ chunk holds its question and its answer together (C5)
+ *    5. chunkPage: the price header is its own chunk and keeps the amount
+ *       verbatim...
+ *    6. chunkPage: every FAQ chunk holds its question and its answer together
+ *       (C5)
  *    7. chunkPage: a page without a full date gets page_modified null
- *    8. chunkPage: a long section is split at list items and never inside one (C2)
- *    9. chunkPage: a very long paragraph is split at sentences with one sentence of...
- *    10. chunkPage: small sections are merged into a neighbour instead of standing a...
- *    11. chunkPage: reviews are one chunk each, text before the name and date (layou...
+ *    8. chunkPage: a long section is split at list items and never inside one
+ *       (C2)
+ *    9. chunkPage: a very long paragraph is split at sentences with one
+ *       sentence of...
+ *    10. chunkPage: small sections are merged into a neighbour instead of
+ *        standing a...
+ *    11. chunkPage: reviews are one chunk each, text before the name and date
+ *        (layou...
  *    12. chunkPage: videos are grouped about 15 per chunk (C7)
- *    13. chunkPage: deterministic, same input gives byte-identical chunks and hashes
- *    14. chunkPage: a change inside one section only changes that chunk's hash (stab...
- *    15. verifyPage catches a lost sentence, a lost amount and an oversized chunk
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ *    13. chunkPage: deterministic, same input gives byte-identical chunks and
+ *        hashes
+ *    14. chunkPage: a change inside one section only changes that chunk's hash
+ *        (stab...
+ *    15. verifyPage catches a lost sentence, a lost amount and an oversized
+ *        chunk
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 import assert from "node:assert/strict";
@@ -73,7 +83,7 @@ const SAMPLE = [
   "",
 ].join("\n");
 
-// ===== BAGIAN 1: kindForHeading: the order of the rules decides (R8) =====
+// ===== PART 1: kindForHeading: the order of the rules decides (R8) =====
 test("kindForHeading: the order of the rules decides (R8)", () => {
   assert.equal(kindForHeading("Included in the Out-Patient Program ($18,995 USD)"), "included");
   assert.equal(kindForHeading("Excluded Services and Contingency Costs"), "excluded");
@@ -90,7 +100,7 @@ test("kindForHeading: the order of the rules decides (R8)", () => {
   assert.equal(kindForHeading("Something Unrelated"), undefined);
 });
 
-// ===== BAGIAN 2: parseAtoms: headings, list items and paragraphs are separate atoms =====
+// ===== PART 2: parseAtoms: headings, list items and paragraphs are separate atoms =====
 test("parseAtoms: headings, list items and paragraphs are separate atoms", () => {
   const atoms = parseAtoms("## Head\n\nFirst line\nsecond line\n\n- item one\n- item two\n");
   assert.deepEqual(
@@ -104,7 +114,7 @@ test("parseAtoms: headings, list items and paragraphs are separate atoms", () =>
   );
 });
 
-// ===== BAGIAN 3: splitLongParagraph: parts stay under the limit and each repeats one sentence =====
+// ===== PART 3: splitLongParagraph: parts stay under the limit and each repeats one sentence =====
 test("splitLongParagraph: parts stay under the limit and each repeats one sentence", () => {
   const text = para(30);
   const parts = splitLongParagraph(text, 600);
@@ -118,7 +128,7 @@ test("splitLongParagraph: parts stay under the limit and each repeats one senten
   }
 });
 
-// ===== BAGIAN 4: chunkPage: kinds, prefix, ids and date of a small package page =====
+// ===== PART 4: chunkPage: kinds, prefix, ids and date of a small package page =====
 test("chunkPage: kinds, prefix, ids and date of a small package page", () => {
   const res = chunkPage(page(SAMPLE, { modifiedDate: "Oct 12, 2026" }));
   assert.deepEqual(res.warnings, []);
@@ -137,7 +147,7 @@ test("chunkPage: kinds, prefix, ids and date of a small package page", () => {
   assert.deepEqual(verifyPage(page(SAMPLE), res.chunks), []);
 });
 
-// ===== BAGIAN 5: chunkPage: the price header is its own chunk and keeps the amount verbatim... =====
+// ===== PART 5: chunkPage: the price header is its own chunk and keeps the amount verbatim... =====
 test("chunkPage: the price header is its own chunk and keeps the amount verbatim (C6)", () => {
   const res = chunkPage(page(SAMPLE));
   const price = res.chunks.find((c) => c.kind === "price");
@@ -145,7 +155,7 @@ test("chunkPage: the price header is its own chunk and keeps the amount verbatim
   assert.ok(bodyWithoutPrefix(price).includes("$1,000 Price starting from"));
 });
 
-// ===== BAGIAN 6: chunkPage: every FAQ chunk holds its question and its answer together (C5) =====
+// ===== PART 6: chunkPage: every FAQ chunk holds its question and its answer together (C5) =====
 test("chunkPage: every FAQ chunk holds its question and its answer together (C5)", () => {
   const res = chunkPage(page(SAMPLE));
   const faqs = res.chunks.filter((c) => c.kind === "faq");
@@ -155,7 +165,7 @@ test("chunkPage: every FAQ chunk holds its question and its answer together (C5)
   assert.ok(!faqs[1]!.text.includes("What is it?"), "the second chunk does not carry the first question");
 });
 
-// ===== BAGIAN 7: chunkPage: a page without a full date gets page_modified null =====
+// ===== PART 7: chunkPage: a page without a full date gets page_modified null =====
 test("chunkPage: a page without a full date gets page_modified null", () => {
   assert.equal(chunkPage(page(SAMPLE)).chunks[0]!.page_modified, null);
   assert.equal(toIsoDate("Oct 12, 2026"), "2026-10-12");
@@ -164,7 +174,7 @@ test("chunkPage: a page without a full date gets page_modified null", () => {
   assert.equal(toIsoDate("Oct 2026"), null);
 });
 
-// ===== BAGIAN 8: chunkPage: a long section is split at list items and never inside one (C2) =====
+// ===== PART 8: chunkPage: a long section is split at list items and never inside one (C2) =====
 test("chunkPage: a long section is split at list items and never inside one (C2)", () => {
   const items = Array.from({ length: 40 }, (_, i) => `- Item ${i + 1}: ${sentence(i + 1)}`);
   const text = `# Test Clinic Package\n\n## Included in the Program\n\n${items.join("\n")}\n`;
@@ -179,7 +189,7 @@ test("chunkPage: a long section is split at list items and never inside one (C2)
   assert.deepEqual(verifyPage(page(text), res.chunks), []);
 });
 
-// ===== BAGIAN 9: chunkPage: a very long paragraph is split at sentences with one sentence of... =====
+// ===== PART 9: chunkPage: a very long paragraph is split at sentences with one sentence of... =====
 test("chunkPage: a very long paragraph is split at sentences with one sentence of overlap (C8)", () => {
   const text = `# Test Clinic Package\n\n## About the Clinic\n\n${para(45)}\n`;
   const res = chunkPage(page(text));
@@ -197,7 +207,7 @@ test("chunkPage: a very long paragraph is split at sentences with one sentence o
   assert.deepEqual(verifyPage(page(text), res.chunks), []);
 });
 
-// ===== BAGIAN 10: chunkPage: small sections are merged into a neighbour instead of standing a... =====
+// ===== PART 10: chunkPage: small sections are merged into a neighbour instead of standing a... =====
 test("chunkPage: small sections are merged into a neighbour instead of standing alone (C3)", () => {
   const text = `# Test Clinic Package\n\n## About the Clinic\n\n${para(5)}\n\n## Short Note\n\nTiny note.\n\n## More About Us\n\n${para(5, 10)}\n`;
   const res = chunkPage(page(text));
@@ -206,7 +216,7 @@ test("chunkPage: small sections are merged into a neighbour instead of standing 
   assert.deepEqual(verifyPage(page(text), res.chunks), []);
 });
 
-// ===== BAGIAN 11: chunkPage: reviews are one chunk each, text before the name and date (layou... =====
+// ===== PART 11: chunkPage: reviews are one chunk each, text before the name and date (layou... =====
 test("chunkPage: reviews are one chunk each, text before the name and date (layout A)", () => {
   const text = [
     "# Test Clinic Package",
@@ -236,7 +246,7 @@ test("chunkPage: reviews are one chunk each, text before the name and date (layo
   assert.deepEqual(verifyPage(page(text), res.chunks), []);
 });
 
-// ===== BAGIAN 12: chunkPage: videos are grouped about 15 per chunk (C7) =====
+// ===== PART 12: chunkPage: videos are grouped about 15 per chunk (C7) =====
 test("chunkPage: videos are grouped about 15 per chunk (C7)", () => {
   const videos = Array.from({ length: 40 }, (_, i) => `- Video: Title number ${i + 1}`);
   const text = `# Test Clinic Package\n\n## Videos\n\n${videos.join("\n")}\n`;
@@ -248,14 +258,14 @@ test("chunkPage: videos are grouped about 15 per chunk (C7)", () => {
   for (const n of counts) assert.ok(n <= LIMITS.videosPerChunk);
 });
 
-// ===== BAGIAN 13: chunkPage: deterministic, same input gives byte-identical chunks and hashes =====
+// ===== PART 13: chunkPage: deterministic, same input gives byte-identical chunks and hashes =====
 test("chunkPage: deterministic, same input gives byte-identical chunks and hashes", () => {
   const a = JSON.stringify(chunkPage(page(SAMPLE)));
   const b = JSON.stringify(chunkPage(page(SAMPLE)));
   assert.equal(a, b);
 });
 
-// ===== BAGIAN 14: chunkPage: a change inside one section only changes that chunk's hash (stab... =====
+// ===== PART 14: chunkPage: a change inside one section only changes that chunk's hash (stab... =====
 test("chunkPage: a change inside one section only changes that chunk's hash (stable ids)", () => {
   const before = chunkPage(page(SAMPLE)).chunks;
   const after = chunkPage(page(SAMPLE.replace("three nights", "four nights"))).chunks;
@@ -268,7 +278,7 @@ test("chunkPage: a change inside one section only changes that chunk's hash (sta
   assert.match(changed[0]!, /included/);
 });
 
-// ===== BAGIAN 15: verifyPage catches a lost sentence, a lost amount and an oversized chunk =====
+// ===== PART 15: verifyPage catches a lost sentence, a lost amount and an oversized chunk =====
 test("verifyPage catches a lost sentence, a lost amount and an oversized chunk", () => {
   const p = page(SAMPLE);
   const good = chunkPage(p).chunks;

@@ -1,22 +1,22 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/web/src/components/RichText.tsx
- * TUJUAN  : Menampilkan teks balasan. Hanya dua hal dipahami: **tebal** dan
- *           butir daftar '- '. Tanpa pustaka Markdown karena teks datang dari
- *           model dan tidak boleh bisa menyuntik HTML, tautan atau gambar.
- *           Penampil ini hanya membangun elemen React (tanpa innerHTML); apa
- *           pun yang tidak dikenal tampil sebagai teks biasa.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Impor
- *    2. Memecah teks menjadi paragraf dan daftar
- *    3. Mengubah **tebal** menjadi <strong>
- *    4. Komponen penampil
- * KALAU DIMINTA MENGUBAH:
- *    - Mengizinkan format baru (misalnya miring): ubah inline (BAGIAN 3)
- *      dengan hati-hati karena aturan keamanan
+ * PURPOSE : Show the reply text. Only two things are understood: **bold** and
+ *           the '- ' list bullet. No Markdown library, because the text comes
+ *           from the model and must not be able to inject HTML, links or
+ *           images. This renderer only builds React elements (no innerHTML);
+ *           anything it does not recognise is shown as plain text.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Imports
+ *    2. Split the text into paragraphs and lists
+ *    3. Turn **bold** into <strong>
+ *    4. Display component
+ * IF ASKED TO CHANGE:
+ *    - Allow a new format (for example italics): change inline (PART 3)
+ *      carefully because of the security rules
  * ============================================================================ */
 
-// ===== BAGIAN 1: Impor =====
+// ===== PART 1: Imports =====
 /**
  * Renders reply text. Only two things are understood: **bold** and "- " list items.
  *
@@ -28,7 +28,7 @@ import { Fragment, type ReactNode } from "react";
 
 type Block = { kind: "paragraph"; lines: string[] } | { kind: "list"; items: string[] };
 
-// ===== BAGIAN 2: Memecah teks menjadi paragraf dan daftar =====
+// ===== PART 2: Split the text into paragraphs and lists =====
 /** Splits text into paragraphs and bullet lists. Blank lines separate blocks. */
 export function parseBlocks(text: string): Block[] {
   const blocks: Block[] = [];
@@ -54,7 +54,7 @@ export function parseBlocks(text: string): Block[] {
   return blocks;
 }
 
-// ===== BAGIAN 3: Mengubah **tebal** menjadi <strong> =====
+// ===== PART 3: Turn **bold** into <strong> =====
 /** Turns **bold** into <strong>. An unmatched ** stays as literal text. */
 function inline(text: string): ReactNode[] {
   return text.split(/(\*\*[^*]+\*\*)/g).map((part, index) =>
@@ -66,7 +66,7 @@ function inline(text: string): ReactNode[] {
   );
 }
 
-// ===== BAGIAN 4: Komponen penampil =====
+// ===== PART 4: Display component =====
 export function RichText({ text }: { text: string }) {
   return (
     <>

@@ -1,29 +1,28 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/scripts/ask.ts
- * TUJUAN  : Perintah `npm run ask -- "pertanyaan"`: menanyakan satu
- *           pertanyaan dari awal sampai akhir ke database asli, model
- *           embedding asli dan model jawaban asli. Mencetak jawaban, link
- *           sumber, chunk yang dipakai dan waktu tiap langkah. Tidak menulis
- *           apa pun. Cocok untuk mencoba satu pertanyaan dari komputer
- *           sendiri.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Impor (alat yang dipakai skrip ini)
- *    2. Fungsi utama skrip
- *    3. Baca pertanyaan dari baris perintah
- *    4. Muat rahasia dari .env.api
- *    5. Siapkan pencari, penjawab dan penulis ulang (error konfigurasi berhenti di sini)
- *    6. Jalankan: rewrite, cari, jawab, lalu ukur waktu tiap langkah
- *    7. Cetak hasil: jawaban, sumber, chunk, waktu
- *    8. Jalankan fungsi utama
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah cara hasil dicetak ke layar (BAGIAN 7)
- *    - Mengubah pengaturan model yang dipakai untuk uji coba satu pertanyaan
- *      (BAGIAN 5)
- *    - Mengubah pesan bila pertanyaan kosong (BAGIAN 3)
+ * PURPOSE : The command `npm run ask -- "question"`: asks one question from
+ *           start to finish against the real database, the real embedding
+ *           model and the real answer model. It prints the answer, the source
+ *           links, the chunks used and the time of each step. It writes
+ *           nothing. Good for trying one question from your own computer.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Imports (tools this script uses)
+ *    2. Main function of the script
+ *    3. Read the question from the command line
+ *    4. Load the secrets from .env.api
+ *    5. Prepare the searcher, the answerer and the rewriter (a configuration
+ *       error stops here)
+ *    6. Run: rewrite, search, answer, then time each step
+ *    7. Print the result: answer, sources, chunks, time
+ *    8. Run the main function
+ * IF ASKED TO CHANGE:
+ *    - Change how the result is printed to the screen (PART 7)
+ *    - Change the model settings used to try a single question (PART 5)
+ *    - Change the message shown when the question is empty (PART 3)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Impor (alat yang dipakai skrip ini) =====
+// ===== PART 1: Imports (tools this script uses) =====
 /**
  * Ask one question end to end, against the real database, the real embedding model and the real answer model.
  *   npm run ask -- "How much does the treatment cost?"
@@ -36,20 +35,20 @@ import { loadEnvFile } from "../env";
 import { RetrievalError, createRetriever, gatherChunks, loadDbConfig, loadExpandPages, loadRetrieveCount } from "../retrieval";
 import { createRewriter } from "../rewrite";
 
-// ===== BAGIAN 2: Fungsi utama skrip =====
+// ===== PART 2: Main function of the script =====
 async function main(): Promise<void> {
 
-  // ===== BAGIAN 3: Baca pertanyaan dari baris perintah =====
+  // ===== PART 3: Read the question from the command line =====
   const question = process.argv.slice(2).join(" ").trim();
   if (!question) {
     console.error('usage: npm run ask -- "your question"');
     process.exit(2);
   }
 
-  // ===== BAGIAN 4: Muat rahasia dari .env.api =====
+  // ===== PART 4: Load the secrets from .env.api =====
   loadEnvFile(resolve(process.cwd(), "../../.env.api"));
 
-  // ===== BAGIAN 5: Siapkan pencari, penjawab dan penulis ulang (error konfigurasi berhenti di sini) =====
+  // ===== PART 5: Prepare the searcher, the answerer and the rewriter (a configuration error stops here) =====
   let retriever, answerer, rewriter, model, effort, rewriteEffort, count = 0, expand = 0;
   try {
     const cfg = loadAnthropicConfig();
@@ -67,7 +66,7 @@ async function main(): Promise<void> {
   }
   try {
 
-    // ===== BAGIAN 6: Jalankan: rewrite, cari, jawab, lalu ukur waktu tiap langkah =====
+    // ===== PART 6: Run: rewrite, search, answer, then time each step =====
     // Warm the embedding model first so the timings below show the normal speed, not the one-time model load.
     await retriever.search("warm up", 1);
     const t0 = Date.now();
@@ -78,7 +77,7 @@ async function main(): Promise<void> {
     const result = await answerer.answer(question, chunks, { language: rw.language, history: [] });
     const t3 = Date.now();
 
-    // ===== BAGIAN 7: Cetak hasil: jawaban, sumber, chunk, waktu =====
+    // ===== PART 7: Print the result: answer, sources, chunks, time =====
     console.log(`\nQuestion: ${question}\n`);
     console.log(`Rewrite:  language=${rw.language} category=${rw.category}${rw.fallback ? " (FALLBACK: model step failed, own words used)" : ""}\n          query="${rw.query}"`);
     console.log(`Kind:     ${result.kind}${result.ungrounded ? "  (UNGROUNDED: no valid chunk cited)" : ""}`);
@@ -96,5 +95,5 @@ async function main(): Promise<void> {
   }
 }
 
-// ===== BAGIAN 8: Jalankan fungsi utama =====
+// ===== PART 8: Run the main function =====
 void main();

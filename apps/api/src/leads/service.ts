@@ -1,15 +1,15 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/leads/service.ts
- * TUJUAN  : Aturan penerimaan lead setelah bentuk permintaan sudah valid:
- *           kolom jebakan 'website' terisi berarti bot (jawab ok, simpan
- *           nothing), sesi care mode tidak pernah meninggalkan lead, selain
- *           itu simpan dengan versi persetujuan dan bahasa chat.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Bentuk input dan kontrak layanan
- *    2. Layanan lead: honeypot, care mode, simpan
- * KALAU DIMINTA MENGUBAH:
- *    - Aturan siapa yang boleh menyimpan lead (BAGIAN 2)
+ * PURPOSE : Rules for accepting a lead once the request shape is valid: a
+ *           filled 'website' trap field means a bot (answer ok, store
+ *           nothing), a care mode session never leaves a lead, otherwise store
+ *           it with the consent version and the chat language.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Shape of the input and the service contract
+ *    2. Lead service: honeypot, care mode, store
+ * IF ASKED TO CHANGE:
+ *    - Rules for who may store a lead (PART 2)
  * ============================================================================ */
 
 /**
@@ -23,7 +23,7 @@ import { LEAD_CONSENT_VERSION, type LeadResponse } from "@pwbot/shared";
 import { primaryCode } from "../i18n";
 import type { LeadStore } from "./store";
 
-// ===== BAGIAN 1: Bentuk input dan kontrak layanan =====
+// ===== PART 1: Shape of the input and the service contract =====
 export interface LeadInput {
   sessionId: string;
   name: string;
@@ -36,7 +36,7 @@ export interface LeadService {
   submit(input: LeadInput): Promise<{ status: number; body: LeadResponse }>;
 }
 
-// ===== BAGIAN 2: Layanan lead: honeypot, care mode, simpan =====
+// ===== PART 2: Lead service: honeypot, care mode, store =====
 export function createLeadService({
   store,
   isCare = () => false,

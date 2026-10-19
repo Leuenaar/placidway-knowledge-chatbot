@@ -1,7 +1,7 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/i18n/index.ts
- * TUJUAN  : Pintu keluar modul i18n (teks tetap multibahasa).
+ * PURPOSE : Exit door of the i18n module (fixed multilingual text).
  * ============================================================================ */
 
 export { createLocalizer, type Language, type Localizer } from "./localizer";

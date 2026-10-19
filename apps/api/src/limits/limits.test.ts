@@ -1,10 +1,11 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/limits/limits.test.ts
- * TUJUAN  : Uji pembatas (C6): batas per alamat, anggaran token harian,
- *           percakapan bersamaan, pesan krisis, memori, konfigurasi, teks
- *           batas, dan aplikasi dengan pembatas lewat HTTP sungguhan.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the limiter (C6): the per-address limit, the daily token
+ *           budget, simultaneous conversations, crisis messages, memory,
+ *           configuration, the limit text, and the app with the limiter over
+ *           real HTTP.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. limiter: per address
  *    2. limiter: daily token budget
  *    3. limiter: chats at the same time
@@ -15,9 +16,9 @@
  *    8. meter
  *    9. the app with limits (real HTTP)
  *    10. live bot: limited()
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 import assert from "node:assert/strict";
@@ -48,7 +49,7 @@ const ok = (a: ReturnType<ReturnType<typeof createLimiter>["admit"]>) => {
   if (a.ok) a.release();
 };
 
-// ===== BAGIAN 1: limiter: per address =====
+// ===== PART 1: limiter: per address =====
 describe("limiter: per address", () => {
   it("allows the burst size, refuses the next message with the seconds to wait, and frees a slot as the window slides", () => {
     const { c, limiter } = make({ perDay: 100 });
@@ -96,7 +97,7 @@ describe("limiter: per address", () => {
   });
 });
 
-// ===== BAGIAN 2: limiter: daily token budget =====
+// ===== PART 2: limiter: daily token budget =====
 describe("limiter: daily token budget", () => {
   it("refuses everybody once the day's tokens are used, and starts fresh the next UTC day", () => {
     const { c, limiter } = make({ perDay: 1000, perWindow: 1000 });
@@ -124,7 +125,7 @@ describe("limiter: daily token budget", () => {
   });
 });
 
-// ===== BAGIAN 3: limiter: chats at the same time =====
+// ===== PART 3: limiter: chats at the same time =====
 describe("limiter: chats at the same time", () => {
   it("refuses with busy while the slots are taken and frees one when a chat is done (once, even if released twice)", () => {
     const { limiter } = make({ perDay: 1000, perWindow: 1000 });
@@ -142,7 +143,7 @@ describe("limiter: chats at the same time", () => {
   });
 });
 
-// ===== BAGIAN 4: limiter: crisis messages =====
+// ===== PART 4: limiter: crisis messages =====
 describe("limiter: crisis messages", () => {
   it("skip every limit, but only up to a small number per address and per day", () => {
     const { limiter } = make({ dailyTokens: 10, perWindow: 1, perDay: 1, maxConcurrent: 1, crisisPerWindow: 2, crisisPerDay: 3 });
@@ -157,7 +158,7 @@ describe("limiter: crisis messages", () => {
   });
 });
 
-// ===== BAGIAN 5: limiter: memory =====
+// ===== PART 5: limiter: memory =====
 describe("limiter: memory", () => {
   it("keeps no address anywhere, drops the least recently seen address beyond the cap", () => {
     const { limiter } = make({ maxKeys: 3, perDay: 1000, perWindow: 1000, maxConcurrent: 100 });
@@ -174,7 +175,7 @@ describe("limiter: memory", () => {
   });
 });
 
-// ===== BAGIAN 6: limits config =====
+// ===== PART 6: limits config =====
 describe("limits config", () => {
   it("has safe defaults and reads each setting", () => {
     const d = loadLimitsConfig({});
@@ -190,7 +191,7 @@ describe("limits config", () => {
   });
 });
 
-// ===== BAGIAN 7: limit texts and language guess =====
+// ===== PART 7: limit texts and language guess =====
 describe("limit texts and language guess", () => {
   it("has every text in all five languages, none empty, no em dash", () => {
     for (const code of ["en", "id", "tr", "es", "ar"]) {
@@ -217,7 +218,7 @@ describe("limit texts and language guess", () => {
   });
 });
 
-// ===== BAGIAN 8: meter =====
+// ===== PART 8: meter =====
 describe("meter", () => {
   it("reports input plus output tokens of every call, and nothing when the call fails", async () => {
     const seen: number[] = [];
@@ -232,7 +233,7 @@ describe("meter", () => {
   });
 });
 
-// ===== BAGIAN 9: the app with limits (real HTTP) =====
+// ===== PART 9: the app with limits (real HTTP) =====
 describe("the app with limits (real HTTP)", () => {
   async function start(opts: { limiter: ReturnType<typeof createLimiter>; bot: Bot; trustProxy?: number }) {
     const server: Server = createApp({ bot: opts.bot, limiter: opts.limiter, ...(opts.trustProxy ? { trustProxy: opts.trustProxy } : {}) }).listen(0);
@@ -310,7 +311,7 @@ describe("the app with limits (real HTTP)", () => {
   });
 });
 
-// ===== BAGIAN 10: live bot: limited() =====
+// ===== PART 10: live bot: limited() =====
 describe("live bot: limited()", () => {
   function liveBot() {
     const history = createHistoryStore();

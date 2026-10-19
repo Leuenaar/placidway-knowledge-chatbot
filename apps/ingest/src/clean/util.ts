@@ -1,24 +1,24 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/clean/util.ts
- * TUJUAN  : Alat kecil pembersih: mencari jumlah $ persis seperti tertulis,
- *           membuang URL, hash sha256, pemeriksaan jumlah $ (R10), dan
- *           membaca berkas mentah.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Pola jumlah $ dan fungsi extractAmounts
- *    2. Pola URL dan fungsi stripUrls (buang tautan)
- *    3. Hash sha256 teks bersih (R9)
- *    4. Pemeriksaan R10: tiap jumlah $ ada di teks bersih atau tercatat dibuang
- *    5. Membaca berkas mentah (header 'kunci: nilai', garis ---, teks)
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah cara jumlah $ dikenali (BAGIAN 1)
- *    - Mengubah aturan pemeriksaan harga hilang atau tambahan (BAGIAN 4)
+ * PURPOSE : Small cleaning helpers: finds $ amounts exactly as written,
+ *           strips URLs, sha256 hash, the $ amount check (R10), and
+ *           reading raw files.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. $ amount pattern and the extractAmounts function
+ *    2. URL pattern and the stripUrls function (remove links)
+ *    3. sha256 hash of the clean text (R9)
+ *    4. Check R10: every $ amount is in the clean text or recorded as removed
+ *    5. Read a raw file ('key: value' header, a --- line, the text)
+ * IF ASKED TO CHANGE:
+ *    - Change how $ amounts are recognised (PART 1)
+ *    - Change the rule for missing or extra price checks (PART 4)
  * ============================================================================ */
 
 import { createHash } from "node:crypto";
 import type { AmountCheck, Line, RawPage } from "./types.js";
 
-// ===== BAGIAN 1: Pola jumlah $ dan fungsi extractAmounts =====
+// ===== PART 1: $ amount pattern and the extractAmounts function =====
 /** A $ amount exactly as written on the page, e.g. $18,995, $18995, $3,950. */
 const AMOUNT_RE = /\$\s?\d[\d,]*(?:\.\d+)?/g;
 
@@ -26,7 +26,7 @@ export function extractAmounts(text: string): string[] {
   return (text.match(AMOUNT_RE) ?? []).map((a) => a.replace(/\s/g, ""));
 }
 
-// ===== BAGIAN 2: Pola URL dan fungsi stripUrls (buang tautan) =====
+// ===== PART 2: URL pattern and the stripUrls function (remove links) =====
 /** Angle-bracket links the crawler writes after link text, e.g. "Name <https://...>" or "<null>". */
 const URL_GLUED = /\s*<(?:https?:\/\/[^>\s]*|null)>(?=[A-Za-z0-9])/g;
 const URL_ANY = /\s*<(?:https?:\/\/[^>\s]*|null)>/g;
@@ -39,12 +39,12 @@ export function stripUrls(s: string): { text: string; removed: number } {
   return { text, removed };
 }
 
-// ===== BAGIAN 3: Hash sha256 teks bersih (R9) =====
+// ===== PART 3: sha256 hash of the clean text (R9) =====
 export function sha256(text: string): string {
   return createHash("sha256").update(text, "utf8").digest("hex");
 }
 
-// ===== BAGIAN 4: Pemeriksaan R10: tiap jumlah $ ada di teks bersih atau tercatat dibuang =====
+// ===== PART 4: Check R10: every $ amount is in the clean text or recorded as removed =====
 /** Compare two lists of amounts as multisets. */
 export function checkAmounts(kept: string[], cleaned: string[], dropped: string[]): AmountCheck {
   const count = (list: string[]) => {
@@ -67,7 +67,7 @@ export function checkAmounts(kept: string[], cleaned: string[], dropped: string[
   return { kept, cleaned, dropped, ok: lost.length === 0 && invented.length === 0, lost, invented };
 }
 
-// ===== BAGIAN 5: Membaca berkas mentah (header 'kunci: nilai', garis ---, teks) =====
+// ===== PART 5: Read a raw file ('key: value' header, a --- line, the text) =====
 /**
  * Parse a file written by the fetch step:
  *   source_url: ...

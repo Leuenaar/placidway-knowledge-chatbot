@@ -1,14 +1,14 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/web/src/ids.ts
- * TUJUAN  : Pembuat id sesi. crypto.randomUUID hanya ada di konteks aman
- *           (https atau localhost); versi cadangan membuat UUID v4 sendiri
- *           supaya demo lewat http tidak error.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Membuat id sesi (UUID v4, dengan cadangan)
+ * PURPOSE : Session id builder. crypto.randomUUID only exists in a secure
+ *           context (https or localhost); the fallback builds a UUID v4 itself
+ *           so a demo over http does not fail.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Create a session id (UUID v4, with a fallback)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Membuat id sesi (UUID v4, dengan cadangan) =====
+// ===== PART 1: Create a session id (UUID v4, with a fallback) =====
 /**
  * Id helpers.
  *

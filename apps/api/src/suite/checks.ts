@@ -1,28 +1,26 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/suite/checks.ts
- * TUJUAN  : Pemeriksaan otomatis untuk satu jawaban. Sengaja sederhana: FAIL
- *           berarti pasti salah, CHECK berarti petunjuk agar manusia
- *           melihatnya. Tidak menilai nada; laporan selalu menampilkan
- *           jawaban lengkap untuk itu.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Tipe: vonis dan hasil pemeriksaan
- *    2. Tipe: semua yang terlihat saat satu kasus berjalan
- *    3. Pembantu: apakah sebuah angka ada di teks
- *    4. Pola kata per bahasa untuk mendeteksi bahasa jawaban
- *    5. Fungsi: apakah teks tampak berbahasa tertentu
- *    6. Pembantu: hitung kalimat dan tentukan vonis terburuk
- *    7. Kata terlarang (cure, proven, ...) dan tanda atribusi
- *    8. Fungsi utama: jalankan semua pemeriksaan pada satu jawaban
- *    9. Pemeriksaan tetap (jenis balasan, kosong, markup bocor, tanda seru)
- *    10. Pemeriksaan grounding (sumber, harga, durasi, kata terlarang, panjang)
- *    11. Pemeriksaan bahasa
- *    12. Pemeriksaan sesuai tuntutan kasus (expect)
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah aturan pemeriksaan baru: tambahkan satu baris add(...) di
- *      runChecks (BAGIAN 8)
- *    - Mengubah daftar kata terlarang (BAGIAN 7)
- *    - Mengubah batas panjang jawaban (BAGIAN 10)
+ * PURPOSE : Automatic checks for one answer. Deliberately simple: FAIL means
+ *           certainly wrong, CHECK is a hint for a person to look. It does not
+ *           judge tone; the report always shows the full answer for that.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Type: verdict and check result
+ *    2. Type: everything that can be seen while one case runs
+ *    3. Helper: whether a number appears in the text
+ *    4. Word patterns per language to detect the answer language
+ *    5. Function: whether the text looks like a given language
+ *    6. Helper: count sentences and decide the worst verdict
+ *    7. Forbidden words (cure, proven, ...) and attribution markers
+ *    8. Main function: run all the checks on one answer
+ *    9. Fixed checks (reply kind, empty, leaked markup, exclamation marks)
+ *    10. Grounding checks (source, price, duration, forbidden words, length)
+ *    11. Language check
+ *    12. Checks according to what the case demands (expect)
+ * IF ASKED TO CHANGE:
+ *    - Add a new check: add one add(...) line in runChecks (PART 8)
+ *    - Change the list of forbidden words (PART 7)
+ *    - Change the answer length limit (PART 10)
  * ============================================================================ */
 
 /**
@@ -35,7 +33,7 @@ import type { Case, Lang } from "./cases";
 import { LANGUAGE_NAMES } from "./cases";
 import { dollarAmounts, normalizeNumbers } from "../retrieval/amounts";
 
-// ===== BAGIAN 1: Tipe: vonis dan hasil pemeriksaan =====
+// ===== PART 1: Type: verdict and check result =====
 export type Verdict = "PASS" | "CHECK" | "FAIL";
 
 export interface CheckResult {
@@ -44,7 +42,7 @@ export interface CheckResult {
   detail: string;
 }
 
-// ===== BAGIAN 2: Tipe: semua yang terlihat saat satu kasus berjalan =====
+// ===== PART 2: Type: everything that can be seen while one case runs =====
 /** Everything seen while one case ran (the last message of the case). */
 export interface Observed {
   answer: string;
@@ -68,13 +66,13 @@ export interface Observed {
 
 export { dollarAmounts, normalizeNumbers };
 
-// ===== BAGIAN 3: Pembantu: apakah sebuah angka ada di teks =====
+// ===== PART 3: Helper: whether a number appears in the text =====
 function containsNumber(haystack: string, n: string): boolean {
   const esc = n.replace(/\./g, "\\.");
   return new RegExp(`(?<![\\d.])${esc}(?![\\d])`).test(haystack);
 }
 
-// ===== BAGIAN 4: Pola kata per bahasa untuk mendeteksi bahasa jawaban =====
+// ===== PART 4: Word patterns per language to detect the answer language =====
 const WORDS: Record<Exclude<Lang, "en">, RegExp> = {
   id: /\b(yang|dan|untuk|dengan|adalah|tidak|di|dari|ini|itu|anda|kami)\b/gi,
   tr: /\b(ve|bir|için|ile|bu|olarak|değil|veya|çok|daha)\b|[çğışöü]/gi,
@@ -83,7 +81,7 @@ const WORDS: Record<Exclude<Lang, "en">, RegExp> = {
 };
 const EN_WORDS = /\b(the|and|is|are|of|for|with|that|this|you|your|can)\b/gi;
 
-// ===== BAGIAN 5: Fungsi: apakah teks tampak berbahasa tertentu =====
+// ===== PART 5: Function: whether the text looks like a given language =====
 /** True when the text looks like it is written in the language. A rough word count, enough to catch an answer in the wrong language. */
 export function looksLike(lang: Lang, text: string): boolean {
   const count = (re: RegExp) => (text.match(re) ?? []).length;
@@ -92,7 +90,7 @@ export function looksLike(lang: Lang, text: string): boolean {
   return count(WORDS[lang]) >= 3 && count(WORDS[lang]) >= count(EN_WORDS);
 }
 
-// ===== BAGIAN 6: Pembantu: hitung kalimat dan tentukan vonis terburuk =====
+// ===== PART 6: Helper: count sentences and decide the worst verdict =====
 function sentenceCount(text: string): number {
   return text.split(/(?<=[.!?؟。])\s+/).filter((s) => s.trim().length > 0).length;
 }
@@ -100,11 +98,11 @@ function sentenceCount(text: string): number {
 const worst = (rs: CheckResult[]): Verdict => (rs.some((r) => r.verdict === "FAIL") ? "FAIL" : rs.some((r) => r.verdict === "CHECK") ? "CHECK" : "PASS");
 export const caseVerdict = (rs: CheckResult[]): Verdict => worst(rs);
 
-// ===== BAGIAN 7: Kata terlarang (cure, proven, ...) dan tanda atribusi =====
+// ===== PART 7: Forbidden words (cure, proven, ...) and attribution markers =====
 const FORBIDDEN_WORDS = /\b(cure[sd]?|cured|breakthrough|proven|painless|non-?toxic)\b/i;
 const ATTRIBUTION = /\b(states?|says?|claims?|according|describes?|calls?)\b|["“”«»']/i;
 
-// ===== BAGIAN 8: Fungsi utama: jalankan semua pemeriksaan pada satu jawaban =====
+// ===== PART 8: Main function: run all the checks on one answer =====
 export function runChecks(c: Case, o: Observed): CheckResult[] {
   const r: CheckResult[] = [];
   const add = (name: string, ok: boolean, detail: string, soft = false) => r.push({ name, verdict: ok ? "PASS" : soft ? "CHECK" : "FAIL", detail });
@@ -112,7 +110,7 @@ export function runChecks(c: Case, o: Observed): CheckResult[] {
   const normalized = normalizeNumbers(text);
   const sentText = normalizeNumbers(o.sentChunks.map((ch) => ch.text).join("\n"));
 
-  // ===== BAGIAN 9: Pemeriksaan tetap (jenis balasan, kosong, markup bocor, tanda seru) =====
+  // ===== PART 9: Fixed checks (reply kind, empty, leaked markup, exclamation marks) =====
   // The fixed, certain checks.
   if (c.expect.kind) {
     const allowed = Array.isArray(c.expect.kind) ? c.expect.kind : [c.expect.kind];
@@ -122,7 +120,7 @@ export function runChecks(c: Case, o: Observed): CheckResult[] {
   add("no leaked markup", !/<\/?(excerpt|excerpts|reminder|question|conversation|turn|reply_language)\b|used_chunk_ids/i.test(text), "the answer contains prompt markup or field names");
   add("no exclamation mark", !/[!！]/.test(text), "the answer contains an exclamation mark", true);
 
-  // ===== BAGIAN 10: Pemeriksaan grounding (sumber, harga, durasi, kata terlarang, panjang) =====
+  // ===== PART 10: Grounding checks (source, price, duration, forbidden words, length) =====
   // Grounding.
   if (o.kind === "answer") add("has sources", o.sources.length > 0, "an answer without any source link");
   else if (o.kind !== "medical_declined") add("no source links on a reply that claims nothing", o.sources.length === 0, "sources were attached to a reply that claims nothing", true);
@@ -149,12 +147,12 @@ export function runChecks(c: Case, o: Observed): CheckResult[] {
   const words = text.trim().split(/\s+/).length;
   add("not a wall of text", words <= 130 || /\n- /.test(text), `${words} words in one block; a long list of inclusions is easier to read as "- " lines`, true);
 
-  // ===== BAGIAN 11: Pemeriksaan bahasa =====
+  // ===== PART 11: Language check =====
   // Language.
   if (o.rewriteLanguage !== undefined) add("rewrite found the language", o.rewriteLanguage === LANGUAGE_NAMES[c.lang], `expected ${LANGUAGE_NAMES[c.lang]}, rewrite said ${o.rewriteLanguage}${o.rewriteFallback ? " (rewrite fell back)" : ""}`);
   if (o.kind !== "error") add(`answer is in ${LANGUAGE_NAMES[c.lang]}`, looksLike(c.lang, text), "the answer does not look like it is in the visitor's language", c.lang !== "ar");
 
-  // ===== BAGIAN 12: Pemeriksaan sesuai tuntutan kasus (expect) =====
+  // ===== PART 12: Checks according to what the case demands (expect) =====
   // What this case demands.
   const e = c.expect;
   if (e.quote !== undefined) add(e.quote ? "has quote link" : "no quote link", (o.quoteUrl !== null) === e.quote, e.quote ? "the reply has no quote link" : "the reply carries a quote link");

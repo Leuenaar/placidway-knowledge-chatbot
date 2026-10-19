@@ -1,24 +1,25 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/live/bot.test.ts
- * TUJUAN  : Uji bot live: pencari dan penjawab diganti tiruan sehingga yang
- *           diuji adalah keputusan bot sendiri (balasan mana yang tampil,
- *           link dan saran apa yang ikut, kegagalan tidak membocorkan
- *           detail). Blok terakhir mengirim HTTP sungguhan ke aplikasi dengan
- *           bot live.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the live bot: the searcher and the answerer are replaced
+ *           by stand-ins so what is tested is the bot's own decisions (which
+ *           reply is shown, which link and suggestions come with it, a failure
+ *           does not leak details). The last block sends real HTTP to the app
+ *           with the live bot.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. live bot
  *    2. live bot: rewrite and history
  *    3. app with the live bot (real HTTP)
  *    4. live bot: whole pages next to the hits
- *    5. live bot: branches (crisis, small talk, medical, out of scope, disclaimer,...
+ *    5. live bot: branches (crisis, small talk, medical, out of scope,
+ *       disclaimer,...
  *    6. shared contract: disclaimer_text
  *    7. live bot: disclaimer trigger
  *    8. live bot: unanswered-question log
  *    9. live bot: lead card offer (N4)
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 /**
@@ -71,7 +72,7 @@ function bot(result: AnswerResult | Error, opts: { retrievalError?: Error; chunk
   return { bot: createLiveBot({ retriever, answerer, rewriter: opts.rewriter ?? stubRewriter(), log: (m) => logs.push(m) }), logs, asked };
 }
 
-// ===== BAGIAN 1: live bot =====
+// ===== PART 1: live bot =====
 describe("live bot", () => {
   it("returns a grounded answer with sources and topic-based follow-ups", async () => {
     const used = [chunk("P6-price-1", 6, "price")];
@@ -139,7 +140,7 @@ describe("live bot", () => {
   });
 });
 
-// ===== BAGIAN 2: live bot: rewrite and history =====
+// ===== PART 2: live bot: rewrite and history =====
 describe("live bot: rewrite and history", () => {
   const ok: AnswerResult = { ...base, kind: "answer", answer: "It starts at $18,995.", usedChunks: [chunk("P6-price-1", 6, "price")], sources: [{ url: SOURCE_PAGES[5]!.url, title: SOURCE_PAGES[5]!.title }] };
 
@@ -227,7 +228,7 @@ describe("live bot: rewrite and history", () => {
   });
 });
 
-// ===== BAGIAN 3: app with the live bot (real HTTP) =====
+// ===== PART 3: app with the live bot (real HTTP) =====
 describe("app with the live bot (real HTTP)", () => {
   let server: Server;
   let baseUrl: string;
@@ -316,7 +317,7 @@ describe("app with the live bot (real HTTP)", () => {
   });
 });
 
-// ===== BAGIAN 4: live bot: whole pages next to the hits =====
+// ===== PART 4: live bot: whole pages next to the hits =====
 describe("live bot: whole pages next to the hits", () => {
   const ok: AnswerResult = { ...base, kind: "answer", answer: "Out-patient $18,995, in-patient $30,000.", usedChunks: [chunk("P2-price-2", 2, "price")], sources: [{ url: SOURCE_PAGES[1]!.url, title: SOURCE_PAGES[1]!.title }] };
 
@@ -357,7 +358,7 @@ describe("live bot: whole pages next to the hits", () => {
   });
 });
 
-// ===== BAGIAN 5: live bot: branches (crisis, small talk, medical, out of scope, disclaimer,... =====
+// ===== PART 5: live bot: branches (crisis, small talk, medical, out of scope, disclaimer,... =====
 describe("live bot: branches (crisis, small talk, medical, out of scope, disclaimer, care mode, languages)", () => {
   const ok: AnswerResult = { ...base, kind: "answer", answer: "It starts at $18,995.", usedChunks: [chunk("P6-price-1", 6, "price")], sources: [{ url: SOURCE_PAGES[5]!.url, title: SOURCE_PAGES[5]!.title }] };
   const review: AnswerResult = { ...ok, answer: "Patients describe it as hard.", usedChunks: [chunk("P1-review-1", 1, "review")] };
@@ -582,7 +583,7 @@ describe("live bot: branches (crisis, small talk, medical, out of scope, disclai
   });
 });
 
-// ===== BAGIAN 6: shared contract: disclaimer_text =====
+// ===== PART 6: shared contract: disclaimer_text =====
 describe("shared contract: disclaimer_text", () => {
   const base2: ChatResponse = { answer: "a", kind: "crisis", sources: [], show_disclaimer: false, quote_url: null, offer_lead: false, follow_ups: [] };
   it("accepts a missing, null or string disclaimer_text and rejects anything else; accepts the new kinds", () => {
@@ -593,7 +594,7 @@ describe("shared contract: disclaimer_text", () => {
   });
 });
 
-// ===== BAGIAN 7: live bot: disclaimer trigger =====
+// ===== PART 7: live bot: disclaimer trigger =====
 describe("live bot: disclaimer trigger", () => {
   it("a price answer that cites page 7's price-estimate note does not use up the medical disclaimer", async () => {
     const note: AnswerResult = { ...base, kind: "answer", answer: "It is $18,995.", usedChunks: [chunk("P7-disclaimer-1", 7, "disclaimer")], sources: [{ url: SOURCE_PAGES[6]!.url, title: SOURCE_PAGES[6]!.title }] };
@@ -608,7 +609,7 @@ describe("live bot: disclaimer trigger", () => {
   });
 });
 
-// ===== BAGIAN 8: live bot: unanswered-question log =====
+// ===== PART 8: live bot: unanswered-question log =====
 describe("live bot: unanswered-question log", () => {
   const ok: AnswerResult = { ...base, kind: "answer", answer: "It is $18,995.", usedChunks: [chunk("P6-price-1", 6, "price")], sources: [{ url: SOURCE_PAGES[5]!.url, title: SOURCE_PAGES[5]!.title }] };
 
@@ -691,7 +692,7 @@ describe("live bot: unanswered-question log", () => {
   });
 });
 
-// ===== BAGIAN 9: live bot: lead card offer (N4) =====
+// ===== PART 9: live bot: lead card offer (N4) =====
 describe("live bot: lead card offer (N4)", () => {
   const ok: AnswerResult = { ...base, kind: "answer", answer: "Please use the consultation link.", usedChunks: [chunk("P6-price-1", 6, "price")], sources: [{ url: SOURCE_PAGES[5]!.url, title: SOURCE_PAGES[5]!.title }] };
 

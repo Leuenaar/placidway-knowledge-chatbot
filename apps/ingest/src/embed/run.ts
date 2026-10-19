@@ -1,19 +1,18 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/embed/run.ts
- * TUJUAN  : Membuat vektor (embedding) untuk semua chunk. Chunk yang tidak
- *           berubah memakai ulang vektor lama; vektor dari model lain tidak
- *           pernah dipakai ulang. Berkas dijaga berurutan sehingga dua kali
- *           jalan memberi berkas identik.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Tipe: berkas vektor dan hasil embed
- *    2. Membaca berkas vektor lama (atau tidak ada bila model berbeda)
- *    3. Membuat vektor untuk daftar chunk (pakai ulang yang sama)
- *    4. Membaca chunks.json lalu menulis vectors.json
- *    5. Lokasi bawaan berkas vektor
- * KALAU DIMINTA MENGUBAH:
- *    - Mengganti model embedding: lihat packages/embed dan makeEmbedder di
- *      cli.ts BAGIAN 7
+ * PURPOSE : Create vectors (embeddings) for all chunks. Unchanged chunks reuse
+ *           the old vector; vectors from another model are never reused. The
+ *           file is kept in order, so two runs give an identical file.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Type: the vector file and the embed result
+ *    2. Read the old vector file (or none if the model is different)
+ *    3. Create vectors for a list of chunks (reusing the same ones)
+ *    4. Read chunks.json, then write vectors.json
+ *    5. Default location of the vector file
+ * IF ASKED TO CHANGE:
+ *    - Change the embedding model: see packages/embed and makeEmbedder in
+ *      cli.ts PART 7
  * ============================================================================ */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -21,7 +20,7 @@ import { dirname, join } from "node:path";
 import type { Embedder } from "@pwbot/embed";
 import type { Chunk } from "../chunk/types.js";
 
-// ===== BAGIAN 1: Tipe: berkas vektor dan hasil embed =====
+// ===== PART 1: Type: the vector file and the embed result =====
 export interface VectorFile {
   model: string;
   dims: number;
@@ -37,14 +36,14 @@ export interface EmbedRun {
   file: VectorFile;
 }
 
-// ===== BAGIAN 2: Membaca berkas vektor lama (atau tidak ada bila model berbeda) =====
+// ===== PART 2: Read the old vector file (or none if the model is different) =====
 /** Read an earlier vectors file, or undefined when there is none or it was made by another model. */
 export function readVectorFile(path: string): VectorFile | undefined {
   if (!existsSync(path)) return undefined;
   return JSON.parse(readFileSync(path, "utf8")) as VectorFile;
 }
 
-// ===== BAGIAN 3: Membuat vektor untuk daftar chunk (pakai ulang yang sama) =====
+// ===== PART 3: Create vectors for a list of chunks (reusing the same ones) =====
 /**
  * Give every chunk a vector. A chunk whose text_hash is unchanged since the last run keeps its vector (no model call),
  * so Refresh only pays for the chunks that changed. Vectors from another model are never reused.
@@ -77,7 +76,7 @@ export async function embedChunks(chunks: Chunk[], embedder: Embedder, previous?
   };
 }
 
-// ===== BAGIAN 4: Membaca chunks.json lalu menulis vectors.json =====
+// ===== PART 4: Read chunks.json, then write vectors.json =====
 export async function embedDirectory(chunksFile: string, outFile: string, embedder: Embedder): Promise<EmbedRun> {
   const chunks = JSON.parse(readFileSync(chunksFile, "utf8")) as Chunk[];
   const run = await embedChunks(chunks, embedder, readVectorFile(outFile));
@@ -86,5 +85,5 @@ export async function embedDirectory(chunksFile: string, outFile: string, embedd
   return run;
 }
 
-// ===== BAGIAN 5: Lokasi bawaan berkas vektor =====
+// ===== PART 5: Default location of the vector file =====
 export const defaultVectorPath = (root: string) => join(root, "data", "embeddings", "vectors.json");

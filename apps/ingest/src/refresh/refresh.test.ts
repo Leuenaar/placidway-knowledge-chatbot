@@ -1,19 +1,22 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/refresh/refresh.test.ts
- * TUJUAN  : Uji alur refresh: beda chunk (tambah, ubah, hapus), rencana
- *           refresh, laporan peringatan, refresh pada halaman asli, penjaga
- *           salinan lama dan --force.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the refresh flow: chunk diff (add, change, delete), the
+ *           refresh plan, the warning report, refresh on the real pages, the
+ *           guard against an older copy, and --force.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. diffChunks: added, changed, removed, and renumbered content
- *    2. planRefresh: new, unchanged, changed, same text but other chunks, and the o...
- *    3. renderRefreshReport: lists blocked pages and renumbered ids as warnings
- *    4. refresh on the real pages: new -> loaded, again -> nothing to do, one page...
+ *    2. planRefresh: new, unchanged, changed, same text but other chunks, and
+ *       the o...
+ *    3. renderRefreshReport: lists blocked pages and renumbered ids as
+ *       warnings
+ *    4. refresh on the real pages: new -> loaded, again -> nothing to do, one
+ *       page...
  *    5. refresh blocks an older copy of a page, and --force loads it anyway
  *    6. refresh stops before touching the database when a raw page is broken
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 import assert from "node:assert/strict";
@@ -32,7 +35,7 @@ import { refresh } from "./run.js";
 const chunk = (id: string, hash: string): Chunk => ({ id, page_no: Number(id[1]), source_url: "u", page_type: "package", h1: "H", section: "S", kind: "overview", text: "t".repeat(50), text_hash: hash, page_modified: null });
 const entry = (pageNo: number, hash: string, modifiedDate?: string): ManifestEntry => ({ pageNo, file: "f", sourceUrl: "u", pageType: "package", hash, meta: { h1: "H", ...(modifiedDate ? { modifiedDate } : {}) } });
 
-// ===== BAGIAN 1: diffChunks: added, changed, removed, and renumbered content =====
+// ===== PART 1: diffChunks: added, changed, removed, and renumbered content =====
 test("diffChunks: added, changed, removed, and renumbered content", () => {
   const old = [{ id: "P2-a-1", text_hash: "h1" }, { id: "P2-a-2", text_hash: "h2" }, { id: "P2-a-3", text_hash: "h3" }];
   const next = [chunk("P2-a-1", "h1"), chunk("P2-a-2", "hNEW"), chunk("P2-a-3", "h2"), chunk("P2-a-4", "h3")];
@@ -44,7 +47,7 @@ test("diffChunks: added, changed, removed, and renumbered content", () => {
   assert.deepEqual(diffChunks(old, [chunk("P2-a-1", "h1")]).removed, ["P2-a-2", "P2-a-3"]);
 });
 
-// ===== BAGIAN 2: planRefresh: new, unchanged, changed, same text but other chunks, and the o... =====
+// ===== PART 2: planRefresh: new, unchanged, changed, same text but other chunks, and the o... =====
 test("planRefresh: new, unchanged, changed, same text but other chunks, and the older-copy guard", () => {
   const manifest = [entry(1, "A"), entry(2, "B"), entry(3, "C"), entry(4, "D"), entry(5, "E", "Oct 02, 2026"), entry(6, "F", "Oct 12, 2026")];
   const chunks = [chunk("P2-a-1", "x"), chunk("P3-a-1", "y"), chunk("P4-a-1", "z"), chunk("P4-a-2", "z2")];
@@ -68,7 +71,7 @@ test("planRefresh: new, unchanged, changed, same text but other chunks, and the 
   assert.match(plans.find((p) => p.pageNo === 6)!.reason, /did not/, "same Modified date but other text");
 });
 
-// ===== BAGIAN 3: renderRefreshReport: lists blocked pages and renumbered ids as warnings =====
+// ===== PART 3: renderRefreshReport: lists blocked pages and renumbered ids as warnings =====
 test("renderRefreshReport: lists blocked pages and renumbered ids as warnings", () => {
   const plans = planRefresh([entry(5, "E", "Oct 02, 2026")], [], [{ page_no: 5, cleaned_hash: "X", page_modified: "2026-10-12" }], new Map());
   const md = renderRefreshReport(plans, "plan", []);
@@ -91,7 +94,7 @@ function run(root: string, db: ReturnType<typeof mockDb>, o: { apply?: boolean; 
   return refresh({ root, db: db.rest, apply: o.apply ?? false, force: o.force ?? false, makeEmbedder: createFakeEmbedder, allowFake: true });
 }
 
-// ===== BAGIAN 4: refresh on the real pages: new -> loaded, again -> nothing to do, one page... =====
+// ===== PART 4: refresh on the real pages: new -> loaded, again -> nothing to do, one page... =====
 test("refresh on the real pages: new -> loaded, again -> nothing to do, one page edited -> only that page is written", opts, async () => {
   const root = sandbox();
   const db = mockDb();
@@ -130,7 +133,7 @@ test("refresh on the real pages: new -> loaded, again -> nothing to do, one page
   }
 });
 
-// ===== BAGIAN 5: refresh blocks an older copy of a page, and --force loads it anyway =====
+// ===== PART 5: refresh blocks an older copy of a page, and --force loads it anyway =====
 test("refresh blocks an older copy of a page, and --force loads it anyway", opts, async () => {
   const root = sandbox();
   const db = mockDb();
@@ -151,7 +154,7 @@ test("refresh blocks an older copy of a page, and --force loads it anyway", opts
   assert.ok(forced.loaded.includes(5));
 });
 
-// ===== BAGIAN 6: refresh stops before touching the database when a raw page is broken =====
+// ===== PART 6: refresh stops before touching the database when a raw page is broken =====
 test("refresh stops before touching the database when a raw page is broken", opts, async () => {
   const root = sandbox();
   const db = mockDb();

@@ -1,31 +1,33 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : packages/shared/src/index.ts
- * TUJUAN  : Kontrak bersama antara server dan browser: batas panjang pesan,
- *           jenis balasan, bentuk permintaan dan jawaban chat, bentuk
- *           permintaan kartu kontak, tujuh halaman sumber yang sah, link
- *           penawaran, teks disclaimer, dan pemeriksa bentuk data
+ * PURPOSE : Contract shared by the server and the browser: message length
+ *           limit, reply kinds, the shape of chat requests and answers, the
+ *           shape of the contact card request, the seven valid source pages,
+ *           the quote link, the disclaimer text, and the shape checker
  *           (isChatResponse).
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Batas: panjang pesan, jumlah riwayat, panjang jawaban lama
- *    2. Batas dan versi persetujuan kartu kontak (N4)
- *    3. Batas saran lanjutan per balasan
- *    4. Jenis balasan yang mungkin
- *    5. Tipe: sumber, riwayat, permintaan chat
- *    6. Tipe: teks kartu kontak dan permintaan serta jawaban /api/lead
- *    7. Tipe: bentuk jawaban chat dan health
- *    8. Tujuh halaman sumber yang sah (satu-satunya link sumber yang boleh)
- *    9. Link formulir penawaran gratis
- *    10. Teks disclaimer lengkap
- *    11. Pemeriksa bentuk data yang datang lewat jaringan
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah batas panjang pesan: BAGIAN 1 (juga batas di kotak input web)
- *    - Mengubah teks disclaimer: BAGIAN 10
- *    - Mengubah daftar halaman sumber: BAGIAN 8 dan PAGE_TYPES di
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Limits: message length, number of history entries, length of an old
+ *       answer
+ *    2. Limits and version of the contact card consent (N4)
+ *    3. Limit on follow-up suggestions per reply
+ *    4. Possible reply kinds
+ *    5. Type: source, history, chat request
+ *    6. Type: contact card text and the /api/lead request and answer
+ *    7. Type: the shape of the chat and health answers
+ *    8. The seven valid source pages (the only source links allowed)
+ *    9. Link to the free quote form
+ *    10. Full disclaimer text
+ *    11. Checker for the shape of data that arrives over the network
+ * IF ASKED TO CHANGE:
+ *    - Change the message length limit: PART 1 (also the limit in the web
+ *      input box)
+ *    - Change the disclaimer text: PART 10
+ *    - Change the list of source pages: PART 8 and PAGE_TYPES in
  *      apps/ingest/src/pages.ts
  * ============================================================================ */
 
-// ===== BAGIAN 1: Batas: panjang pesan, jumlah riwayat, panjang jawaban lama =====
+// ===== PART 1: Limits: message length, number of history entries, length of an old answer =====
 /**
  * Shared API contract between the web UI and the API server.
  *
@@ -44,17 +46,17 @@ export const MAX_HISTORY_ENTRIES = 12;
 /** Longest earlier bot answer accepted in the history (the browser cuts longer ones; they are context only). */
 export const MAX_HISTORY_ANSWER_LENGTH = 2000;
 
-// ===== BAGIAN 2: Batas dan versi persetujuan kartu kontak (N4) =====
+// ===== PART 2: Limits and version of the contact card consent (N4) =====
 /** Lead capture (nice-to-have N4): limits for the name and email a visitor may leave, and the version of the consent text they agreed to. */
 export const MAX_LEAD_NAME_LENGTH = 100;
 export const MAX_LEAD_EMAIL_LENGTH = 254;
 export const LEAD_CONSENT_VERSION = "v1";
 
-// ===== BAGIAN 3: Batas saran lanjutan per balasan =====
+// ===== PART 3: Limit on follow-up suggestions per reply =====
 /** Most follow-up suggestions a reply may carry. More than a few only adds choice overload. */
 export const MAX_FOLLOW_UPS = 3;
 
-// ===== BAGIAN 4: Jenis balasan yang mungkin =====
+// ===== PART 4: Possible reply kinds =====
 /**
  * What kind of reply the bot produced. The UI uses it for styling, and the server
  * uses it to decide which fixed behaviour applied (answer, decline, fallback).
@@ -75,7 +77,7 @@ export const ANSWER_KINDS = [
 
 export type AnswerKind = (typeof ANSWER_KINDS)[number];
 
-// ===== BAGIAN 5: Tipe: sumber, riwayat, permintaan chat =====
+// ===== PART 5: Type: source, history, chat request =====
 export interface Source {
   url: string;
   title: string;
@@ -97,7 +99,7 @@ export interface ChatRequest {
   history?: HistoryEntry[];
 }
 
-// ===== BAGIAN 6: Tipe: teks kartu kontak dan permintaan serta jawaban /api/lead =====
+// ===== PART 6: Type: contact card text and the /api/lead request and answer =====
 /** The words of the lead card, in the visitor's language, chosen by the server (the web page has no texts of its own for it). */
 export interface LeadTexts {
   title: string;
@@ -126,7 +128,7 @@ export interface LeadResponse {
   ok: boolean;
 }
 
-// ===== BAGIAN 7: Tipe: bentuk jawaban chat dan health =====
+// ===== PART 7: Type: the shape of the chat and health answers =====
 export interface ChatResponse {
   answer: string;
   kind: AnswerKind;
@@ -155,7 +157,7 @@ export interface HealthResponse {
   mode: "mock" | "live";
 }
 
-// ===== BAGIAN 8: Tujuh halaman sumber yang sah (satu-satunya link sumber yang boleh) =====
+// ===== PART 8: The seven valid source pages (the only source links allowed) =====
 /** The only pages the bot may use as a knowledge base, and therefore the only valid sources. */
 export const SOURCE_PAGES: readonly (Source & { n: number })[] = [
   {
@@ -195,12 +197,12 @@ export const SOURCE_PAGES: readonly (Source & { n: number })[] = [
   },
 ];
 
-// ===== BAGIAN 9: Link formulir penawaran gratis =====
+// ===== PART 9: Link to the free quote form =====
 /** Free quote form link. It is taken from the page content (the "Contact PlacidWay for a Free Quote" link). */
 export const QUOTE_URL =
   "https://www.placidway.com/rfi/5/Alternative-Cancer-Treatment-by-ITC-Immunity-Therapy-Center";
 
-// ===== BAGIAN 10: Teks disclaimer lengkap =====
+// ===== PART 10: Full disclaimer text =====
 /**
  * Disclaimer wording. It reuses the sentences from the "Important Disclaimer" block of
  * the price comparison page, so the bot says what PlacidWay itself says.
@@ -209,7 +211,7 @@ export const DISCLAIMER_TEXT =
   "PlacidWay provides medical travel information, not healthcare services, and does not endorse any provider. " +
   "Consult your local licensed healthcare provider before pursuing any treatment.";
 
-// ===== BAGIAN 11: Pemeriksa bentuk data yang datang lewat jaringan =====
+// ===== PART 11: Checker for the shape of data that arrives over the network =====
 /** Runtime check for data that crossed the network, so the UI never trusts an unknown shape. */
 export function isChatResponse(value: unknown): value is ChatResponse {
   if (typeof value !== "object" || value === null) return false;

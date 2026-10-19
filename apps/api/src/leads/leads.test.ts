@@ -1,17 +1,16 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/leads/leads.test.ts
- * TUJUAN  : Uji penangkapan kontak (N4): penyimpanan (tidak pernah mencatat
- *           nama atau email di log), aturan layanan, dan POST /api/lead lewat
- *           HTTP sungguhan (validasi ketat, batas sendiri, kolom jebakan,
- *           mode peduli).
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the contact capture (N4): storage (never logs the name or
+ *           email), the service rules, and POST /api/lead over real HTTP
+ *           (strict validation, its own limit, the trap field, care mode).
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. lead store
  *    2. lead service
  *    3. POST /api/lead (real HTTP)
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 /**
@@ -39,7 +38,7 @@ function fetchStub(status: number, body: unknown = null) {
   return { fetchFn, calls };
 }
 
-// ===== BAGIAN 1: lead store =====
+// ===== PART 1: lead store =====
 describe("lead store", () => {
   it("writes name, email, language and the consent version, and nothing else", async () => {
     const f = fetchStub(201);
@@ -102,7 +101,7 @@ describe("lead store", () => {
   });
 });
 
-// ===== BAGIAN 2: lead service =====
+// ===== PART 2: lead service =====
 describe("lead service", () => {
   const input = { sessionId: SESSION, name: "Ana", email: "ana@example.com", language: "pt-BR" };
 
@@ -139,7 +138,7 @@ describe("lead service", () => {
   });
 });
 
-// ===== BAGIAN 3: POST /api/lead (real HTTP) =====
+// ===== PART 3: POST /api/lead (real HTTP) =====
 describe("POST /api/lead (real HTTP)", () => {
   let server: Server;
   let baseUrl: string;

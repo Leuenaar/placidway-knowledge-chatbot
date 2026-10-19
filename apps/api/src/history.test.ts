@@ -1,22 +1,22 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/history.test.ts
- * TUJUAN  : Uji penyimpan riwayat percakapan di memori server
- *           (src/history.ts): batas pesan, masa berlaku, dan benih riwayat
- *           dari browser.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the conversation history store in the server memory
+ *           (src/history.ts): the message limit, the expiry, and the history
+ *           seed from the browser.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. history store
  *    2. history store: turns from the browser (seed)
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { createHistoryStore } from "./history";
 
-// ===== BAGIAN 1: history store =====
+// ===== PART 1: history store =====
 describe("history store", () => {
   it("returns nothing for an unknown session and keeps sessions apart", () => {
     const h = createHistoryStore();
@@ -92,7 +92,7 @@ describe("history store", () => {
   });
 });
 
-// ===== BAGIAN 2: history store: turns from the browser (seed) =====
+// ===== PART 2: history store: turns from the browser (seed) =====
 describe("history store: turns from the browser (seed)", () => {
   const turns = [
     { role: "visitor" as const, text: "q1" },

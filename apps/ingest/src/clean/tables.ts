@@ -1,28 +1,28 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/clean/tables.ts
- * TUJUAN  : Mengubah tabel markdown di halaman mentah menjadi kalimat (aturan
- *           R5): tiap baris tabel jadi satu kalimat, kolom 'Actions' dan
- *           kolom kosong dibuang, kolom pertama jadi nama baris kecuali
- *           isinya uang (tabel harga halaman 1).
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Tipe: sel tabel
- *    2. Tipe: info barang yang dibuang
- *    3. Tipe: hasil konversi satu tabel
- *    4. Apakah baris ini awal tabel
- *    5. Membaca sel-sel tabel
- *    6. Nilai satu sel
- *    7. Pola uang dan kolom noise
- *    8. Pembantu: akhiri kalimat dengan tanda baca
- *    9. Konversi satu tabel menjadi kalimat
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah cara tabel ditulis jadi kalimat (BAGIAN 9)
+ * PURPOSE : Turn markdown tables on the raw page into sentences (rule R5):
+ *           each table row becomes one sentence, the 'Actions' column and
+ *           empty columns are dropped, and the first column becomes the row
+ *           name unless its content is money (the price table on page 1).
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Type: table cell
+ *    2. Type: information about a removed item
+ *    3. Type: result of converting one table
+ *    4. Whether this line starts a table
+ *    5. Read the table cells
+ *    6. The value of one cell
+ *    7. Money pattern and noise columns
+ *    8. Helper: end a sentence with punctuation
+ *    9. Convert one table into sentences
+ * IF ASKED TO CHANGE:
+ *    - Change how a table is written as sentences (PART 9)
  * ============================================================================ */
 
 import type { Line } from "./types.js";
 import { extractAmounts, stripUrls } from "./util.js";
 
-// ===== BAGIAN 1: Tipe: sel tabel =====
+// ===== PART 1: Type: table cell =====
 /**
  * R5: turn the crawler's table layout into one sentence per row.
  *
@@ -37,7 +37,7 @@ interface Cell {
   items: string[];
 }
 
-// ===== BAGIAN 2: Tipe: info barang yang dibuang =====
+// ===== PART 2: Type: information about a removed item =====
 export interface DropInfo {
   rule: string;
   line: number;
@@ -45,7 +45,7 @@ export interface DropInfo {
   amounts: string[];
 }
 
-// ===== BAGIAN 3: Tipe: hasil konversi satu tabel =====
+// ===== PART 3: Type: result of converting one table =====
 export interface TableConversion {
   /** Index in the input array of the first line after the table. */
   next: number;
@@ -55,14 +55,14 @@ export interface TableConversion {
   warnings: string[];
 }
 
-// ===== BAGIAN 4: Apakah baris ini awal tabel =====
+// ===== PART 4: Whether this line starts a table =====
 export function isTableStart(lines: Line[], i: number): boolean {
   const cur = lines[i];
   if (!cur || !cur.t.startsWith("|")) return false;
   return i === 0 || (lines[i - 1]?.t.trim() ?? "") === "";
 }
 
-// ===== BAGIAN 5: Membaca sel-sel tabel =====
+// ===== PART 5: Read the table cells =====
 function parseCells(lines: Line[], start: number): { cells: Cell[]; ncols: number; next: number } {
   let ncols = 0;
   for (let k = start; k < lines.length && lines[k]!.t.startsWith("|"); k++) ncols++;
@@ -117,7 +117,7 @@ function parseCells(lines: Line[], start: number): { cells: Cell[]; ncols: numbe
   return { cells, ncols, next: lastUsed + 1 };
 }
 
-// ===== BAGIAN 6: Nilai satu sel =====
+// ===== PART 6: The value of one cell =====
 function cellValue(c: Cell): { value: string; urls: number } {
   const parts = [...c.text];
   if (c.items.length) parts.push(c.items.join(", "));
@@ -130,16 +130,16 @@ function cellValue(c: Cell): { value: string; urls: number } {
   return { value, urls: s.removed };
 }
 
-// ===== BAGIAN 7: Pola uang dan kolom noise =====
+// ===== PART 7: Money pattern and noise columns =====
 const MONEY = /^(\$\s?\d|\d[\d,.]*\s*(USD|\$))/i;
 const NOISE_COLUMNS = /^(actions?)$/i;
 
-// ===== BAGIAN 8: Pembantu: akhiri kalimat dengan tanda baca =====
+// ===== PART 8: Helper: end a sentence with punctuation =====
 function sentenceEnd(s: string): string {
   return /[.!?]$/.test(s) ? s : `${s}.`;
 }
 
-// ===== BAGIAN 9: Konversi satu tabel menjadi kalimat =====
+// ===== PART 9: Convert one table into sentences =====
 export function convertTable(lines: Line[], start: number): TableConversion {
   const { cells, ncols, next } = parseCells(lines, start);
   const out: TableConversion = { next, rows: [], drops: [], urlsRemoved: 0, warnings: [] };

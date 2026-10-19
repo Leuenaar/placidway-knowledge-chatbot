@@ -1,15 +1,15 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/limits/meter.ts
- * TUJUAN  : Pembungkus klien model supaya setiap panggilan melaporkan token
- *           yang dipakai ke anggaran harian.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Pembungkus penghitung token
+ * PURPOSE : Wrapper around the model client so every call reports the tokens
+ *           it used to the daily budget.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Token counter wrapper
  * ============================================================================ */
 
 import type { ModelClient } from "../answer/anthropic";
 
-// ===== BAGIAN 1: Pembungkus penghitung token =====
+// ===== PART 1: Token counter wrapper =====
 /** Wraps a model client so every call reports the tokens it used (input + output, including reasoning) to the daily budget. */
 export function meterClient(client: ModelClient, onTokens: (tokens: number) => void): ModelClient {
   return {

@@ -1,13 +1,14 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/mock/bot.test.ts
- * TUJUAN  : Uji bot contoh (mock) untuk kartu kontak N4: kartu muncul sekali
- *           per sesi dan bentuk balasan sesuai kontrak.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the sample (mock) bot for the N4 contact card: the card
+ *           appears once per session and the shape of the reply follows the
+ *           contract.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. mock bot: lead card (N4)
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 import assert from "node:assert/strict";
@@ -17,7 +18,7 @@ import { createMockBot } from "./bot";
 
 const A = "11111111-1111-4111-8111-111111111111";
 
-// ===== BAGIAN 1: mock bot: lead card (N4) =====
+// ===== PART 1: mock bot: lead card (N4) =====
 describe("mock bot: lead card (N4)", () => {
   it("offers the card when asked to be contacted or for a quote, once per session", async () => {
     const bot = createMockBot();

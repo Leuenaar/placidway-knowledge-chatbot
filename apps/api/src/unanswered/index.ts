@@ -1,8 +1,7 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/unanswered/index.ts
- * TUJUAN  : Pintu keluar modul unanswered (log pertanyaan yang tidak
- *           terjawab).
+ * PURPOSE : Exit door of the unanswered module (log of unanswered questions).
  * ============================================================================ */
 
 export { MAX_QUESTION_LENGTH, maskPersonalData, questionForLog } from "./mask";

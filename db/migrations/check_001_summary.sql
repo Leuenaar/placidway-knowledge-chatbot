@@ -1,15 +1,16 @@
 -- ============================================================================
--- PETA FILE
+-- FILE MAP
 -- FILE    : db/migrations/check_001_summary.sql
--- TUJUAN  : Versi ringkas audit 001: satu tabel hasil, setiap baris harus
---           bertuliskan OK. 'found' adalah isi database sebenarnya,
---           'expected' yang seharusnya. Hanya-baca. Jumlah tabel yang
---           diharapkan otomatis tiga, ditambah satu bila tabel leads ada.
--- BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
---    1. Satu tabel hasil: tabel tanpa RLS, hak anon, fungsi, sequence, tabel service_role
+-- PURPOSE : Short version of audit 001: one result table, every row must say
+--           OK. 'found' is the real database content, 'expected' is what it
+--           should be. Read only. The expected number of tables is
+--           automatically three, plus one if the leads table exists.
+-- PARTS   : (in the code, search for the text PART n with Ctrl+F)
+--    1. One result table: tables without RLS, anon rights, functions,
+--       sequences, service_role tables
 -- ============================================================================
 
--- ===== BAGIAN 1: Satu tabel hasil: tabel tanpa RLS, hak anon, fungsi, sequence, tabel service_role =====
+-- ===== PART 1: One result table: tables without RLS, anon rights, functions, sequences, service_role tables =====
 -- check_001_summary.sql
 -- One result table instead of five. Run it in the Supabase SQL Editor.
 -- Every row should say OK. "found" is what the database really has, "expected"

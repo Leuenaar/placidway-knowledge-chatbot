@@ -1,25 +1,33 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/ingest/src/clean/gates.test.ts
- * TUJUAN  : Uji gerbang pembersih pada 7 halaman asli: tidak ada sisa
- *           boilerplate, hasil deterministik, ukuran sesuai pengukuran, isi
- *           penting tiap halaman bertahan.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the cleaner gate on the 7 real pages: no boilerplate is
+ *           left, the result is deterministic, the size matches the
+ *           measurement, and the important content of each page survives.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. gate: all 7 pages are cleaned, no warnings, R10 passes on each
  *    2. gate: no boilerplate is left in any page
  *    3. gate: the only $ amount removed anywhere is the unnamed row on page 6
- *    4. gate: the cleaner is deterministic (two runs give identical text and hash)
+ *    4. gate: the cleaner is deterministic (two runs give identical text and
+ *       hash)
  *    5. gate: sizes are close to the measurements in the handoff (R1 to R5)
- *    6. gate page 1: header, price table and the Appendix package name survive; the...
- *    7. gate pages 2 to 4: 'Price starting from' and both program prices are present
- *    8. gate pages 2 to 4: the three packages differ only by cancer type in their H1
- *    9. gate page 5: every video is one 'Video:' line and no video link is left
- *    10. gate page 6: prices are sentences, the unnamed row is reported, the broken...
- *    11. gate page 7: tables are sentences with modified dates, the disclaimer stays...
- *    12. gate: reviewer names are clean (page 7 used to swallow the review block)
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ *    6. gate page 1: header, price table and the Appendix package name
+ *       survive; the...
+ *    7. gate pages 2 to 4: 'Price starting from' and both program prices are
+ *       present
+ *    8. gate pages 2 to 4: the three packages differ only by cancer type in
+ *       their H1
+ *    9. gate page 5: every video is one 'Video:' line and no video link is
+ *       left
+ *    10. gate page 6: prices are sentences, the unnamed row is reported, the
+ *        broken...
+ *    11. gate page 7: tables are sentences with modified dates, the disclaimer
+ *        stays...
+ *    12. gate: reviewer names are clean (page 7 used to swallow the review
+ *        block)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 import assert from "node:assert/strict";
@@ -55,7 +63,7 @@ const get = (n: number): CleanResult => {
   return p;
 };
 
-// ===== BAGIAN 1: gate: all 7 pages are cleaned, no warnings, R10 passes on each =====
+// ===== PART 1: gate: all 7 pages are cleaned, no warnings, R10 passes on each =====
 test("gate: all 7 pages are cleaned, no warnings, R10 passes on each", opts, () => {
   assert.equal(pages.size, 7);
   for (const p of pages.values()) {
@@ -65,7 +73,7 @@ test("gate: all 7 pages are cleaned, no warnings, R10 passes on each", opts, () 
   }
 });
 
-// ===== BAGIAN 2: gate: no boilerplate is left in any page =====
+// ===== PART 2: gate: no boilerplate is left in any page =====
 test("gate: no boilerplate is left in any page", opts, () => {
   const banned: [RegExp, string][] = [
     [/\[img:/, "image line"],
@@ -89,13 +97,13 @@ test("gate: no boilerplate is left in any page", opts, () => {
   }
 });
 
-// ===== BAGIAN 3: gate: the only $ amount removed anywhere is the unnamed row on page 6 =====
+// ===== PART 3: gate: the only $ amount removed anywhere is the unnamed row on page 6 =====
 test("gate: the only $ amount removed anywhere is the unnamed row on page 6", opts, () => {
   const dropped = [...pages.values()].flatMap((p) => p.report.dropped.filter((d) => d.amounts.length).map((d) => ({ page: p.pageNo, rule: d.rule, amounts: d.amounts })));
   assert.deepEqual(dropped, [{ page: 6, rule: "R5-unnamed-row", amounts: ["$18995"] }]);
 });
 
-// ===== BAGIAN 4: gate: the cleaner is deterministic (two runs give identical text and hash) =====
+// ===== PART 4: gate: the cleaner is deterministic (two runs give identical text and hash) =====
 test("gate: the cleaner is deterministic (two runs give identical text and hash)", opts, () => {
   const again = load();
   for (const [n, p] of pages) {
@@ -106,7 +114,7 @@ test("gate: the cleaner is deterministic (two runs give identical text and hash)
   assert.equal(hashes.size, 7, "seven different pages give seven different hashes");
 });
 
-// ===== BAGIAN 5: gate: sizes are close to the measurements in the handoff (R1 to R5) =====
+// ===== PART 5: gate: sizes are close to the measurements in the handoff (R1 to R5) =====
 test("gate: sizes are close to the measurements in the handoff (R1 to R5)", opts, () => {
   // Handoff 5.3 measured: 21,594 / ~11,900 x3 / 38,738 (before R6) / 4,301 / 8,727.
   const near = (n: number, expected: number, tol = 0.12) => {
@@ -123,7 +131,7 @@ test("gate: sizes are close to the measurements in the handoff (R1 to R5)", opts
   assert.ok(get(5).text.length < 30000);
 });
 
-// ===== BAGIAN 6: gate page 1: header, price table and the Appendix package name survive; the... =====
+// ===== PART 6: gate page 1: header, price table and the Appendix package name survive; the... =====
 test("gate page 1: header, price table and the Appendix package name survive; the booking widget does not", opts, () => {
   const p = get(1);
   assert.equal(p.meta.modifiedDate, "Oct 12, 2026");
@@ -134,7 +142,7 @@ test("gate page 1: header, price table and the Appendix package name survive; th
   assert.ok(p.text.includes("Medically reviewed by: Dr. Carlos Bautista"));
 });
 
-// ===== BAGIAN 7: gate pages 2 to 4: 'Price starting from' and both program prices are present =====
+// ===== PART 7: gate pages 2 to 4: 'Price starting from' and both program prices are present =====
 test("gate pages 2 to 4: 'Price starting from' and both program prices are present", opts, () => {
   for (const n of [2, 3, 4]) {
     const p = get(n);
@@ -146,14 +154,14 @@ test("gate pages 2 to 4: 'Price starting from' and both program prices are prese
   }
 });
 
-// ===== BAGIAN 8: gate pages 2 to 4: the three packages differ only by cancer type in their H1 =====
+// ===== PART 8: gate pages 2 to 4: the three packages differ only by cancer type in their H1 =====
 test("gate pages 2 to 4: the three packages differ only by cancer type in their H1", opts, () => {
   const h1s = [2, 3, 4].map((n) => get(n).meta.h1);
   assert.equal(new Set(h1s).size, 3);
   assert.ok(/Adenocarcinoma/.test(h1s[0]!) && /Adrenal/.test(h1s[1]!) && /Anal/.test(h1s[2]!));
 });
 
-// ===== BAGIAN 9: gate page 5: every video is one 'Video:' line and no video link is left =====
+// ===== PART 9: gate page 5: every video is one 'Video:' line and no video link is left =====
 test("gate page 5: every video is one 'Video:' line and no video link is left", opts, () => {
   const p = get(5);
   const videos = p.text.split("\n").filter((l) => l.startsWith("- Video: "));
@@ -166,7 +174,7 @@ test("gate page 5: every video is one 'Video:' line and no video link is left", 
   assert.ok(p.text.includes("## Recent Reviews"));
 });
 
-// ===== BAGIAN 10: gate page 6: prices are sentences, the unnamed row is reported, the broken... =====
+// ===== PART 10: gate page 6: prices are sentences, the unnamed row is reported, the broken... =====
 test("gate page 6: prices are sentences, the unnamed row is reported, the broken intro is kept as is", opts, () => {
   const p = get(6);
   assert.ok(p.text.includes("- Breast Cancer: $18995 (Price in USD)."));
@@ -176,7 +184,7 @@ test("gate page 6: prices are sentences, the unnamed row is reported, the broken
   assert.ok(p.text.includes("prices range between in Tijuana"), "the broken sentence is content, not removed; rules must not use it");
 });
 
-// ===== BAGIAN 11: gate page 7: tables are sentences with modified dates, the disclaimer stays... =====
+// ===== PART 11: gate page 7: tables are sentences with modified dates, the disclaimer stays... =====
 test("gate page 7: tables are sentences with modified dates, the disclaimer stays, the contents list goes", opts, () => {
   const p = get(7);
   assert.ok(p.text.includes("Important Disclaimer"));
@@ -189,7 +197,7 @@ test("gate page 7: tables are sentences with modified dates, the disclaimer stay
   assert.equal(p.meta.lastUpdated, "Oct 2026");
 });
 
-// ===== BAGIAN 12: gate: reviewer names are clean (page 7 used to swallow the review block) =====
+// ===== PART 12: gate: reviewer names are clean (page 7 used to swallow the review block) =====
 test("gate: reviewer names are clean (page 7 used to swallow the review block)", opts, () => {
   assert.equal(get(7).meta.reviewedBy, "Dr. Felix Mendes");
   for (const n of [1, 2, 3, 4, 5, 6]) assert.equal(get(n).meta.reviewedBy, "Dr. Carlos Bautista", `page ${n}`);

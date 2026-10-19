@@ -1,19 +1,19 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/app.test.ts
- * TUJUAN  : Uji kontrak API: menjalankan aplikasi Express asli di port acak
- *           dan mengirim permintaan HTTP sungguhan, jadi yang diuji adalah
- *           jalur yang sama dengan yang dipakai browser (health, jenis
- *           balasan, aturan kontrak, saran lanjutan, validasi).
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the API contract: runs the real Express app on a random
+ *           port and sends real HTTP requests, so what is tested is the same
+ *           path the browser uses (health, reply kinds, contract rules,
+ *           follow-up suggestions, validation).
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. health
  *    2. reply kinds
  *    3. contract rules
  *    4. follow-up suggestions
  *    5. validation
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 /**
@@ -65,7 +65,7 @@ function asChatResponse(body: unknown): ChatResponse {
   return body;
 }
 
-// ===== BAGIAN 1: health =====
+// ===== PART 1: health =====
 describe("health", () => {
   it("reports mock mode", async () => {
     const res = await fetch(`${baseUrl}/api/health`);
@@ -74,7 +74,7 @@ describe("health", () => {
   });
 });
 
-// ===== BAGIAN 2: reply kinds =====
+// ===== PART 2: reply kinds =====
 describe("reply kinds", () => {
   const cases: [string, string, number][] = [
     ["How much does the adenocarcinoma package cost?", "answer", 200],
@@ -104,7 +104,7 @@ describe("reply kinds", () => {
   }
 });
 
-// ===== BAGIAN 3: contract rules =====
+// ===== PART 3: contract rules =====
 describe("contract rules", () => {
   it("only cites the 7 allowed pages", async () => {
     const allowed = new Set(SOURCE_PAGES.map((p) => p.url));
@@ -144,7 +144,7 @@ describe("contract rules", () => {
   });
 });
 
-// ===== BAGIAN 4: follow-up suggestions =====
+// ===== PART 4: follow-up suggestions =====
 describe("follow-up suggestions", () => {
   const probes = [
     "How much does it cost?",
@@ -189,7 +189,7 @@ describe("follow-up suggestions", () => {
   });
 });
 
-// ===== BAGIAN 5: validation =====
+// ===== PART 5: validation =====
 describe("validation", () => {
   it("rejects an empty message", async () => {
     const res = await chat("   ");

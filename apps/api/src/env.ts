@@ -1,11 +1,11 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/env.ts
- * TUJUAN  : Membaca file .env.api (baris KEY=nilai) ke environment. Nilai
- *           yang sudah diset di environment asli menang, jadi server bisa
- *           memakai secret tanpa file.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Pembaca file .env
+ * PURPOSE : Read the .env.api file (KEY=value lines) into the environment.
+ *           Values already set in the real environment win, so the server can
+ *           use secrets without a file.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Reader for the .env file
  * ============================================================================ */
 
 /**
@@ -14,7 +14,7 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 
-// ===== BAGIAN 1: Pembaca file .env =====
+// ===== PART 1: Reader for the .env file =====
 export function loadEnvFile(path: string): void {
   if (!existsSync(path)) return;
   for (const line of readFileSync(path, "utf8").split(/\r?\n/)) {

@@ -1,18 +1,18 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/bot.ts
- * TUJUAN  : Kontrak sederhana sebuah bot: apa yang harus bisa dilakukan bot
- *           (reply, limited). Bot mock dan bot live sama-sama memenuhinya,
- *           jadi jalur di app.ts tidak pernah berubah.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Bentuk hasil dan kontrak bot
+ * PURPOSE : The simple contract of a bot: what a bot must be able to do
+ *           (reply, limited). The mock bot and the live bot both meet it, so
+ *           the routes in app.ts never change.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Shape of the result and the bot contract
  * ============================================================================ */
 
 /** What the HTTP layer needs from a bot. The mock bot and the live bot both fit it, so the routes never change. */
 import type { ChatResponse, HistoryEntry } from "@pwbot/shared";
 import type { LimitReason } from "./limits";
 
-// ===== BAGIAN 1: Bentuk hasil dan kontrak bot =====
+// ===== PART 1: Shape of the result and the bot contract =====
 export interface BotResult {
   status: number;
   body: ChatResponse;

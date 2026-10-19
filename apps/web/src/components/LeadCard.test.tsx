@@ -1,16 +1,16 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/web/src/components/LeadCard.test.tsx
- * TUJUAN  : Uji kartu kontak di browser: tampilan awal, pemeriksaan dasar
- *           sebelum kirim, dan permintaan ke server hanya membawa tanda
- *           persetujuan serta apa yang diketik pengunjung.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the contact card in the browser: the first view, the basic
+ *           checks before sending, and a request to the server that carries
+ *           only the consent flag and what the visitor typed.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. LeadCard
  *    2. checks before sending
  *    3. submitLead
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 /**
@@ -31,7 +31,7 @@ const texts: LeadTexts = { title: "Leave your details", name: "Your name", email
 const render = (outcome?: "done" | "declined") =>
   renderToStaticMarkup(createElement(LeadCard, { texts, sessionId: SID, outcome, onOutcome: () => {} }));
 
-// ===== BAGIAN 1: LeadCard =====
+// ===== PART 1: LeadCard =====
 describe("LeadCard", () => {
   it("shows the server's texts, an untouched consent box and a disabled send button", () => {
     const html = render();
@@ -61,7 +61,7 @@ describe("LeadCard", () => {
   });
 });
 
-// ===== BAGIAN 2: checks before sending =====
+// ===== PART 2: checks before sending =====
 describe("checks before sending", () => {
   it("accepts ordinary emails and refuses malformed ones", () => {
     for (const e of ["ana@example.com", " ana@example.com ", "a.b+c@mail.co.id"]) assert.ok(looksLikeEmail(e), e);
@@ -77,7 +77,7 @@ describe("checks before sending", () => {
   });
 });
 
-// ===== BAGIAN 3: submitLead =====
+// ===== PART 3: submitLead =====
 describe("submitLead", () => {
   const realFetch = globalThis.fetch;
   afterEach(() => { globalThis.fetch = realFetch; });

@@ -1,35 +1,39 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/live/bot.ts
- * TUJUAN  : Bot live: pertanyaan masuk, jawaban terperiksa dengan sumber
- *           keluar. Alurnya: rewrite (bahasa, query, kategori) lalu pilih
- *           cabang lalu balasan. Yang diputuskan SERVER, bukan model: link
- *           sumber, saran pertanyaan, link quote, jenis balasan, disclaimer
- *           sekali per sesi, kartu kontak, dan apa yang tampil kalau ada yang
- *           janggal. Jawaban yang tidak mengutip potongan asli tidak pernah
- *           ditampilkan.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Teks tetap bawaan dan jenis chunk khusus (disclaimer, medis)
- *    2. Opsi bot live (retriever, answerer, rewriter, localizer, log, dst)
- *    3. Pembuat bot live dan fungsi bantu (saran, bahasa, alasan pencatatan)
- *    4. Kartu kontak: aturan kapan ditawarkan (sekali, bukan care mode, bukan medis)
- *    5. Disclaimer penuh sekali per sesi
- *    6. limited: balasan saat kena batas pemakaian (tanpa model)
- *    7. reply: siapkan riwayat, rewrite, bahasa, care mode
- *    8. CABANG 1: krisis (dua detektor, teks tetap, care mode mulai)
- *    9. CABANG 2: obrolan ringan tanpa mencari halaman
- *    10. CABANG 3: jalur normal (cari halaman, model menjawab, server memeriksa)
- *    11. Pencatatan pertanyaan tak terjawab dan balasan tanpa isi halaman
- *    12. Jawaban berdasar: disclaimer, sumber, saran, kartu kontak
- *    13. Kalau ada yang gagal: balasan error yang aman
- * KALAU DIMINTA MENGUBAH:
- *    - Jenis chunk yang memicu disclaimer atau yang disembunyikan untuk
- *      pertanyaan medis (BAGIAN 1)
- *    - Aturan kapan kartu kontak muncul (BAGIAN 4)
- *    - Alasan 'price_not_listed' (kata uang di PRICE_WORDS) (BAGIAN 3)
- *    - Apa yang berubah di care mode (tanpa quote, tanpa saran) (BAGIAN 10)
- *    - Perilaku saat krisis (BAGIAN 8)
- *    - Teks balasan tetap: edit di i18n/texts.ts (BAGIAN 1)
+ * PURPOSE : Live bot: a question comes in, a checked answer with sources goes
+ *           out. The flow: rewrite (language, query, category), then choose a
+ *           branch, then reply. The SERVER decides, not the model: source
+ *           links, suggested questions, the quote link, the kind of reply, the
+ *           disclaimer once per session, the contact card, and what to show
+ *           when something looks wrong. An answer that does not cite a real
+ *           piece is never shown.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Default fixed text and the special chunk kinds (disclaimer, medical)
+ *    2. Live bot options (retriever, answerer, rewriter, localizer, log, and
+ *       so on)
+ *    3. Builder of the live bot and its helpers (suggestions, language,
+ *       logging reasons)
+ *    4. Contact card: rules for when it is offered (once, not in care mode,
+ *       not for medical questions)
+ *    5. Full disclaimer once per session
+ *    6. limited: the reply when a usage limit is hit (without the model)
+ *    7. reply: prepare the history, rewrite, language, care mode
+ *    8. BRANCH 1: crisis (two detectors, fixed text, care mode starts)
+ *    9. BRANCH 2: small talk without searching the pages
+ *    10. BRANCH 3: normal path (search pages, the model answers, the server
+ *        checks)
+ *    11. Logging unanswered questions and replies without page content
+ *    12. Grounded answer: disclaimer, sources, suggestions, contact card
+ *    13. If something fails: a safe error reply
+ * IF ASKED TO CHANGE:
+ *    - Chunk kinds that trigger the disclaimer or are hidden for medical
+ *      questions (PART 1)
+ *    - Rules for when the contact card appears (PART 4)
+ *    - Reason 'price_not_listed' (money words in PRICE_WORDS) (PART 3)
+ *    - What changes in care mode (no quote, no suggestions) (PART 10)
+ *    - Behaviour in a crisis (PART 8)
+ *    - Fixed reply text: edit it in i18n/texts.ts (PART 1)
  * ============================================================================ */
 
 /**
@@ -61,7 +65,7 @@ import { gatherChunks, type Retriever } from "../retrieval";
 import type { Rewrite, Rewriter } from "../rewrite";
 import type { Reason, UnansweredLog } from "../unanswered";
 
-// ===== BAGIAN 1: Teks tetap bawaan dan jenis chunk khusus (disclaimer, medis) =====
+// ===== PART 1: Default fixed text and the special chunk kinds (disclaimer, medical) =====
 /** The English master texts, kept under their old names for tests and tools. The visitor gets them in their own language. */
 export const UNGROUNDED_REPLY = EN.ungrounded;
 export const NOT_FOUND_REPLY = EN.not_found;
@@ -77,7 +81,7 @@ const DISCLAIMER_KINDS = new Set(["risks", "review", "patient_story"]);
 /** Chunk kinds the answer step never sees for a medical question (a story or review of a result must not answer "will it cure me?"). */
 export const MEDICAL_HIDDEN_KINDS = new Set(["review", "patient_story"]);
 
-// ===== BAGIAN 2: Opsi bot live (retriever, answerer, rewriter, localizer, log, dst) =====
+// ===== PART 2: Live bot options (retriever, answerer, rewriter, localizer, log, and so on) =====
 export interface LiveBotOptions {
   retriever: Retriever;
   answerer: Answerer;
@@ -105,7 +109,7 @@ const englishOnly: Localizer = {
   },
 };
 
-// ===== BAGIAN 3: Pembuat bot live dan fungsi bantu (saran, bahasa, alasan pencatatan) =====
+// ===== PART 3: Builder of the live bot and its helpers (suggestions, language, logging reasons) =====
 export function createLiveBot({
   retriever,
   answerer,
@@ -136,7 +140,7 @@ export function createLiveBot({
   const reasonFor = (rw: Rewrite, message: string, medical: boolean): Reason =>
     medical ? "medical_declined" : rw.category === "out_of_scope" ? "out_of_scope" : PRICE_WORDS.test(rw.fallback ? message : rw.query) ? "price_not_listed" : "not_in_content";
 
-  // ===== BAGIAN 4: Kartu kontak: aturan kapan ditawarkan (sekali, bukan care mode, bukan medis) =====
+  // ===== PART 4: Contact card: rules for when it is offered (once, not in care mode, not for medical questions) =====
   /**
    * The lead card (name and email for a quote), offered only when the visitor asked for a quote or to be contacted, at most once per
    * session, never in care mode and never next to a medical reply. The card's words come in the visitor's language.
@@ -150,7 +154,7 @@ export function createLiveBot({
     return { offer_lead: true, lead_texts };
   };
 
-  // ===== BAGIAN 5: Disclaimer penuh sekali per sesi =====
+  // ===== PART 5: Full disclaimer once per session =====
   /** Show the full disclaimer once per session, decided here. */
   const disclaimerOnce = async (sessionId: string, language: Language): Promise<Pick<ChatResponse, "show_disclaimer" | "disclaimer_text">> => {
     if (history.flags(sessionId).disclaimerShown) return { show_disclaimer: false, disclaimer_text: null };
@@ -161,7 +165,7 @@ export function createLiveBot({
 
   return {
 
-    // ===== BAGIAN 6: limited: balasan saat kena batas pemakaian (tanpa model) =====
+    // ===== PART 6: limited: the reply when a usage limit is hit (without the model) =====
     /** A refused message: a fixed text in the visitor's language (only the five hand-written ones; no model call). Care mode: never a quote button. */
     limited(sessionId, message, reason: LimitReason) {
       const f = history.flags(sessionId);
@@ -174,7 +178,7 @@ export function createLiveBot({
       };
     },
 
-    // ===== BAGIAN 7: reply: siapkan riwayat, rewrite, bahasa, care mode =====
+    // ===== PART 7: reply: prepare the history, rewrite, language, care mode =====
     async reply(sessionId, message, fromBrowser) {
       let language: Language = {};
       try {
@@ -186,7 +190,7 @@ export function createLiveBot({
         if (rw.code) history.setFlags(sessionId, { languageCode: rw.code, languageName: rw.language });
         const care = history.flags(sessionId).care;
 
-        // ===== BAGIAN 8: CABANG 1: krisis (dua detektor, teks tetap, care mode mulai) =====
+        // ===== PART 8: BRANCH 1: crisis (two detectors, fixed text, care mode starts) =====
         // 1. Crisis. Two independent detectors: the rewrite step's category and a keyword net that needs no model.
         if (rw.category === "crisis" || looksLikeCrisis(message)) {
           const { crisis } = await localizer.get(["crisis"], language);
@@ -195,7 +199,7 @@ export function createLiveBot({
           return { status: 200, body: buildResponse({ kind: "crisis", answer: crisis }) };
         }
 
-        // ===== BAGIAN 9: CABANG 2: obrolan ringan tanpa mencari halaman =====
+        // ===== PART 9: BRANCH 2: small talk without searching the pages =====
         // 2. Small talk. If the small talker is missing or fails, the message goes through the normal path below.
         if (rw.category === "small_talk" && smallTalker) {
           try {
@@ -207,7 +211,7 @@ export function createLiveBot({
           }
         }
 
-        // ===== BAGIAN 10: CABANG 3: jalur normal (cari halaman, model menjawab, server memeriksa) =====
+        // ===== PART 10: BRANCH 3: normal path (search pages, the model answers, the server checks) =====
         // 3. The normal path.
         const medical = rw.category === "medical";
         const found = await gatherChunks(retriever, rw.query, { resultCount, expandPages, visitorMessage: message, log });
@@ -219,7 +223,7 @@ export function createLiveBot({
         const quote = care ? null : QUOTE_URL;
         const generalFollowUps = care ? [] : await followUps("general", language);
 
-        // ===== BAGIAN 11: Pencatatan pertanyaan tak terjawab dan balasan tanpa isi halaman =====
+        // ===== PART 11: Logging unanswered questions and replies without page content =====
         // Noted after the reply is built, never awaited. Not in care mode: that session is health-sensitive, nothing from it is kept.
         const note = (reason: Reason) => {
           if (!unanswered || care) return;
@@ -254,7 +258,7 @@ export function createLiveBot({
           return nothing(medical ? t.medical_fallback : t.ungrounded, true);
         }
 
-        // ===== BAGIAN 12: Jawaban berdasar: disclaimer, sumber, saran, kartu kontak =====
+        // ===== PART 12: Grounded answer: disclaimer, sources, suggestions, contact card =====
         history.add(sessionId, message, r.answer);
         const usedKinds = r.usedChunks.map((c) => c.kind);
         const needsDisclaimer = medical || usedKinds.some((k) => DISCLAIMER_KINDS.has(k));
@@ -279,7 +283,7 @@ export function createLiveBot({
         };
       } catch (e) {
 
-        // ===== BAGIAN 13: Kalau ada yang gagal: balasan error yang aman =====
+        // ===== PART 13: If something fails: a safe error reply =====
         // The visitor sees a plain message; the real reason goes to the server log (it never contains a key or the question).
         log(`[chat] ${e instanceof Error ? e.message : String(e)}`);
         const { error } = await localizer.get(["error"], language).catch(() => ({ error: ERROR_REPLY }));

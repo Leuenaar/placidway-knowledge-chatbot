@@ -1,22 +1,22 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/history.ts
- * TUJUAN  : Riwayat percakapan di memori proses server (tidak pernah ke
- *           database, karena pengunjung bisa mengetik data kesehatan). Juga
- *           menyimpan flag per sesi: care mode, disclaimer sudah tampil,
- *           kartu lead sudah ditawarkan, bahasa terakhir.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Tipe data satu giliran chat
- *    2. Flag per sesi (care, disclaimer, lead, bahasa)
- *    3. Opsi dan kontrak penyimpanan riwayat
- *    4. Implementasi di memori: batas pesan, kedaluwarsa, urutan pakai
- * KALAU DIMINTA MENGUBAH:
- *    - Jumlah pesan yang diingat (12), lama kedaluwarsa (1 jam), maksimum
- *      sesi (1000) (BAGIAN 4)
- *    - Menambah flag baru per sesi (BAGIAN 2)
+ * PURPOSE : Conversation history in the memory of the server process (never in
+ *           the database, because visitors can type health data). It also
+ *           keeps per-session flags: care mode, the disclaimer was shown, the
+ *           lead card was offered, the last language.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Data type of one chat turn
+ *    2. Flags per session (care, disclaimer, lead, language)
+ *    3. Options and contract of the history storage
+ *    4. In-memory implementation: message limit, expiry, usage order
+ * IF ASKED TO CHANGE:
+ *    - Number of remembered messages (12), expiry time (1 hour), maximum
+ *      sessions (1000) (PART 4)
+ *    - Add a new per-session flag (PART 2)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Tipe data satu giliran chat =====
+// ===== PART 1: Data type of one chat turn =====
 /**
  * Conversation history, kept in the memory of the server process only. Nothing is written to the database, because
  * visitors may type personal health details. A restart forgets everything, which is the intended behaviour.
@@ -29,7 +29,7 @@ export interface Turn {
   text: string;
 }
 
-// ===== BAGIAN 2: Flag per sesi (care, disclaimer, lead, bahasa) =====
+// ===== PART 2: Flags per session (care, disclaimer, lead, language) =====
 /** Small per-session facts the server decides with. Forgotten together with the turns. */
 export interface SessionFlags {
   /** A crisis message was seen in this session. Stays on until the session ends (see the README, "care mode"). */
@@ -43,7 +43,7 @@ export interface SessionFlags {
   languageName?: string;
 }
 
-// ===== BAGIAN 3: Opsi dan kontrak penyimpanan riwayat =====
+// ===== PART 3: Options and contract of the history storage =====
 export interface HistoryOptions {
   maxMessages?: number;
   ttlMs?: number;
@@ -67,7 +67,7 @@ export interface HistoryStore {
   setFlags(sessionId: string, change: Partial<SessionFlags>): void;
 }
 
-// ===== BAGIAN 4: Implementasi di memori: batas pesan, kedaluwarsa, urutan pakai =====
+// ===== PART 4: In-memory implementation: message limit, expiry, usage order =====
 export function createHistoryStore({ maxMessages = 12, ttlMs = 60 * 60 * 1000, maxSessions = 1000, now = Date.now }: HistoryOptions = {}): HistoryStore {
   interface Session {
     turns: Turn[];

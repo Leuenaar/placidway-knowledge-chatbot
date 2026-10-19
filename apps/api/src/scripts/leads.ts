@@ -1,26 +1,25 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/scripts/leads.ts
- * TUJUAN  : Perintah `npm run leads`: menampilkan daftar kontak (nama dan
- *           email) dari pengunjung yang setuju dihubungi untuk penawaran,
- *           yang terbaru dulu. Dengan `-- purge` menghapus kontak yang lebih
- *           tua dari 90 hari. Ini data pribadi, hanya dicetak di terminal
- *           pemilik.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Impor (alat yang dipakai skrip ini)
- *    2. Fungsi utama skrip
- *    3. Muat rahasia dari .env.api
- *    4. Mode purge: hapus kontak lama sekarang
- *    5. Mode daftar: tampilkan kontak terbaru
- *    6. Jalankan fungsi utama
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah format baris kontak yang tampil (BAGIAN 5)
- *    - Mengubah lama penyimpanan kontak (90 hari): lihat LEAD_RETENTION_DAYS
- *      di leads/store.ts dan fungsi purge di db/migrations/004_leads.sql
- *      (BAGIAN 4)
+ * PURPOSE : The command `npm run leads`: lists the contacts (name and email)
+ *           of visitors who agreed to be contacted about a quote, newest
+ *           first. With `-- purge` it deletes contacts older than 90 days.
+ *           This is personal data, printed only in the owner's terminal.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Imports (tools this script uses)
+ *    2. Main function of the script
+ *    3. Load the secrets from .env.api
+ *    4. Purge mode: delete old contacts now
+ *    5. List mode: show the newest contacts
+ *    6. Run the main function
+ * IF ASKED TO CHANGE:
+ *    - Change the format of the contact line that is shown (PART 5)
+ *    - Change how long contacts are kept (90 days): see LEAD_RETENTION_DAYS in
+ *      leads/store.ts and the purge function in db/migrations/004_leads.sql
+ *      (PART 4)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Impor (alat yang dipakai skrip ini) =====
+// ===== PART 1: Imports (tools this script uses) =====
 /**
  * Shows the leads (name and email left by visitors who agreed to be contacted about a quote), newest first.
  *   npm run leads            newest 50
@@ -33,15 +32,15 @@ import { loadEnvFile } from "../env";
 import { LEAD_RETENTION_DAYS, listLeads, purgeOldLeads } from "../leads";
 import { loadDbConfig } from "../retrieval";
 
-// ===== BAGIAN 2: Fungsi utama skrip =====
+// ===== PART 2: Main function of the script =====
 async function main(): Promise<void> {
 
-  // ===== BAGIAN 3: Muat rahasia dari .env.api =====
+  // ===== PART 3: Load the secrets from .env.api =====
   loadEnvFile(resolve(process.cwd(), "../../.env.api"));
   try {
     const db = loadDbConfig();
 
-    // ===== BAGIAN 4: Mode purge: hapus kontak lama sekarang =====
+    // ===== PART 4: Purge mode: delete old contacts now =====
     if (process.argv[2] === "purge") {
       const n = await purgeOldLeads({ db });
       if (n === undefined) {
@@ -52,7 +51,7 @@ async function main(): Promise<void> {
       return;
     }
 
-    // ===== BAGIAN 5: Mode daftar: tampilkan kontak terbaru =====
+    // ===== PART 5: List mode: show the newest contacts =====
     const limit = Number(process.argv[2] ?? 50);
     const rows = await listLeads({ db }, Number.isFinite(limit) ? limit : 50);
     console.log(`${rows.length} lead(s) shown.\n`);
@@ -63,5 +62,5 @@ async function main(): Promise<void> {
   }
 }
 
-// ===== BAGIAN 6: Jalankan fungsi utama =====
+// ===== PART 6: Run the main function =====
 void main();

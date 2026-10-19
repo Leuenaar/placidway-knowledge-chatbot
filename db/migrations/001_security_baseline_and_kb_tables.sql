@@ -1,24 +1,27 @@
 -- ============================================================================
--- PETA FILE
+-- FILE MAP
 -- FILE    : db/migrations/001_security_baseline_and_kb_tables.sql
--- TUJUAN  : Migrasi 001 (jalankan pertama di Supabase SQL Editor): ekstensi
---           vector, tiga tabel (pages, chunks, unanswered_questions), fungsi
---           penghapus log 30 hari, dan seluruh pengamanan (RLS tanpa
---           kebijakan, semua hak dicabut dari anon dan authenticated, hanya
---           service_role yang diberi akses). Aman dijalankan ulang.
--- BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
---    1. Ekstensi pgvector (di schema extensions)
---    2. Objek baru di public tidak diberi hak ke peran API secara bawaan
---    3. Tabel pages: 7 halaman sumber dan hash teks bersihnya
---    4. Tabel-tabel
---    5. Tabel chunks: potongan teks untuk pencarian, vektor 384, kolom fts
---    6. Tabel unanswered_questions: log pertanyaan tak terjawab (tanpa IP)
---    7. Fungsi penghapus log lebih dari 30 hari
---    8. Kunci semuanya: RLS, cabut hak, beri service_role seperlunya
--- KALAU DIMINTA MENGUBAH:
---    - Menambah kolom atau tabel baru: buat migrasi baru (005_...), jangan
---      ubah 001 yang sudah berjalan (BAGIAN 3)
---    - Mengubah lama simpan log 30 hari: BAGIAN 7 dan purgeOld di
+-- PURPOSE : Migration 001 (run it first in the Supabase SQL Editor): the
+--           vector extension, three tables (pages, chunks,
+--           unanswered_questions), the function that deletes log entries after
+--           30 days, and all the security (RLS without policies, every right
+--           revoked from anon and authenticated, only service_role given
+--           access). Safe to run again.
+-- PARTS   : (in the code, search for the text PART n with Ctrl+F)
+--    1. The pgvector extension (in the extensions schema)
+--    2. New objects in public are not granted rights to the API roles by
+--       default
+--    3. Table pages: the 7 source pages and the hash of their clean text
+--    4. Tables
+--    5. Table chunks: text pieces for search, the 384 vector, the fts column
+--    6. Table unanswered_questions: log of unanswered questions (no IP)
+--    7. Function that deletes log entries older than 30 days
+--    8. Lock everything: RLS, revoke rights, give service_role only what it
+--       needs
+-- IF ASKED TO CHANGE:
+--    - Add a new column or table: write a new migration (005_...), do not
+--      change 001, which has already run (PART 3)
+--    - Change how long the log is kept (30 days): PART 7 and purgeOld in
 --      apps/api/src/unanswered
 -- ============================================================================
 
@@ -44,13 +47,13 @@
 
 begin;
 
--- ===== BAGIAN 1: Ekstensi pgvector (di schema extensions) =====
+-- ===== PART 1: The pgvector extension (in the extensions schema) =====
 -- ---------------------------------------------------------------------------
 -- 1. Extensions (before the default-privilege changes below)
 -- ---------------------------------------------------------------------------
 create extension if not exists vector with schema extensions;
 
--- ===== BAGIAN 2: Objek baru di public tidak diberi hak ke peran API secara bawaan =====
+-- ===== PART 2: New objects in public are not granted rights to the API roles by default =====
 -- ---------------------------------------------------------------------------
 -- 2. New objects in public must not be granted to API roles by default
 -- ---------------------------------------------------------------------------
@@ -66,9 +69,9 @@ alter default privileges for role postgres in schema public
 alter default privileges for role postgres in schema public
   revoke all on functions from anon, authenticated, service_role;
 
--- ===== BAGIAN 3: Tabel pages: 7 halaman sumber dan hash teks bersihnya =====
+-- ===== PART 3: Table pages: the 7 source pages and the hash of their clean text =====
 
--- ===== BAGIAN 4: Tabel-tabel =====
+-- ===== PART 4: Tables =====
 -- ---------------------------------------------------------------------------
 -- 3. Tables
 -- ---------------------------------------------------------------------------
@@ -86,7 +89,7 @@ create table if not exists public.pages (
   fetched_at    timestamptz not null default now()
 );
 
--- ===== BAGIAN 5: Tabel chunks: potongan teks untuk pencarian, vektor 384, kolom fts =====
+-- ===== PART 5: Table chunks: text pieces for search, the 384 vector, the fts column =====
 -- The chunks the bot retrieves from. The id is stable (for example 'P2-cost-1')
 -- so Refresh can update per chunk and the model can return ids instead of URLs.
 -- embedding is 384 dimensions as a placeholder: the embedding model is not
@@ -121,7 +124,7 @@ create table if not exists public.chunks (
 create index if not exists chunks_page_no_idx on public.chunks (page_no);
 create index if not exists chunks_fts_idx on public.chunks using gin (fts);
 
--- ===== BAGIAN 6: Tabel unanswered_questions: log pertanyaan tak terjawab (tanpa IP) =====
+-- ===== PART 6: Table unanswered_questions: log of unanswered questions (no IP) =====
 -- Questions the bot could not answer, to find content gaps. No IP column on
 -- purpose. Rows older than 30 days are deleted by purge_old_unanswered_questions().
 create table if not exists public.unanswered_questions (
@@ -141,7 +144,7 @@ comment on table public.pages is 'The 7 PlacidWay source pages and their cleaned
 comment on table public.chunks is 'Retrieval chunks. Public page content only, no personal data.';
 comment on table public.unanswered_questions is 'Questions the bot could not answer. 30 day retention, no IP address.';
 
--- ===== BAGIAN 7: Fungsi penghapus log lebih dari 30 hari =====
+-- ===== PART 7: Function that deletes log entries older than 30 days =====
 -- ---------------------------------------------------------------------------
 -- 4. Function: 30 day retention for unanswered_questions
 -- ---------------------------------------------------------------------------
@@ -165,7 +168,7 @@ begin
 end;
 $$;
 
--- ===== BAGIAN 8: Kunci semuanya: RLS, cabut hak, beri service_role seperlunya =====
+-- ===== PART 8: Lock everything: RLS, revoke rights, give service_role only what it needs =====
 -- ---------------------------------------------------------------------------
 -- 5. Lock everything down
 -- ---------------------------------------------------------------------------

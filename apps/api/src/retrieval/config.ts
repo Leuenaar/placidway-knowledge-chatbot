@@ -1,21 +1,21 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/retrieval/config.ts
- * TUJUAN  : Pengaturan database untuk server API: alamat dan kunci rahasia
- *           Supabase, dengan pemeriksaan kesalahan umum (menempel kunci
- *           publishable) sebelum permintaan pertama. Juga jumlah potongan
- *           yang dikirim ke model dan jumlah halaman yang dibaca penuh.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Bentuk pengaturan dan jenis error
- *    2. Membaca dan memeriksa SUPABASE_URL dan SUPABASE_API_KEY
- *    3. Jumlah potongan ke model (RETRIEVE_COUNT)
- *    4. Jumlah halaman dibaca penuh (EXPAND_PAGES)
- * KALAU DIMINTA MENGUBAH:
- *    - Jumlah potongan bawaan ke model (8) (BAGIAN 3)
- *    - Jumlah halaman penuh bawaan (2) (BAGIAN 4)
+ * PURPOSE : Database settings for the API server: the Supabase address and
+ *           secret key, with checks for common mistakes (pasting the
+ *           publishable key) before the first request. Also the number of
+ *           pieces sent to the model and the number of pages read in full.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Shape of the settings and the error type
+ *    2. Read and check SUPABASE_URL and SUPABASE_API_KEY
+ *    3. Number of pieces sent to the model (RETRIEVE_COUNT)
+ *    4. Number of pages read in full (EXPAND_PAGES)
+ * IF ASKED TO CHANGE:
+ *    - Default number of pieces sent to the model (8) (PART 3)
+ *    - Default number of full pages (2) (PART 4)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Bentuk pengaturan dan jenis error =====
+// ===== PART 1: Shape of the settings and the error type =====
 /**
  * Database settings for the API server. The server is the only thing that talks to the database, with a
  * secret key; the browser never does. The checks below catch the usual mistake (pasting the publishable key)
@@ -28,7 +28,7 @@ export interface DbConfig {
 
 export class RetrievalError extends Error {}
 
-// ===== BAGIAN 2: Membaca dan memeriksa SUPABASE_URL dan SUPABASE_API_KEY =====
+// ===== PART 2: Read and check SUPABASE_URL and SUPABASE_API_KEY =====
 export function loadDbConfig(env: Record<string, string | undefined> = process.env): DbConfig {
   const url = env.SUPABASE_URL;
   const key = env.SUPABASE_API_KEY;
@@ -54,7 +54,7 @@ export function loadDbConfig(env: Record<string, string | undefined> = process.e
   return { url: u.origin, key };
 }
 
-// ===== BAGIAN 3: Jumlah potongan ke model (RETRIEVE_COUNT) =====
+// ===== PART 3: Number of pieces sent to the model (RETRIEVE_COUNT) =====
 export const DEFAULT_RETRIEVE_COUNT = 8;
 
 /** How many chunks go to the answer step (setting RETRIEVE_COUNT, 1 to 20). More chunks catch a short price chunk that ranks low, but cost more tokens and time. */
@@ -66,7 +66,7 @@ export function loadRetrieveCount(env: Record<string, string | undefined> = proc
   return n;
 }
 
-// ===== BAGIAN 4: Jumlah halaman dibaca penuh (EXPAND_PAGES) =====
+// ===== PART 4: Number of pages read in full (EXPAND_PAGES) =====
 export const DEFAULT_EXPAND_PAGES = 2;
 
 /** How many pages are sent in full next to the search hits (setting EXPAND_PAGES, 0 to 7; 0 = off). */

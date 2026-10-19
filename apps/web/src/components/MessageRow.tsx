@@ -1,24 +1,26 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/web/src/components/MessageRow.tsx
- * TUJUAN  : Satu pesan dalam percakapan. Pesan pengunjung adalah satu
- *           gelembung di kanan. Pesan asisten adalah gelembung di kiri
- *           diikuti hal-hal yang menempel padanya: disclaimer (bila server
- *           bilang waktunya), sumber, tombol penawaran, kartu kontak, dan
- *           pada balasan terbaru saja saran pertanyaan lanjutan. Semuanya
- *           digerakkan oleh field API.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Impor
- *    2. Komponen MessageRow dan propertinya
- *    3. Pesan pengunjung (gelembung kanan)
- *    4. Pesan asisten: gelembung, tombol coba lagi, disclaimer, sumber, tombol penawaran, kartu kontak, saran lanjutan
- * KALAU DIMINTA MENGUBAH:
- *    - Mengubah teks tombol penawaran: cari 'Request a free quote' (BAGIAN 4)
- *    - Mengubah tombol coba lagi: cari 'Try again' (BAGIAN 4)
- *    - Mengubah kapan kartu kontak tampil: cari 'offer_lead' (BAGIAN 4)
+ * PURPOSE : One message in the conversation. A visitor message is a single
+ *           bubble on the right. An assistant message is a bubble on the left
+ *           followed by the things attached to it: the disclaimer (when the
+ *           server says it is time), sources, the quote button, the contact
+ *           card, and, on the newest reply only, the follow-up suggestions.
+ *           All of it is driven by the API fields.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Imports
+ *    2. MessageRow component and its props
+ *    3. Visitor message (right bubble)
+ *    4. Assistant message: bubble, retry button, disclaimer, sources, quote
+ *       button, contact card, follow-up suggestions
+ * IF ASKED TO CHANGE:
+ *    - Change the quote button text: search for 'Request a free quote' (PART
+ *      4)
+ *    - Change the retry button: search for 'Try again' (PART 4)
+ *    - Change when the contact card appears: search for 'offer_lead' (PART 4)
  * ============================================================================ */
 
-// ===== BAGIAN 1: Impor =====
+// ===== PART 1: Imports =====
 /**
  * One message in the conversation. A user message is a single bubble on the right.
  * An assistant message is a bubble on the left, followed by the things that belong to it:
@@ -34,7 +36,7 @@ import { ExternalIcon } from "./Icons";
 import { RichText } from "./RichText";
 import { SourcesList } from "./SourcesList";
 
-// ===== BAGIAN 2: Komponen MessageRow dan propertinya =====
+// ===== PART 2: MessageRow component and its props =====
 export function MessageRow({
   message,
   isLatest,
@@ -55,7 +57,7 @@ export function MessageRow({
   onLead: (messageId: string, outcome: LeadOutcome) => void;
 }) {
 
-  // ===== BAGIAN 3: Pesan pengunjung (gelembung kanan) =====
+  // ===== PART 3: Visitor message (right bubble) =====
   const { role, text, response } = message;
 
   if (role === "user") {
@@ -74,7 +76,7 @@ export function MessageRow({
     );
   }
 
-  // ===== BAGIAN 4: Pesan asisten: gelembung, tombol coba lagi, disclaimer, sumber, tombol penawaran, kartu kontak, saran lanjutan =====
+  // ===== PART 4: Assistant message: bubble, retry button, disclaimer, sources, quote button, contact card, follow-up suggestions =====
   const isAlert = response?.kind === "error" || response?.kind === "rate_limited";
 
   return (

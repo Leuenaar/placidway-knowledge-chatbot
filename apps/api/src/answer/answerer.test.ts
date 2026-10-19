@@ -1,17 +1,17 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/answer/answerer.test.ts
- * TUJUAN  : Uji langkah jawaban: API model diganti tiruan yang mencatat
- *           permintaan dan membalas seperti API asli, jadi tidak butuh kunci
- *           atau jaringan (klien, konfigurasi, prompt, penjawab).
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
+ * PURPOSE : Test of the answer step: the model API is replaced by a stand-in
+ *           that records requests and replies like the real API, so no key or
+ *           network is needed (client, configuration, prompt, answerer).
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
  *    1. anthropic client
  *    2. config
  *    3. prompt
  *    4. answerer
- * KALAU DIMINTA MENGUBAH:
- *    - Menambah uji baru: salin salah satu blok describe/test di file ini
- *      lalu ubah isinya (BAGIAN 1)
+ * IF ASKED TO CHANGE:
+ *    - Add a new test: copy one of the describe/test blocks in this file and
+ *      change its content (PART 1)
  * ============================================================================ */
 
 /**
@@ -52,7 +52,7 @@ function fakeModel(text: string, stopReason = "end_turn") {
 
 const reply = (o: object) => JSON.stringify(o);
 
-// ===== BAGIAN 1: anthropic client =====
+// ===== PART 1: anthropic client =====
 describe("anthropic client", () => {
   it("sends the documented request and reads the text, stop reason and usage", async () => {
     let seen: { url: string; init: RequestInit } | undefined;
@@ -89,7 +89,7 @@ describe("anthropic client", () => {
   });
 });
 
-// ===== BAGIAN 2: config =====
+// ===== PART 2: config =====
 describe("config", () => {
   it("needs a key, defaults the model and allows an override", () => {
     assert.throws(() => loadAnthropicConfig({}), /ANTHROPIC_API_KEY is not set/);
@@ -142,7 +142,7 @@ describe("config", () => {
   });
 });
 
-// ===== BAGIAN 3: prompt =====
+// ===== PART 3: prompt =====
 describe("prompt", () => {
   it("puts every excerpt and the question into the user message", () => {
     const msg = buildUserMessage("How much?", [chunk("P2-price-1", 2, "Price is $14,995."), chunk("P6-price-1", 6)]);
@@ -219,7 +219,7 @@ describe("prompt", () => {
   });
 });
 
-// ===== BAGIAN 4: answerer =====
+// ===== PART 4: answerer =====
 describe("answerer", () => {
   const chunks = [chunk("P2-price-1", 2), chunk("P6-price-1", 6), chunk("P4-price-1", 4)];
 

@@ -1,22 +1,23 @@
 /* ============================================================================
- * PETA FILE
+ * FILE MAP
  * FILE    : apps/api/src/app.ts
- * TUJUAN  : Lapisan HTTP: daftar jalur (/api/health, /api/chat, /api/lead),
- *           pemeriksaan bentuk permintaan dengan zod, batas pemakaian, dan
- *           penanganan error supaya selalu keluar JSON, bukan halaman HTML.
- * BAGIAN  : (di kode, cari tulisan BAGIAN n dengan Ctrl+F)
- *    1. Aturan bentuk permintaan chat (history dari browser dicek ketat)
- *    2. Aturan bentuk permintaan lead (nama, email, centang persetujuan)
- *    3. Opsi aplikasi (bot, mode, batas, lead)
- *    4. Membuat aplikasi dan jalur /api/health
- *    5. Jalur POST /api/chat: validasi, batas pemakaian, panggil bot
- *    6. Jalur POST /api/lead: validasi, batas, simpan lead
- *    7. Jalur tak dikenal dan penanganan error
- * KALAU DIMINTA MENGUBAH:
- *    - Panjang maksimum pesan atau aturan history (BAGIAN 1)
- *    - Aturan nama dan email pada kartu kontak (BAGIAN 2)
- *    - Batas ukuran isi permintaan (64kb) (BAGIAN 4)
- *    - Teks error yang dilihat pengunjung (BAGIAN 7)
+ * PURPOSE : HTTP layer: the list of routes (/api/health, /api/chat,
+ *           /api/lead), request shape checks with zod, usage limits, and error
+ *           handling so the output is always JSON, never an HTML page.
+ * PARTS   : (in the code, search for the text PART n with Ctrl+F)
+ *    1. Shape rules for a chat request (the history from the browser is
+ *       checked strictly)
+ *    2. Shape rules for a lead request (name, email, consent checkbox)
+ *    3. App options (bot, mode, limits, lead)
+ *    4. Create the app and the /api/health route
+ *    5. Route POST /api/chat: validation, usage limits, call the bot
+ *    6. Route POST /api/lead: validation, limits, store the lead
+ *    7. Unknown routes and error handling
+ * IF ASKED TO CHANGE:
+ *    - Maximum message length or history rule (PART 1)
+ *    - Rules for the name and email on the contact card (PART 2)
+ *    - Limit on the size of the request body (64kb) (PART 4)
+ *    - Error text the visitor sees (PART 7)
  * ============================================================================ */
 
 /**
@@ -35,7 +36,7 @@ import { limitText, type Limiter } from "./limits";
 import { createMockBot } from "./mock/bot";
 import { errorResponse } from "./responses";
 
-// ===== BAGIAN 1: Aturan bentuk permintaan chat (history dari browser dicek ketat) =====
+// ===== PART 1: Shape rules for a chat request (the history from the browser is checked strictly) =====
 /**
  * The chat the browser remembers. Strict on purpose: it must alternate visitor / assistant starting with the visitor, a visitor
  * entry is as short as a message may be, an assistant entry is capped. Anything else is a broken or hostile client: 400.
@@ -57,7 +58,7 @@ const chatRequestSchema = z.object({
   history: historySchema.optional(),
 });
 
-// ===== BAGIAN 2: Aturan bentuk permintaan lead (nama, email, centang persetujuan) =====
+// ===== PART 2: Shape rules for a lead request (name, email, consent checkbox) =====
 /**
  * A lead: the name and email a visitor chose to leave. Strict on purpose: the box must be ticked (the literal true), the name is plain
  * text without control characters, the email must look like an email. Anything else is a broken or hostile client: 400.
@@ -72,7 +73,7 @@ const leadRequestSchema = z.object({
   website: z.string().max(200).optional(),
 }).strict();
 
-// ===== BAGIAN 3: Opsi aplikasi (bot, mode, batas, lead) =====
+// ===== PART 3: App options (bot, mode, limits, lead) =====
 export interface AppOptions {
   /** The reply logic. Default: the mock bot (canned replies), a fresh one per app so tests stay isolated. */
   bot?: Bot;
@@ -88,7 +89,7 @@ export interface AppOptions {
   trustProxy?: number;
 }
 
-// ===== BAGIAN 4: Membuat aplikasi dan jalur /api/health =====
+// ===== PART 4: Create the app and the /api/health route =====
 export function createApp(options: AppOptions = {}) {
   const app = express();
   const bot: Bot = options.bot ?? createMockBot();
@@ -107,7 +108,7 @@ export function createApp(options: AppOptions = {}) {
     res.json(body);
   });
 
-  // ===== BAGIAN 5: Jalur POST /api/chat: validasi, batas pemakaian, panggil bot =====
+  // ===== PART 5: Route POST /api/chat: validation, usage limits, call the bot =====
   app.post("/api/chat", async (req, res) => {
     const parsed = chatRequestSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -153,7 +154,7 @@ export function createApp(options: AppOptions = {}) {
     }
   });
 
-  // ===== BAGIAN 6: Jalur POST /api/lead: validasi, batas, simpan lead =====
+  // ===== PART 6: Route POST /api/lead: validation, limits, store the lead =====
   app.post("/api/lead", async (req, res) => {
     const parsed = leadRequestSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -183,7 +184,7 @@ export function createApp(options: AppOptions = {}) {
     }
   });
 
-  // ===== BAGIAN 7: Jalur tak dikenal dan penanganan error =====
+  // ===== PART 7: Unknown routes and error handling =====
   app.use("/api", (_req, res) => {
     res.status(404).json(errorResponse("error", "This endpoint does not exist."));
   });
